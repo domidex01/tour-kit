@@ -155,7 +155,8 @@ export function Footer() {
 
         <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-y border-[var(--tk-hairline)] py-6">
           <p className="text-[12px] text-fd-muted-foreground">
-            &copy; {new Date().getFullYear()} userTourKit. MIT Licensed.
+            &copy; {new Date().getFullYear()} userTourKit. Source-available under BSL 1.1 — free in
+            development, a licence key in production.
           </p>
         </div>
       </div>

@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Tour Kit — Live Interactive Demo',
     description:
-      'Click through a working product tour built with Tour Kit. Headless React, WCAG 2.1 AA, MIT-licensed core.',
+      'Click through a working product tour built with Tour Kit. Headless React, WCAG 2.1 AA, free in development.',
     url: '/demo',
     type: 'website',
     siteName: 'userTourKit',
@@ -47,7 +47,7 @@ const FAQS = [
   {
     question: 'How do I install Tour Kit after trying the demo?',
     answer:
-      'Run `pnpm add @tour-kit/core @tour-kit/react` (npm install and bun add work too). The free MIT-licensed core requires only React 18 or 19 and Node 18+. Add @tour-kit/hints for the persistent beacon shown in the demo.',
+      'Run `pnpm add @tour-kit/core @tour-kit/react` (npm install and bun add work too). The core requires only React 18 or 19 and Node 18+, and needs no licence key to develop against. Add @tour-kit/hints for the persistent beacon shown in the demo.',
   },
   {
     question: 'Does Tour Kit work with Next.js, Remix, Vite, or React Router?',
@@ -62,7 +62,7 @@ const FAQS = [
   {
     question: 'Is the demo using paid features?',
     answer:
-      'No. The demo uses only the free MIT-licensed packages: @tour-kit/core, @tour-kit/react, and @tour-kit/hints. Pro features (checklists, announcements, surveys, adoption tracking, analytics, AI chat, media embeds, scheduling) are documented separately and require a one-time license.',
+      'No. Nothing on this page needs a key, and neither does anything you build locally — development, evaluation, testing and CI are free for every package. A one-time licence key, from $9.99, is for serving Tour Kit to end users of a deployed application.',
   },
 ]
 
@@ -142,7 +142,7 @@ export default function DemoPage() {
                 Esc
               </kbd>{' '}
               to verify focus trap and keyboard navigation. The demo is built entirely with the free
-              MIT-licensed packages — no signup, no install, no paid tier.
+              Free in development — no signup, no install, no key.
             </p>
           </div>
         </header>
@@ -258,7 +258,7 @@ export default function DemoPage() {
               >
                 <h3 className="font-semibold text-fd-foreground">Unlock Pro features</h3>
                 <p className="mt-1 text-sm text-fd-muted-foreground">
-                  Checklists, announcements, surveys, AI chat, and analytics — one-time $99.
+                  Checklists, announcements, surveys, AI chat, and analytics — one-time from $9.99.
                 </p>
               </Link>
             </div>

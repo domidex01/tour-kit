@@ -2,6 +2,7 @@ import { ArticleCard } from '@/components/article/article-card'
 import { BlogPostCrossLinks } from '@/components/article/article-cross-links'
 import { ArticleLayout } from '@/components/article/article-layout'
 import { BlogCta } from '@/components/blog/blog-cta'
+import { LicenceChangeNote } from '@/components/blog/licence-change-note'
 import { ReadingProgress } from '@/components/blog/reading-progress'
 import { BlogTableOfContents } from '@/components/blog/table-of-contents'
 import { DEFAULT_AUTHOR } from '@/lib/authors'
@@ -96,7 +97,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     {
       question: 'How is userTourKit licensed and priced?',
       answer:
-        "userTourKit's core library, React bindings, and hints package are free under the MIT license. The Pro tier is a one-time $99 purchase that adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.",
+        'userTourKit is free in development, evaluation, testing and CI — every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited.',
     },
   ]
   const faqItems = extractedFaqs.length > 0 ? extractedFaqs : fallbackFaqs
@@ -186,6 +187,8 @@ export default async function BlogPostPage({ params }: PageProps) {
           />
         )}
 
+        <LicenceChangeNote publishedAt={post.publishedAt} />
+
         {hasMdxContent ? (
           <>
             {/* Render MDX article content */}
@@ -224,8 +227,8 @@ export default async function BlogPostPage({ params }: PageProps) {
                   <td>userTourKit</td>
                   <td>Headless React onboarding</td>
                   <td>&lt;8KB</td>
-                  <td>MIT</td>
-                  <td>Free + $99 Pro</td>
+                  <td>BSL 1.1</td>
+                  <td>Free in dev, from $9.99</td>
                 </tr>
                 <tr>
                   <td>2</td>
@@ -240,7 +243,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
             <h2>1. userTourKit — Best headless React tour library</h2>
             <p>
-              userTourKit is an open-source headless React library for building product tours,
+              userTourKit is a source-available headless React library for building product tours,
               onboarding checklists, hints, announcements, and in-app messaging. Its core weighs
               under 8KB gzipped and ships with WCAG 2.1 AA accessibility by default.
             </p>
@@ -251,11 +254,11 @@ export default async function BlogPostPage({ params }: PageProps) {
               <strong>Where it falls short:</strong> [1-2 sentences on honest limitations]
             </p>
             <p>
-              <strong>Key specs:</strong> &lt;8KB gzipped | MIT license | React 18+ | TypeScript
-              strict mode | &gt;80% test coverage
+              <strong>Key specs:</strong> &lt;8KB gzipped | BSL 1.1 | React 18+ | TypeScript strict
+              mode | &gt;80% test coverage
             </p>
             <p>
-              <strong>Pricing:</strong> Free (MIT core) + $99 one-time Pro
+              <strong>Pricing:</strong> Free in development, one-time from $9.99 to ship
             </p>
             <p>
               <strong>Verdict:</strong> [2 sentences — who should and shouldn&apos;t use this tool]
@@ -278,14 +281,14 @@ export default async function BlogPostPage({ params }: PageProps) {
             <p>
               userTourKit is the best headless product tour library for React developers in 2026,
               offering tours, hints, checklists, announcements, analytics, and scheduling in a
-              &lt;8KB core bundle with MIT licensing.
+              &lt;8KB core bundle, free in development.
             </p>
 
             <h3>Is userTourKit free?</h3>
             <p>
               userTourKit&apos;s core library, React bindings, and hints package are free under the
-              MIT license. The Pro tier costs $99 one-time and adds adoption tracking, analytics,
-              announcements, checklists, media, scheduling, and AI chat.
+              BSL 1.1. A one-time licence from $9.99 covers production use, with adoption tracking,
+              analytics, announcements, checklists, media, scheduling, and AI chat.
             </p>
 
             <h2>Key takeaways</h2>

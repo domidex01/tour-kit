@@ -1,85 +1,51 @@
 import { ArrowRight, Check, Code2, Sparkles, Users, Zap } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
-import Link from 'next/link'
 
 import {
   type BuyButtonPlacement,
   TrackedBuyButton,
 } from '@/components/analytics/tracked-buy-button'
 import { SectionHead } from '@/components/landing/section-head'
-import { POLAR_CHECKOUT_URL } from '@/lib/polar-config'
+import { checkoutUrl } from '@/lib/polar-config'
+import { TIERS, formatPrice, formatProjects } from '@/lib/pricing'
 
 /**
  * Figma 3945:2175 (dark) / 3792:2175 (light) — three 352x400 plan cards on a
  * 32px gutter, which is exactly the 1120 container.
  *
- * Only the $99 Pro has a checkout: `POLAR_CHECKOUT_URL` is a single SKU. Core
- * and Team are drawn as the design has them and route to /pricing rather than
- * to a Polar link that would take the wrong amount. `TrackedBuyButton` stays
- * on Pro alone, so the `buy_click` dimension keeps measuring the one thing it
- * has always measured.
+ * The cards are DERIVED from `TIERS` rather than written out here. The Figma
+ * frames carried placeholder names and prices ("Core $39 / Pro $99 / Team
+ * $299") that never matched any pricing the product has had, and a hardcoded
+ * copy is how the site came to advertise a price checkout does not charge.
+ * `TIERS` is the single source `structured-data.tsx` also reads, so the markup
+ * Google sees cannot drift from the rendered card.
+ *
+ * Every tier now has its own Polar SKU (`POLAR_CHECKOUT_URLS` is typed
+ * `Record<TierId, string>`), so all three cards are `TrackedBuyButton`s — the
+ * design's "only Pro checks out, the rest route to /pricing" no longer holds.
  */
-type Plan = {
-  id: string
-  name: string
-  scope: string
-  price: string
-  icon: LucideIcon
-  features: readonly string[]
-  cta: string
-  /** Pro is the only plan with a checkout; the rest route to /pricing. */
-  href: string
-  featured?: boolean
-}
+const ICONS = [Code2, Zap, Users] as const
 
-const PLANS: readonly Plan[] = [
-  {
-    id: 'core',
-    name: 'Core',
-    scope: '1 project',
-    price: '$39',
-    icon: Code2,
-    features: [
-      'The core library — tours & hints',
-      'One project, one production app',
-      'Full TypeScript, WCAG 2.1 AA',
-      'Lifetime updates, no renewal',
-    ],
-    cta: 'Buy Core',
-    href: '/pricing',
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    scope: '5 projects',
-    price: '$99',
-    icon: Zap,
-    features: [
-      'Everything in Core',
-      'All 9 packages included',
-      'Analytics, checklists, scheduling',
-      'Five projects, lifetime updates',
-    ],
-    cta: 'Buy Pro',
-    href: POLAR_CHECKOUT_URL,
-    featured: true,
-  },
-  {
-    id: 'team',
-    name: 'Team',
-    scope: 'Unlimited projects',
-    price: '$299',
-    icon: Users,
-    features: [
-      'Everything in Pro',
-      'Unlimited projects & apps',
-      '24/7 priority support',
-      'Three custom themes',
-    ],
-    cta: 'Buy Team',
-    href: '/pricing',
-  },
-]
+/** True of every tier: the tiers differ only in how many projects a key covers. */
+const SHARED_FEATURES = [
+  'Serve it to end users — no badge',
+  'Every package, no feature gates',
+  'All future updates — no subscription',
+  'Converts to MIT on its Change Date',
+] as const
+
+const PLANS = TIERS.map((tier, i) => ({
+  id: tier.id,
+  name: tier.name,
+  scope: formatProjects(tier.projects),
+  price: formatPrice(tier.price),
+  icon: ICONS[i % ICONS.length],
+  features: SHARED_FEATURES,
+  cta: `Get ${tier.name}`,
+  href: checkoutUrl(tier.id),
+  featured: tier.highlight,
+  /** Per-tier GA conversion value; without it every card reports Starter's. */
+  value: tier.price,
+}))
 
 interface PricingTeaserProps {
   /** Buy-click analytics dimension; capability pages pass `<slug>_teaser`. */
@@ -95,12 +61,13 @@ export function PricingTeaser({ placement = 'home_teaser' }: PricingTeaserProps)
             <>
               Own your code.
               <br />
-              Pay once, not forever.
+              Pay once, when you ship.
             </>
           }
         >
-          One license covers the core library and every package you install. Lifetime, one-time — no
-          renewals, no seats, no per-MAU invoice. Free for open-source and non-commercial projects.
+          Every package is free while you build — development, evaluation, CI, the lot. A licence is
+          for serving it to end users, and it is a one-time purchase, never a subscription: no
+          renewals, no seats, no per-MAU invoice.
         </SectionHead>
 
         {/* 352 / 352 / 352 on a 32px gutter. Three across only from `lg`: at
@@ -160,9 +127,7 @@ export function PricingTeaser({ placement = 'home_teaser' }: PricingTeaserProps)
                   <span className="text-[36px] font-extrabold leading-10 tracking-[-0.02em] text-fd-foreground">
                     {plan.price}
                   </span>
-                  <span className="text-[15px] leading-6 text-fd-muted-foreground">
-                    lifetime license
-                  </span>
+                  <span className="text-[15px] leading-6 text-fd-muted-foreground">one-time</span>
                 </p>
 
                 <ul className="mt-6 flex flex-1 flex-col gap-3">
@@ -188,17 +153,20 @@ export function PricingTeaser({ placement = 'home_teaser' }: PricingTeaserProps)
                   <TrackedBuyButton
                     href={plan.href}
                     placement={placement}
+                    value={plan.value}
                     className={`${buttonBase} bg-[var(--tk-cta)] text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30`}
                   >
                     {label}
                   </TrackedBuyButton>
                 ) : (
-                  <Link
+                  <TrackedBuyButton
                     href={plan.href}
+                    placement={placement}
+                    value={plan.value}
                     className={`${buttonBase} border border-[var(--tk-hairline)] text-fd-foreground hover:bg-fd-secondary hover:shadow-md`}
                   >
                     {label}
-                  </Link>
+                  </TrackedBuyButton>
                 )}
               </div>
             )

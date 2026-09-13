@@ -6,7 +6,7 @@ const TRUST_CHIPS = [
   'Lighthouse a11y 100',
   'TypeScript strict',
   '>80% test coverage',
-  'MIT core',
+  'Free in development',
   'React 19 ready',
   'shadcn-native',
 ]

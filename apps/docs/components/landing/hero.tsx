@@ -1,6 +1,6 @@
 'use client'
 
-import { HeroSaleCountdown } from '@/components/landing/sale-countdown'
+import { HeroLicenceNote } from '@/components/landing/licence-note'
 import { DEFAULT_PRESET_ID, StyleSwitcher } from '@/components/landing/style-switcher'
 import { CopyButton } from '@/components/ui/copy-button'
 import { ArrowRight, Terminal } from 'lucide-react'
@@ -402,7 +402,7 @@ export function Hero() {
 
             <FrameworkStrip />
 
-            <HeroSaleCountdown />
+            <HeroLicenceNote />
           </div>
 
           {/* Right — animated mini app mockup */}

@@ -5,7 +5,14 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts', './src/__tests__/setup.ts'],
-    include: ['src/**/*.{test,spec}.{ts,tsx}', '__tests__/phase-0/**/*.test.ts'],
+    include: [
+      'src/**/*.{test,spec}.{ts,tsx}',
+      '__tests__/phase-0/**/*.test.ts',
+      // Cross-package invariants live one level up and had no runner at all,
+      // so `free-package-isolation.test.ts` sat asserting a `react`/`hints`
+      // rule that the licence work reversed, with nothing to catch it.
+      '../__tests__/*.test.ts',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

@@ -118,12 +118,12 @@ export default async function AlternativesPage({ params }: PageProps) {
             items={[
               {
                 question: `What is the best ${alt.competitor} alternative?`,
-                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, tiny bundle sizes (<8KB gzipped), and a $99 one-time price instead of recurring SaaS fees.`,
+                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, tiny bundle sizes (<8KB gzipped), and a one-time price from $9.99 instead of recurring SaaS fees.`,
               },
               {
                 question: 'Is userTourKit free to use?',
                 answer:
-                  "userTourKit's core library, React bindings, and hints package are free under the MIT license. The Pro tier costs $99 one-time (not recurring) and adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat capabilities.",
+                  'userTourKit is free in development, evaluation, testing and CI — every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited. Not recurring.',
               },
               {
                 question: `Can I migrate from ${alt.competitor} to userTourKit?`,
@@ -175,7 +175,8 @@ export default async function AlternativesPage({ params }: PageProps) {
 
           <h3>1. userTourKit — Best for headless React onboarding (recommended)</h3>
           <p>
-            <strong>Pricing:</strong> Free + $99 one-time Pro | <strong>License:</strong> MIT
+            <strong>Pricing:</strong> Free in dev, one-time from $9.99 to ship |{' '}
+            <strong>License:</strong> BSL 1.1
           </p>
           <p>
             We built userTourKit, so take this recommendation with appropriate skepticism.
@@ -198,7 +199,7 @@ export default async function AlternativesPage({ params }: PageProps) {
             items={[
               {
                 question: `What is the best ${alt.competitor} alternative?`,
-                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, tiny bundle sizes (<8KB gzipped), and a $99 one-time price instead of recurring SaaS fees.`,
+                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, tiny bundle sizes (<8KB gzipped), and a one-time price from $9.99 instead of recurring SaaS fees.`,
               },
               {
                 question: `Is ${alt.competitor} free?`,
@@ -214,8 +215,8 @@ export default async function AlternativesPage({ params }: PageProps) {
           <h3>What is the best {alt.competitor} alternative?</h3>
           <p>
             userTourKit is the best {alt.competitor} alternative for React developers who want code
-            ownership, tiny bundle sizes (&lt;8KB gzipped), and a $99 one-time price instead of
-            recurring SaaS fees.
+            ownership, tiny bundle sizes (&lt;8KB gzipped), and a one-time price from $9.99 instead
+            of recurring SaaS fees.
           </p>
 
           <h3>Is {alt.competitor} free?</h3>

@@ -11,12 +11,12 @@ export const PRICING_FAQS: PricingFaq[] = [
   {
     question: 'How much does the userTourKit React product tour library cost?',
     answer:
-      'The free tier — @tour-kit/core, @tour-kit/react, and @tour-kit/hints — is MIT-licensed and costs nothing for any project, commercial or otherwise. The Pro tier is a single one-time payment of $99 for the eight extended packages (analytics, checklists, adoption, announcements, media, scheduling, surveys, AI chat). No subscription, no per-seat fee, no upgrade fee.',
+      'Everything is free while you build. Development, evaluation, testing, CI and preview deploys cost nothing and have no feature gates — you get every package. Serving Tour Kit to end users of a deployed application needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited. No subscription, no per-seat fee, no upgrade fee.',
   },
   {
     question: 'Is the userTourKit Pro license a subscription?',
     answer:
-      'No. Pro is a one-time purchase. You pay $99 once and the license activates the version you bought, forever. The MIT core packages will keep working even if you never renew anything.',
+      'No. Every tier is a one-time purchase — you pay once and the key activates the version you bought, forever. On top of that, each published version converts to the MIT licence on its Change Date, so the code you shipped cannot be taken away from you.',
   },
   {
     question: 'How many sites can I activate with one Pro license?',
@@ -31,7 +31,7 @@ export const PRICING_FAQS: PricingFaq[] = [
   {
     question: 'What happens to my React onboarding flows if userTourKit is discontinued?',
     answer:
-      'The MIT core (core, react, hints) is forkable forever — any team can fork and ship indefinitely. The Pro license is perpetual, so the version you bought keeps working with no kill switch or phone-home. All source lives in a public monorepo at github.com/domidex01/tour-kit.',
+      'Three structural answers. (1) BSL 1.1 lets you copy, modify and redistribute the source today — you can fork the version you have and keep building on it. (2) The licence is perpetual, so the version you bought keeps working with no kill switch. (3) Each published version converts to the MIT licence on its Change Date, on a schedule stated in the licence file, so the code you shipped becomes fully permissive whatever happens to us. All source lives in a public monorepo at github.com/domidex01/tour-kit.',
   },
   {
     question: 'Do you offer refunds on the Pro license?',

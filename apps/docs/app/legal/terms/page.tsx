@@ -52,26 +52,28 @@ export default function TermsPage() {
 
           <h2>The open-source packages</h2>
           <p>
-            <code>@tour-kit/core</code>, <code>@tour-kit/react</code>, and{' '}
-            <code>@tour-kit/hints</code> are released under the{' '}
+            Every <code>@tour-kit/*</code> package is released under the{' '}
             <a
-              href="https://github.com/domidex01/tour-kit/blob/main/LICENSE"
+              href="https://github.com/domidex01/tour-kit/blob/main/LICENSE.md"
               target="_blank"
               rel="noopener noreferrer"
             >
-              MIT license
+              Business Source License 1.1
             </a>
-            . You may use, copy, modify, and distribute them subject to that license. Nothing on
-            this page narrows the rights granted by MIT.
+            . You may copy, modify, redistribute and make any non-production use of them without
+            charge — development, evaluation, testing and continuous integration are all covered by
+            the Additional Use Grant. Serving Tour Kit to end users of a deployed application
+            requires a licence key. Each published version converts to the MIT licence on its Change
+            Date. Nothing on this page narrows the rights granted by that licence.
           </p>
 
-          <h2>The Pro license</h2>
+          <h2>The production licence</h2>
           <ul>
             <li>
-              <strong>What you get</strong>: a one-time, non-recurring license to use the
-              userTourKit Pro packages (adoption tracking, analytics, announcements, checklists,
-              media, scheduling, AI chat) on the number of production sites stated on the{' '}
-              <Link href="/pricing">pricing page</Link>.
+              <strong>What you get</strong>: a one-time, non-recurring licence to use every
+              userTourKit package in production, on the number of projects stated on the{' '}
+              <Link href="/pricing">pricing page</Link>. A project is a registrable domain, so{' '}
+              <code>foo.com</code> and <code>app.foo.com</code> are one project, not two.
             </li>
             <li>
               <strong>What activation does</strong>: license keys validate against our license
@@ -79,9 +81,9 @@ export default function TermsPage() {
               gates runtime use.
             </li>
             <li>
-              <strong>Scope</strong>: a license is for one purchaser (you, or the legal entity that
-              purchased it). You may not resell, sublicense, or repackage Pro modules into a
-              competing onboarding product.
+              <strong>Scope</strong>: a licence is for one purchaser (you, or the legal entity that
+              purchased it). You may not resell or repackage Tour Kit into a competing onboarding
+              product.
             </li>
             <li>
               <strong>Refunds</strong>: 14-day refund window from purchase, no questions asked.
@@ -97,9 +99,10 @@ export default function TermsPage() {
               Refunds process through Polar.
             </li>
             <li>
-              <strong>Termination</strong>: we may revoke a license for material breach (resale,
-              license-key sharing at scale, charge-backs after delivery). MIT-licensed Free packages
-              remain unaffected by Pro termination.
+              <strong>Termination</strong>: we may revoke a licence for material breach (resale,
+              licence-key sharing at scale, charge-backs after delivery). Non-production use stays
+              granted by the licence itself and is unaffected, as are versions that have passed
+              their Change Date.
             </li>
           </ul>
 

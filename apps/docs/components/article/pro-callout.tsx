@@ -77,11 +77,11 @@ interface ProCalloutProps {
  * by the `proCrossSell` frontmatter field; see `app/docs/_page-logic.tsx`).
  *
  * The biggest conversion lever for Tour Kit Pro is *adoption*: the production
- * watermark only sells the one-time $99 license once a reader actually ships a
+ * badge only sells the one-time licence once a reader actually ships a
  * Pro package. Free-package docs are the largest engaged surface, so this routes
  * those readers toward the relevant Pro package. Keeps the same free-first voice
  * as the blog/home/docs CTAs — Pro packages run unlicensed in development; the
- * $99 license removes the production watermark when you ship.
+ * licence removes the production badge when you ship, from $9.99.
  *
  * Compact (`not-prose`, left of an end-of-page band) so it reads as part of the
  * article, not an interstitial. Distinct from `DocsCta` (the end-of-page footer
@@ -104,7 +104,7 @@ export function ProCallout({ package: pkg }: ProCalloutProps) {
       <p className="mt-2.5 font-semibold leading-snug text-fd-foreground">{cross.title}</p>
       <p className="mt-1 text-[14px] leading-relaxed text-fd-muted-foreground">{cross.body}</p>
       <p className="mt-1.5 text-[13px] leading-relaxed text-fd-muted-foreground">
-        Works unlicensed in development — a one-time $99 license removes the production watermark
+        Works unlicensed in development — a one-time licence from $9.99 removes the production badge
         when you ship.
       </p>
       <TrackedCtaLink

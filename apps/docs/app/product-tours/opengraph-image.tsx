@@ -1,6 +1,7 @@
 import { generateOGImage } from '@/lib/og-image'
 
-export const alt = 'Product Tours for React — headless, accessible, free & MIT | userTourKit'
+export const alt =
+  'Product Tours for React — headless, accessible, free in development | userTourKit'
 export const size = {
   width: 1200,
   height: 630,
@@ -10,7 +11,7 @@ export const contentType = 'image/png'
 export default async function Image() {
   const buffer = await generateOGImage({
     title: 'Product Tours for React',
-    subtitle: 'Headless, accessible, router-aware — free & MIT',
+    subtitle: 'Headless, accessible, router-aware — free in development',
     category: 'TOURS',
   })
 

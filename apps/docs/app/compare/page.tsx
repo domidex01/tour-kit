@@ -26,7 +26,7 @@ const COMPARE_FAQS = [
   {
     question: 'How does userTourKit compare to SaaS platforms like Appcues, Pendo, and WalkMe?',
     answer:
-      'SaaS platforms ship a no-code builder, hosted analytics, and an account-level dashboard for non-engineers — at a monthly per-MAU price that typically lands between $300 and $2,000+ for small teams. userTourKit is a code-first React library: lower running cost (free MIT core or $99 one-time Pro), full control over rendering and data, but no no-code builder. The comparison pages map use cases to the right tool.',
+      'SaaS platforms ship a no-code builder, hosted analytics, and an account-level dashboard for non-engineers — at a monthly per-MAU price that typically lands between $300 and $2,000+ for small teams. userTourKit is a code-first React library: lower running cost (free in development, a one-time licence from $9.99 to ship), full control over rendering and data, but no no-code builder. The comparison pages map use cases to the right tool.',
   },
   {
     question: 'What methodology do these comparisons use?',

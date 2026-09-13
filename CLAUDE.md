@@ -238,7 +238,16 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     stub `createStorageAdapter` through `vi.mock` on core's main barrel, and
     `vi.mock` does not intercept a `/engine` subpath, so an engine that resolved
     its own would silently disarm all six.
-  - license <8 KB
+  - license <8.5 KB, measured 8 116. The licence-payment Wave 1 raised this
+    from 8 KB at 7 793: +302 B of that is `MULTI_LABEL_SUFFIXES`, the curated
+    public-suffix table behind `toRegistrableDomain()`, and 21 B is the
+    dev-host branch in `LicenseGate` that keeps the badge off localhost. Last-two-labels alone
+    turns `foo.co.uk` into `co.uk` and `x.vercel.app` into `vercel.app`, so one
+    Starter key would cover an entire registry or every Vercel deployment — an
+    incomplete table is the one failure here that costs money, so the table
+    does not get shrunk to fit the row. Grow the table before reaching for
+    `tldts`: it carries the full PSL and does not fit this package at any
+    plausible budget.
   - media <9 KB
   - ai <7 KB (client), <8 KB (server)
   - scheduling <4 KB
