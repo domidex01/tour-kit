@@ -28,7 +28,7 @@ const CROSS_SELL: Record<ProPackage, CrossSell> = {
   checklists: {
     name: '@tour-kit/checklists',
     title: 'Turn this tour into a guided onboarding checklist',
-    body: 'Multi-step onboarding with task dependencies and progress tracking — the natural next step after a tour.',
+    body: 'Multi-step onboarding with task dependencies and progress tracking, the natural next step after a tour.',
   },
   adoption: {
     name: '@tour-kit/adoption',
@@ -58,7 +58,7 @@ const CROSS_SELL: Record<ProPackage, CrossSell> = {
   analytics: {
     name: '@tour-kit/analytics',
     title: 'Pipe tour events into your analytics stack',
-    body: 'A plugin-based bridge to the tools you already use — one integration, every event.',
+    body: 'A plugin-based bridge to the tools you already use, one integration, every event.',
   },
   scheduling: {
     name: '@tour-kit/scheduling',
@@ -104,7 +104,7 @@ export function ProCallout({ package: pkg }: ProCalloutProps) {
       <p className="mt-2.5 font-semibold leading-snug text-fd-foreground">{cross.title}</p>
       <p className="mt-1 text-[14px] leading-relaxed text-fd-muted-foreground">{cross.body}</p>
       <p className="mt-1.5 text-[13px] leading-relaxed text-fd-muted-foreground">
-        Works unlicensed in development — a one-time licence from $9.99 removes the production badge
+        Works unlicensed in development, a one-time licence from $9.99 removes the production badge
         when you ship.
       </p>
       <TrackedCtaLink

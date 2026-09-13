@@ -27,7 +27,7 @@ export function LicenceChangeNote({ publishedAt }: { publishedAt?: string }) {
     <aside className="mb-8 rounded-lg border border-amber-500/30 bg-amber-500/5 px-5 py-4 text-[14px] leading-relaxed text-fd-muted-foreground">
       <p>
         <strong className="font-semibold text-fd-foreground">
-          Note — licensing changed on 11 September 2026.
+          Note, licensing changed on 11 September 2026.
         </strong>{' '}
         This post was written when Tour Kit shipped an MIT-licensed core plus a paid Pro suite.
         Every package is now source-available under BSL 1.1: free for development, evaluation,

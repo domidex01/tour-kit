@@ -34,10 +34,10 @@ const bundleSizes = bundleSizesRaw as BundleSizeSnapshot
 
 const TITLE = 'React tour library bundle sizes'
 const PAGE_DESCRIPTION =
-  'Gzipped and minified production-build sizes for every major React product tour library — userTourKit, React Joyride, Shepherd.js, Driver.js, Intro.js, Onborda, and Reactour. Sourced from bundlephobia with a timestamped snapshot.'
+  'Gzipped and minified production-build sizes for every major React product tour library, userTourKit, React Joyride, Shepherd.js, Driver.js, Intro.js, Onborda, and Reactour. Sourced from bundlephobia with a timestamped snapshot.'
 
 export const metadata: Metadata = {
-  title: `${TITLE} — userTourKit benchmarks`,
+  title: `${TITLE}, userTourKit benchmarks`,
   description: PAGE_DESCRIPTION,
   keywords: [
     'react tour library bundle size',
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
 }
 
 function formatBytes(bytes: number | undefined): string {
-  if (bytes == null) return '—'
+  if (bytes == null) return ','
   if (bytes < 1024) return `${bytes} B`
   const kb = bytes / 1024
   return kb >= 100 ? `${Math.round(kb)} KB` : `${kb.toFixed(1)} KB`
@@ -255,10 +255,10 @@ export default function BundleSizeBenchmarkPage() {
                       {formatBytes(r.minifiedBytes)}
                     </td>
                     <td className="px-3 py-2 text-right font-mono tabular-nums text-fd-muted-foreground">
-                      {r.dependencyCount ?? '—'}
+                      {r.dependencyCount ?? ','}
                     </td>
                     <td className="px-3 py-2 font-mono text-[12px] text-fd-muted-foreground">
-                      {r.version ?? '—'}
+                      {r.version ?? ','}
                     </td>
                     <td className="px-3 py-2">
                       <a
@@ -290,7 +290,7 @@ export default function BundleSizeBenchmarkPage() {
                       <code className="text-[11px]">{r.name}</code>
                     </td>
                     <td colSpan={4} className="px-3 py-2 text-[13px] italic">
-                      unavailable — {r.error}
+                      unavailable, {r.error}
                     </td>
                     <td className="px-3 py-2">
                       <a
@@ -326,8 +326,8 @@ export default function BundleSizeBenchmarkPage() {
             </a>
             ). The raw JSON output is committed to the repository at{' '}
             <code>content/benchmarks/bundle-sizes.json</code> and re-fetched on a quarterly cadence.
-            For the complete methodology — what counts as a bundle, how gzip is computed, and what
-            we do when bundlephobia 404s a scoped package — see{' '}
+            For the complete methodology, what counts as a bundle, how gzip is computed, and what we
+            do when bundlephobia 404s a scoped package, see{' '}
             <Link href="/how-we-test#bundle-size">How We Test</Link>.
           </p>
 
@@ -343,7 +343,7 @@ export default function BundleSizeBenchmarkPage() {
             </li>
             <li>
               <strong>Peer dependencies.</strong> React and React DOM are standard peer deps and are
-              excluded from every measurement — otherwise every library would show a false
+              excluded from every measurement, otherwise every library would show a false
               +42&nbsp;KB.
             </li>
             <li>
@@ -355,7 +355,7 @@ export default function BundleSizeBenchmarkPage() {
               <strong>Feature parity is not equal.</strong> userTourKit and Shepherd.js include
               checklists, hints, analytics hooks, and announcement primitives in their builds. React
               Joyride is a single-purpose tour component. Compare features <em>and</em> size
-              together — see our <Link href="/compare">comparison articles</Link> for per-competitor
+              together, see our <Link href="/compare">comparison articles</Link> for per-competitor
               context.
             </li>
           </ul>
@@ -363,12 +363,12 @@ export default function BundleSizeBenchmarkPage() {
           <h2>What this means in practice</h2>
           <p>
             If shaving every kilobyte matters (landing pages, marketing sites, mobile-first B2C),
-            the single-purpose libraries at the top of the table —{' '}
+            the single-purpose libraries at the top of the table,{' '}
             {sortedByGzip
               .slice(0, 3)
               .map((r) => r.label)
               .join(', ')}
-            &nbsp;— are the right starting point. If you need tours <em>plus</em> hints, checklists,
+            &nbsp;, are the right starting point. If you need tours <em>plus</em> hints, checklists,
             announcements, and analytics in one install, the middle of the table (userTourKit,
             Shepherd.js) costs more but replaces multiple packages. When in doubt, run{' '}
             <Link href="/docs/getting-started">a proof-of-concept</Link> and measure your actual
@@ -378,14 +378,14 @@ export default function BundleSizeBenchmarkPage() {
           <h2>Related</h2>
           <ul>
             <li>
-              <Link href="/how-we-test">How we test</Link> — the methodology this benchmark follows.
+              <Link href="/how-we-test">How we test</Link>, the methodology this benchmark follows.
             </li>
             <li>
-              <Link href="/editorial-policy">Editorial policy</Link> — why this page honestly lists
+              <Link href="/editorial-policy">Editorial policy</Link>, why this page honestly lists
               our packages alongside competitors (including where our numbers look worse).
             </li>
             <li>
-              <Link href="/compare">Head-to-head comparisons</Link> — bundle size in context of
+              <Link href="/compare">Head-to-head comparisons</Link>, bundle size in context of
               features, licensing, and DX.
             </li>
           </ul>

@@ -202,7 +202,7 @@ export function QuickStart() {
             </>
           }
         >
-          Install, wrap, define, start. The same four steps in React, Vue and Svelte — only the
+          Install, wrap, define, start. The same four steps in React, Vue and Svelte, only the
           adapter package changes.
         </SectionHead>
 

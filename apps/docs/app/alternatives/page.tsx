@@ -6,7 +6,7 @@ import { BreadcrumbJsonLd, ItemListJsonLd, OrganizationJsonLd } from '@/lib/stru
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 
-const ALT_TITLE = 'Alternatives — userTourKit'
+const ALT_TITLE = 'Alternatives, userTourKit'
 const ALT_DESC =
   'Find the best alternatives to Appcues, Pendo, WalkMe, Userpilot, UserGuiding, React Joyride, Shepherd.js, and more. Ranked by developers for developers.'
 const ALT_OG_IMAGE = `/api/og?title=${encodeURIComponent('Alternatives')}&category=ALTERNATIVES`
@@ -57,8 +57,8 @@ export default function AlternativesHub() {
           </h1>
           <p className="text-[16px] leading-relaxed text-fd-muted-foreground">
             Outgrew your current product tour or onboarding platform? Each roundup ranks the best
-            alternatives for a specific tool — Appcues, Pendo, WalkMe, Userpilot, UserGuiding, React
-            Joyride, Shepherd.js, Driver.js, Intro.js, and others — across developer experience,
+            alternatives for a specific tool, Appcues, Pendo, WalkMe, Userpilot, UserGuiding, React
+            Joyride, Shepherd.js, Driver.js, Intro.js, and others, across developer experience,
             framework support, bundle size, accessibility, licensing, pricing, and project health
             (release cadence, open issues, maintainer responsiveness). We also flag the migration
             cost: API surface differences, behavioral gaps, and the migration patterns that have

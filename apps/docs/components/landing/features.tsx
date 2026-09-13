@@ -5,7 +5,7 @@ const features = [
   {
     title: 'Headless first',
     description:
-      'All logic lives in hooks — your design system, your components. Need to ship fast? Use the pre-styled components and customize later.',
+      'All logic lives in hooks, your design system, your components. Need to ship fast? Use the pre-styled components and customize later.',
     code: `const tour = useTour('onboarding', {
   steps: [
     { target: '#sidebar', title: 'Nav' },
@@ -23,7 +23,7 @@ return <div style={tour.tooltipProps.style}>
   {
     title: 'Accessible by default',
     description:
-      'WCAG 2.1 AA from day one — not bolted on after an audit. Focus traps, keyboard nav, and screen reader announcements are handled so you never retrofit accessibility.',
+      'WCAG 2.1 AA from day one, not bolted on after an audit. Focus traps, keyboard nav, and screen reader announcements are handled so you never retrofit accessibility.',
     code: `<Tour id="onboarding">
   {/* Focus trap auto-managed */}
   {/* Arrow keys navigate steps */}
@@ -41,7 +41,7 @@ return <div style={tour.tooltipProps.style}>
   {
     title: 'Tree-shakeable & tiny',
     description:
-      'Import one hook and you ship under 4 KB of core — the rest tree-shakes away. A monolithic tour component ships its whole surface whether you use it or not.',
+      'Import one hook and you ship under 4 KB of core, the rest tree-shakes away. A monolithic tour component ships its whole surface whether you use it or not.',
     code: `// Only imports what you use
 import { useTour } from '@tour-kit/core';
 // → 3.9 KB brotli, enforced by a CI budget
@@ -54,7 +54,7 @@ import { useTour } from '@tour-kit/core';
   {
     title: 'TypeScript native',
     description:
-      'Strict mode from the first commit. Full type inference for configs, hooks, and props — no @types packages, no any casts, no surprises.',
+      'Strict mode from the first commit. Full type inference for configs, hooks, and props, no @types packages, no any casts, no surprises.',
     code: `// Full type inference
 const tour = useTour<MyStepData>('setup', {
   steps: [
@@ -86,7 +86,7 @@ export function Features() {
             </>
           }
         >
-          Headless architecture, strict TypeScript, and WCAG accessibility — not afterthoughts, but
+          Headless architecture, strict TypeScript, and WCAG accessibility, not afterthoughts, but
           foundations.
         </SectionHead>
 

@@ -2583,7 +2583,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'How Appcues, Pendo, and UserGuiding affect your Core Web Vitals',
     metaTitle: 'How Appcues, Pendo, and UserGuiding affect your Core Web Vit',
     description:
-      "We measured how three popular SaaS onboarding tools impact LCP, INP, and CLS — the metrics Google actually uses to rank your pages. Here's what the field data shows.",
+      "We measured how three popular SaaS onboarding tools impact LCP, INP, and CLS, the metrics Google actually uses to rank your pages. Here's what the field data shows.",
     keywords: [
       'onboarding tool core web vitals',
       'third party script core web vitals',
@@ -3367,7 +3367,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: "How we set Tour Kit's price at $99 (building in public)",
     metaTitle: "How we set Tour Kit's price at $99 (building in public)",
     description:
-      "The real pricing decision behind Tour Kit's original $99 one-time license — since superseded by a three-tier ladder from $9.99. Unit economics, anchoring psychology, and why we left subscription revenue on the table.",
+      "The real pricing decision behind Tour Kit's original $99 one-time license, since superseded by a three-tier ladder from $9.99. Unit economics, anchoring psychology, and why we left subscription revenue on the table.",
     keywords: [
       'tour kit pricing decision',
       'open source pricing strategy',
@@ -4719,7 +4719,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'Product tours for API products: developer onboarding done right',
     metaTitle: 'Product tours for API products: developer onboarding done right',
     description:
-      "Cut your API's time to first call with guided product tours. Learn 5 onboarding patterns used by Stripe, Twilio, and Postman — with code examples.",
+      "Cut your API's time to first call with guided product tours. Learn 5 onboarding patterns used by Stripe, Twilio, and Postman, with code examples.",
     keywords: [
       'api product onboarding',
       'developer api onboarding',
@@ -4865,8 +4865,8 @@ export const BLOG_POSTS: BlogMeta[] = [
   },
   {
     slug: 'saas-onboarding-flow-analysis',
-    title: "I analyzed 100 SaaS onboarding flows — here's what the top 10% do different",
-    metaTitle: "I analyzed 100 SaaS onboarding flows — here's what the top 10% do different",
+    title: "I analyzed 100 SaaS onboarding flows, here's what the top 10% do different",
+    metaTitle: "I analyzed 100 SaaS onboarding flows, here's what the top 10% do different",
     description:
       'Study of 100 SaaS onboarding flows reveals 8 patterns separating top performers (70%+ completion) from the 19% average. Data and methodology included.',
     keywords: [
@@ -5789,7 +5789,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'Why I chose $99 one-time over $300/month recurring',
     metaTitle: 'Why I chose $99 one-time over $300/month recurring',
     description:
-      "A solo developer explains the pricing decision behind Tour Kit's original $99 one-time license — since superseded by a three-tier ladder from $9.99. Real numbers, real tradeoffs, and why subscription models felt wrong.",
+      "A solo developer explains the pricing decision behind Tour Kit's original $99 one-time license, since superseded by a three-tier ladder from $9.99. Real numbers, real tradeoffs, and why subscription models felt wrong.",
     keywords: [
       'one-time pricing vs subscription developer tool',
       'developer tool pricing strategy',

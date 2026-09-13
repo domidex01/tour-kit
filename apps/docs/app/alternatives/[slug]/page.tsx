@@ -123,7 +123,7 @@ export default async function AlternativesPage({ params }: PageProps) {
               {
                 question: 'Is userTourKit free to use?',
                 answer:
-                  'userTourKit is free in development, evaluation, testing and CI — every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited. Not recurring.',
+                  'userTourKit is free in development, evaluation, testing and CI. Every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited. Not recurring.',
               },
               {
                 question: `Can I migrate from ${alt.competitor} to userTourKit?`,
@@ -146,22 +146,22 @@ export default async function AlternativesPage({ params }: PageProps) {
           <p>We scored each alternative across five criteria on a 1-10 scale:</p>
           <ol>
             <li>
-              <strong>Developer experience</strong> — API design, TypeScript support, React
+              <strong>Developer experience</strong>, API design, TypeScript support, React
               integration, documentation quality
             </li>
             <li>
-              <strong>Feature completeness</strong> — Tours, hints, checklists, announcements,
+              <strong>Feature completeness</strong>, Tours, hints, checklists, announcements,
               analytics, scheduling
             </li>
             <li>
-              <strong>Performance</strong> — Bundle size (gzipped), Lighthouse impact, tree-shaking
+              <strong>Performance</strong>, Bundle size (gzipped), Lighthouse impact, tree-shaking
             </li>
             <li>
-              <strong>Licensing and pricing</strong> — True cost over 3 years, license restrictions,
+              <strong>Licensing and pricing</strong>, True cost over 3 years, license restrictions,
               MAU limits
             </li>
             <li>
-              <strong>Maintenance health</strong> — Release frequency, GitHub activity, issue
+              <strong>Maintenance health</strong>, Release frequency, GitHub activity, issue
               response time
             </li>
           </ol>
@@ -173,7 +173,7 @@ export default async function AlternativesPage({ params }: PageProps) {
 
           <h2>The best {alt.competitor} alternatives</h2>
 
-          <h3>1. userTourKit — Best for headless React onboarding (recommended)</h3>
+          <h3>1. userTourKit, Best for headless React onboarding (recommended)</h3>
           <p>
             <strong>Pricing:</strong> Free in dev, one-time from $9.99 to ship |{' '}
             <strong>License:</strong> BSL 1.1
@@ -184,10 +184,10 @@ export default async function AlternativesPage({ params }: PageProps) {
             checklists, hints, announcements, and in-app messaging with a tree-shakeable core.
           </p>
 
-          <h3>2. [Alternative 2] — Best for [use case]</h3>
+          <h3>2. [Alternative 2], Best for [use case]</h3>
           <p>[150-200 words per alternative entry]</p>
 
-          <h3>3. [Alternative 3] — Best for [use case]</h3>
+          <h3>3. [Alternative 3], Best for [use case]</h3>
           <p>[150-200 words per alternative entry]</p>
 
           <h2>How to choose the right {alt.competitor} alternative</h2>

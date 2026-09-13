@@ -61,7 +61,7 @@ export function Pricing() {
             <strong className="font-semibold text-fd-foreground">
               Free in development, a key in production.
             </strong>{' '}
-            Every package is source-available under BSL&nbsp;1.1 — build, evaluate, test and run CI
+            Every package is source-available under BSL&nbsp;1.1, build, evaluate, test and run CI
             without paying anything. A key is for serving it to end users of a deployed app. Every
             tier gets the whole library; they differ only in how many projects one key covers.
           </p>
@@ -169,7 +169,7 @@ export function Pricing() {
                     : 'inline-flex items-center justify-center gap-2.5 rounded-lg border border-[var(--tk-card-edge)] bg-fd-background/60 px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]'
                 }
               >
-                Get {tier.name} — {formatPrice(tier.price)}
+                Get {tier.name}, {formatPrice(tier.price)}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </TrackedBuyButton>
             </div>
@@ -348,7 +348,7 @@ function LicenseTerms() {
           <dt className="mb-1 font-semibold text-fd-foreground">Activation &amp; reassignment</dt>
           <dd>
             Add the license key as an environment variable. The first production page load on each
-            domain consumes one of five activation slots automatically — no manual claim step.
+            domain consumes one of five activation slots automatically, no manual claim step.
             Domains can be deactivated and reassigned at any time from your{' '}
             <Link
               href="/account"

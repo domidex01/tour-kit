@@ -24,7 +24,7 @@ const ABOUT_FAQS = [
   {
     question: 'What is userTourKit?',
     answer:
-      'userTourKit is a source-available, headless React product tour library under BSL 1.1. Seventeen packages — tours, React bindings, hints, analytics, checklists, adoption, announcements, media, scheduling, surveys, AI chat — free for development, evaluation, testing and CI. A production deployment needs a one-time licence key, from $9.99.',
+      'userTourKit is a source-available, headless React product tour library under BSL 1.1. Seventeen packages, tours, React bindings, hints, analytics, checklists, adoption, announcements, media, scheduling, surveys, AI chat, free for development, evaluation, testing and CI. A production deployment needs a one-time licence key, from $9.99.',
   },
   {
     question: 'Who maintains userTourKit?',
@@ -39,7 +39,7 @@ const ABOUT_FAQS = [
   {
     question: 'What happens if the maintainer disappears?',
     answer:
-      'Three structural answers. (1) BSL 1.1 grants the right to copy, modify and redistribute today, so any team can fork the version they have and keep building with no kill switch. (2) The licence is perpetual — the version you bought activates forever with no recurring fee. (3) Every published version converts to the MIT licence on its Change Date, and source, CI, benchmarks and docs all live in one public monorepo, so builds are reproducible from a clean checkout.',
+      'Three structural answers. (1) BSL 1.1 grants the right to copy, modify and redistribute today, so any team can fork the version they have and keep building with no kill switch. (2) The licence is perpetual, the version you bought activates forever with no recurring fee. (3) Every published version converts to the MIT licence on its Change Date, and source, CI, benchmarks and docs all live in one public monorepo, so builds are reproducible from a clean checkout.',
   },
   {
     question: 'How do I report a bug or request a feature in userTourKit?',
@@ -49,7 +49,7 @@ const ABOUT_FAQS = [
 ]
 
 export const metadata: Metadata = {
-  title: `${TITLE} — userTourKit`,
+  title: `${TITLE}, userTourKit`,
   description: DESCRIPTION,
   keywords: [
     'about usertourkit',
@@ -241,7 +241,7 @@ export default function AboutPage() {
             Most product-tour libraries ship their own UI runtime, often 30–60 KB gzipped, and force
             you into their opinionated styling. userTourKit takes the opposite approach: all tour
             logic lives in hooks and headless primitives, so you compose the UI with the components
-            you already ship — shadcn/ui, Radix, Base UI, or your own.
+            you already ship, shadcn/ui, Radix, Base UI, or your own.
           </p>
 
           <h2>Who maintains it</h2>

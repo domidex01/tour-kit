@@ -41,7 +41,7 @@ export function BlogCta({ variant, placement, fullBleed = false }: BlogCtaProps)
             <code className="rounded bg-fd-muted px-1 py-0.5 text-[12px]">
               npm i @tour-kit/core
             </code>{' '}
-            — free while you build. Every package works unlicensed in development; a one-time
+            , free while you build. Every package works unlicensed in development; a one-time
             licence from $9.99 removes the badge.
           </p>
         </div>

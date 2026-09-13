@@ -20,7 +20,7 @@ import { MaybeLicensed } from './maybe-licensed'
 const DEMO_CHECKLIST: ChecklistConfig = {
   id: 'capability-demo',
   title: 'Get started with Acme',
-  description: 'Click a task to complete it — this is the live component.',
+  description: 'Click a task to complete it, this is the live component.',
   dismissible: false,
   tasks: [
     {
@@ -36,7 +36,7 @@ const DEMO_CHECKLIST: ChecklistConfig = {
     {
       id: 'integration',
       title: 'Connect an integration',
-      description: 'Unlocks once your first project exists — task dependencies at work.',
+      description: 'Unlocks once your first project exists, task dependencies at work.',
       dependsOn: ['project'],
     },
     {
@@ -61,7 +61,7 @@ function DemoChecklistCard() {
       <div className="mt-3 flex items-center justify-between">
         <p className="font-mono text-[12px] text-fd-muted-foreground" aria-live="polite">
           {isComplete
-            ? 'All done — that state can fire confetti, a tour, or your API.'
+            ? 'All done, that state can fire confetti, a tour, or your API.'
             : `${progress.completed}/${progress.total} tasks · ${progress.percentage}%`}
         </p>
         <button

@@ -47,7 +47,7 @@ export function HowItWorks({
       ? [
           {
             title: 'Design it in the Studio',
-            description: `Build your ${thing} visually — no signup, no account. The template is pre-seeded; tweak copy and targets in the browser.`,
+            description: `Build your ${thing} visually, no signup, no account. The template is pre-seeded; tweak copy and targets in the browser.`,
             href: studioHref,
             linkLabel: 'Open the Studio',
           },
@@ -59,7 +59,7 @@ export function HowItWorks({
           },
           {
             title: 'Own the code',
-            description: `The ${thing} lands in your repo as editable components — your design system, your version control, no embed script.`,
+            description: `The ${thing} lands in your repo as editable components, your design system, your version control, no embed script.`,
             href: docsHref,
             linkLabel: 'Read the docs',
           },
@@ -73,13 +73,13 @@ export function HowItWorks({
           },
           {
             title: 'Compose',
-            description: `Declarative config, headless or pre-styled — the ${thing} renders with your design system.`,
+            description: `Declarative config, headless or pre-styled, the ${thing} renders with your design system.`,
             code: composeCode,
             filename: composeFilename,
           },
           {
             title: 'Ship it',
-            description: `The ${thing} lives in your bundle and your version control — no embed script, no vendor dashboard.`,
+            description: `The ${thing} lives in your bundle and your version control, no embed script, no vendor dashboard.`,
             href: docsHref,
             linkLabel: 'Read the docs',
           },

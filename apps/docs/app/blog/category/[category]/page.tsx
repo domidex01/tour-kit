@@ -27,7 +27,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { category } = await params
   const display = getCategoryDisplayName(category) ?? category
-  const title = `${display} articles — userTourKit Blog`
+  const title = `${display} articles, userTourKit Blog`
   const desc = `Browse all ${display} articles on the userTourKit blog.`
   return {
     title,

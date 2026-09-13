@@ -23,7 +23,7 @@ export function HintDemo() {
       <DemoSurface url="acme.app/projects" contentClassName="py-10">
         <div className="mx-auto max-w-md">
           <p className="mb-6 text-center text-[14px] text-fd-muted-foreground">
-            Click a pulsing beacon — the tooltip is the live component.
+            Click a pulsing beacon, the tooltip is the live component.
           </p>
 
           {/* Mock toolbar with hint targets */}
@@ -61,7 +61,7 @@ export function HintDemo() {
         id="capability-demo-share"
         target="#hint-demo-share"
         title="Share with your team"
-        content="Each hint has independent open/dismissed state — no sequence, no order, no tour."
+        content="Each hint has independent open/dismissed state, no sequence, no order, no tour."
         tooltipPlacement="bottom"
         pulse
         color="warning"

@@ -80,7 +80,7 @@ export function SaleAnnouncementBanner() {
             className="group flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[13px] font-medium"
           >
             <span>
-              Tour Kit is <strong className="font-semibold">free in development</strong> —{' '}
+              Tour Kit is <strong className="font-semibold">free in development</strong>,{' '}
               {formatPrice(STARTER_PRICE)} one-time when you ship
             </span>
             <span className="underline underline-offset-4 group-hover:no-underline">

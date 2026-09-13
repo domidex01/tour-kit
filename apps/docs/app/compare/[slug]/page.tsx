@@ -129,12 +129,12 @@ export default async function ComparisonPage({ params }: PageProps) {
               {
                 question: 'Is userTourKit free to use?',
                 answer:
-                  'userTourKit is free in development, evaluation, testing and CI — every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited. Not recurring.',
+                  'userTourKit is free in development, evaluation, testing and CI. Every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited. Not recurring.',
               },
               {
                 question: "What is userTourKit's bundle size?",
                 answer:
-                  'userTourKit is tree-shakeable ESM: importing a single hook ships under 4 KB of core. Whole-package figures overstate the real cost — core v2.1.0 measures 29.6 KB gzipped with its dependencies, because a package of independent primitives measures its entire surface rather than the subset you import. See /benchmarks/bundle-size for the measured table.',
+                  'userTourKit is tree-shakeable ESM: importing a single hook ships under 4 KB of core. Whole-package figures overstate the real cost, core v2.1.0 measures 29.6 KB gzipped with its dependencies, because a package of independent primitives measures its entire surface rather than the subset you import. See /benchmarks/bundle-size for the measured table.',
               },
               {
                 question: 'Does userTourKit work with Next.js and React 19?',
@@ -165,8 +165,8 @@ export default async function ComparisonPage({ params }: PageProps) {
           <p>
             userTourKit is a source-available headless React library for building product tours,
             onboarding checklists, hints, announcements, and in-app messaging. Its
-            framework-agnostic core tree-shakes to the hooks you import — under 4 KB for a single
-            one — and ships with WCAG 2.1 AA accessibility and Lighthouse 100 scores by default, and
+            framework-agnostic core tree-shakes to the hooks you import, under 4 KB for a single
+            one, and ships with WCAG 2.1 AA accessibility and Lighthouse 100 scores by default, and
             integrates natively with shadcn/ui, Radix UI, and Base UI through its UnifiedSlot
             pattern. Free in development, it includes tours, React bindings, and hints. A one-time
             licence from $9.99 covers production use, announcements, checklists, media, scheduling,
@@ -282,7 +282,7 @@ export default async function ComparisonPage({ params }: PageProps) {
               {
                 question: 'Is userTourKit free to use?',
                 answer:
-                  'userTourKit is free in development, evaluation, testing and CI — every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited. Not recurring.',
+                  'userTourKit is free in development, evaluation, testing and CI. Every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited. Not recurring.',
               },
             ]}
           />

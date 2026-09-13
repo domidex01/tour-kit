@@ -25,7 +25,7 @@ import dynamic from 'next/dynamic'
  * 2026-06-11 when /product-tours shipped — see
  * utk-studio/plan/marketing-package-pages.md §3.1.
  */
-const HOME_TITLE = 'userTourKit — Product Tours, Checklists & In-App Messaging for React'
+const HOME_TITLE = 'userTourKit, Product Tours, Checklists & In-App Messaging for React'
 const HOME_DESC =
   'The onboarding toolkit for React: product tours, feature hints, checklists, announcements, and surveys. Headless, accessible, yours.'
 
@@ -143,9 +143,9 @@ export default function HomePage() {
           placement="home_after_features"
           eyebrow="Free in development"
           heading="Ready to build your first tour?"
-          subtext="Source-available under BSL 1.1 — free for development, evaluation and CI. One-time from $9.99 when you ship to production."
+          subtext="Source-available under BSL 1.1, free for development, evaluation and CI. One-time from $9.99 when you ship to production."
           ctaLabel="Build my first tour"
-          reassurance="Free in development — no signup, no credit card."
+          reassurance="Free in development, no signup, no credit card."
         />
         <Packages />
 

@@ -8,7 +8,7 @@ const DESCRIPTION =
   "Terms governing use of usertourkit.com, the userTourKit Pro license, and the project's open-source components."
 
 export const metadata: Metadata = {
-  title: `${TITLE} — userTourKit`,
+  title: `${TITLE}, userTourKit`,
   description: DESCRIPTION,
   alternates: { canonical: '/legal/terms' },
   openGraph: {

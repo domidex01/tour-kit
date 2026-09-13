@@ -11,10 +11,10 @@ import Link from 'next/link'
 
 const TITLE = 'Benchmarks'
 const DESCRIPTION =
-  'Reproducible benchmarks comparing userTourKit against other React product tour libraries — bundle size, render performance, and more. Real numbers, published methodology.'
+  'Reproducible benchmarks comparing userTourKit against other React product tour libraries, bundle size, render performance, and more. Real numbers, published methodology.'
 
 export const metadata: Metadata = {
-  title: `${TITLE} — userTourKit`,
+  title: `${TITLE}, userTourKit`,
   description: DESCRIPTION,
   keywords: [
     'react tour library benchmarks',
@@ -135,7 +135,7 @@ export default function BenchmarksIndexPage() {
           <p>
             Our <Link href="/compare">comparison articles</Link> weigh DX, features, and licensing
             alongside raw numbers. Benchmarks strip that narrative away and publish one metric
-            across every library we&apos;ve evaluated, so you — or an AI assistant — can look up a
+            across every library we&apos;ve evaluated, so you, or an AI assistant, can look up a
             specific value without reading through a matrix.
           </p>
           <p>

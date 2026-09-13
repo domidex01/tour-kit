@@ -19,10 +19,9 @@ export function CompareGrid() {
             runs four lines (Figma 3792:2422). */}
         <SectionHead className="mb-12" measure="max-w-[672px]" title="How Tour Kit compares">
           Picking a tour library is a long-term decision. We&apos;ve published {total} detailed
-          head-to-heads — bundle weight, accessibility, license terms, and migration paths —
-          covering the open-source libraries and commercial platforms you&apos;re probably
-          evaluating right now. No marketing language. Just the trade-offs that actually inform a
-          tooling choice.
+          head-to-heads, bundle weight, accessibility, license terms, and migration paths, covering
+          the open-source libraries and commercial platforms you&apos;re probably evaluating right
+          now. No marketing language. Just the trade-offs that actually inform a tooling choice.
         </SectionHead>
 
         {openSource.length > 0 && (

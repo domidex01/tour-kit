@@ -13,10 +13,10 @@ import Link from 'next/link'
 
 const TITLE = 'Site map'
 const DESCRIPTION =
-  'Every page on usertourkit.com, grouped by section — documentation, guides, API reference, blog, comparisons, alternatives, benchmarks, and company pages. A one-click index for readers and crawlers.'
+  'Every page on usertourkit.com, grouped by section, documentation, guides, API reference, blog, comparisons, alternatives, benchmarks, and company pages. A one-click index for readers and crawlers.'
 
 export const metadata: Metadata = {
-  title: `${TITLE} — userTourKit`,
+  title: `${TITLE}, userTourKit`,
   description: DESCRIPTION,
   keywords: [
     'tour kit sitemap',

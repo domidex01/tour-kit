@@ -22,9 +22,9 @@ export function SocialProof() {
           Why pick a fresh library?
         </h2>
         <p className="mx-auto mb-8 max-w-2xl text-[15px] leading-[1.6] text-fd-muted-foreground">
-          Tour Kit is new — no legacy API debt, no corporate-UX baggage, no AGPL contamination.
-          Built headless-first so you bring your own components and styles. Every chip below is a
-          measured technical fact, not a marketing claim.
+          Tour Kit is new, no legacy API debt, no corporate-UX baggage, no AGPL contamination. Built
+          headless-first so you bring your own components and styles. Every chip below is a measured
+          technical fact, not a marketing claim.
         </p>
         <ul className="mx-auto flex max-w-[900px] flex-wrap items-center justify-center gap-2">
           {TRUST_CHIPS.map((chip) => (

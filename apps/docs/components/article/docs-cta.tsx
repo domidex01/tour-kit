@@ -42,8 +42,8 @@ export function DocsCta() {
       </h2>
       <p className="mt-2 max-w-prose text-[15px] leading-relaxed text-fd-muted-foreground">
         <code className="rounded bg-fd-muted px-1 py-0.5 text-[13px]">npm i @tour-kit/core</code> is
-        free while you build. Every package works unlicensed in development — a one-time licence
-        from $9.99 removes the production watermark when you ship.
+        free while you build. Every package works unlicensed in development, a one-time licence from
+        $9.99 removes the production watermark when you ship.
       </p>
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <TrackedCtaLink
@@ -69,7 +69,7 @@ export function DocsCta() {
           homepage band's reassurance line, with the docs-specific "pay when you
           ship" reframe of the one-time license. */}
       <p className="mt-4 text-[13px] text-fd-muted-foreground">
-        Free in development — no signup, no credit card. Pay once, only when you ship.
+        Free in development, no signup, no credit card. Pay once, only when you ship.
       </p>
     </section>
   )

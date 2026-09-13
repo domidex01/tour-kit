@@ -10,7 +10,7 @@ const corePackages = [
   {
     name: '@tour-kit/core',
     description:
-      'The headless engine. Hooks, positioning, focus management, and state — all framework-agnostic.',
+      'The headless engine. Hooks, positioning, focus management, and state, all framework-agnostic.',
     size: 'under 4 KB tree-shaken',
     install: 'pnpm add @tour-kit/core',
     href: '/docs/core',
@@ -98,7 +98,7 @@ export function Packages() {
             </>
           }
         >
-          Start with the free core. Add analytics, checklists, or scheduling when you need them —
+          Start with the free core. Add analytics, checklists, or scheduling when you need them,
           each package is independently tree-shakeable.
         </SectionHead>
 

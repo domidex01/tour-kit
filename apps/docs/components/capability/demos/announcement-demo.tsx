@@ -24,7 +24,7 @@ const DEMO_ANNOUNCEMENTS: AnnouncementConfig[] = [
     priority: 'high',
     title: 'Dark mode is here',
     description:
-      'This modal is the live @tour-kit/announcements component — focus-trapped, Esc to close, styled with this site’s own design tokens. Attach media, actions, scheduling, and audience rules in config.',
+      'This modal is the live @tour-kit/announcements component, focus-trapped, Esc to close, styled with this site’s own design tokens. Attach media, actions, scheduling, and audience rules in config.',
     frequency: 'always',
     autoShow: false,
     modalOptions: { size: 'md', closeOnEscape: true, showCloseButton: true },
@@ -54,7 +54,7 @@ function DemoTriggers() {
   return (
     <div className="mx-auto flex max-w-md flex-col items-center gap-6 text-center">
       <p className="text-[14px] text-fd-muted-foreground">
-        Press a button — what opens is the real component, not a recording.
+        Press a button, what opens is the real component, not a recording.
       </p>
       <div className="flex flex-wrap items-center justify-center gap-3">
         <button

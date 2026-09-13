@@ -20,7 +20,7 @@ import dynamic from 'next/dynamic'
 const PAGE_PATH = '/product-announcements'
 const PAGE_TITLE = 'In-App Announcements for React | userTourKit'
 const PAGE_DESC =
-  'In-app announcements for React — modal, banner, toast, slideout, spotlight — with scheduling, audience rules, and a priority queue. From $9.99 once to ship.'
+  'In-app announcements for React, modal, banner, toast, slideout, spotlight, with scheduling, audience rules, and a priority queue. From $9.99 once to ship.'
 // File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
 // which blocks Twitter/Facebook crawlers from fetching share images.
 const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
@@ -88,22 +88,22 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'Can I schedule an announcement ahead of time?',
     answer:
-      'Yes — pair with @tour-kit/scheduling to gate announcements by date windows, business hours, recurring patterns, and timezones. Ship the config on Friday; the banner appears Monday 9am in each user’s local time.',
+      'Yes, pair with @tour-kit/scheduling to gate announcements by date windows, business hours, recurring patterns, and timezones. Ship the config on Friday; the banner appears Monday 9am in each user’s local time.',
   },
   {
     question: 'How do you avoid stacking three announcements on one screen?',
     answer:
-      'A priority queue (critical > high > normal > low) shows one at a time by default — the next dequeues when the current dismisses. Frequency rules (once / per session / every N days) and audience targeting decide who sees what, how often.',
+      'A priority queue (critical > high > normal > low) shows one at a time by default, the next dequeues when the current dismisses. Frequency rules (once / per session / every N days) and audience targeting decide who sees what, how often.',
   },
   {
     question: 'Can announcements include video or images?',
     answer:
-      'Yes. Announcement configs take a media slot — YouTube, Vimeo, Loom, Wistia, GIF, Lottie, or plain images via @tour-kit/media, with lazy loading and reduced-motion handling built in.',
+      'Yes. Announcement configs take a media slot, YouTube, Vimeo, Loom, Wistia, GIF, Lottie, or plain images via @tour-kit/media, with lazy loading and reduced-motion handling built in.',
   },
   {
     question: 'What happens before I buy a license?',
     answer:
-      'Everything works. @tour-kit/announcements runs unlicensed in development and on localhost with full functionality — no feature gates. Production shows a small badge until you activate a one-time licence key, from $9.99 for a single project, which covers every Tour Kit package.',
+      'Everything works. @tour-kit/announcements runs unlicensed in development and on localhost with full functionality, no feature gates. Production shows a small badge until you activate a one-time licence key, from $9.99 for a single project, which covers every Tour Kit package.',
   },
 ]
 
@@ -132,25 +132,25 @@ export default function ProductAnnouncementsPage() {
           eyebrow="@tour-kit/announcements · Pro"
           heading="Ship the news"
           headingAccent="inside your product."
-          subhead="In-app announcements for React — modal, banner, toast, slideout, and spotlight variants with scheduling, audience rules, and a priority queue."
+          subhead="In-app announcements for React, modal, banner, toast, slideout, and spotlight variants with scheduling, audience rules, and a priority queue."
           primaryLabel="Try it free in dev"
           primaryHref="/docs/announcements"
           secondaryLabel="See pricing"
           secondaryHref="/pricing"
-          reassurance="Runs free in dev — one-time from $9.99 when you ship."
+          reassurance="Runs free in dev, one-time from $9.99 when you ship."
           factsLine="5 variants · priority queue · frequency rules · your repo, your code"
         />
 
         <DemoSection
           heading="Press the button. That's the component."
-          subtext="The modal and toast below are the live @tour-kit/announcements components — focus-trapped, Esc to close, styled with this site's tokens. This very site's sale banner runs on the same package."
+          subtext="The modal and toast below are the live @tour-kit/announcements components, focus-trapped, Esc to close, styled with this site's tokens. This very site's sale banner runs on the same package."
         >
           <AnnouncementDemo />
         </DemoSection>
 
         <PainOutcomeStrip
           heading="Release notes nobody reads"
-          subtext="Features users never discover may as well not exist. The fix is announcing in-product — without turning your app into a popup festival."
+          subtext="Features users never discover may as well not exist. The fix is announcing in-product, without turning your app into a popup festival."
           items={[
             {
               pain: 'Changelogs live in a graveyard',
@@ -158,7 +158,7 @@ export default function ProductAnnouncementsPage() {
                 'The /changelog page gets traffic from you and your cofounder. Users learn about features by accident.',
               outcome: 'News lands inside the product',
               outcomeDetail:
-                'Announce where users already are — modal for the big stuff, toast for the small, spotlight to point at the new button.',
+                'Announce where users already are, modal for the big stuff, toast for the small, spotlight to point at the new button.',
             },
             {
               pain: 'Popup chaos, zero coordination',
@@ -174,7 +174,7 @@ export default function ProductAnnouncementsPage() {
                 'Messaging suites price in-app announcements like enterprise software and render them in their styles, not yours.',
               outcome: 'Your design system, from $9.99 once',
               outcomeDetail:
-                'shadcn-native components or fully headless render props — the announcement looks like your product.',
+                'shadcn-native components or fully headless render props, the announcement looks like your product.',
             },
           ]}
         />
@@ -217,7 +217,7 @@ export default function ProductAnnouncementsPage() {
             {
               title: 'Priority queue & frequency rules',
               description:
-                'critical > high > normal > low, one at a time; show once, per session, or every N days — per announcement.',
+                'critical > high > normal > low, one at a time; show once, per session, or every N days, per announcement.',
             },
             {
               title: 'Scheduling & timezones',
@@ -237,10 +237,10 @@ export default function ProductAnnouncementsPage() {
         <CtaBand
           placement="announcements_after_features"
           eyebrow="Pro package"
-          heading="Try it free in dev — watermark until you license."
+          heading="Try it free in dev, watermark until you license."
           subtext="Full functionality in development and on localhost, no key required. One licence from $9.99 unlocks production for every package."
           ctaLabel="Build my announcement"
-          reassurance="No signup, no credit card — install and go."
+          reassurance="No signup, no credit card, install and go."
           primaryHref="/builder"
         />
 

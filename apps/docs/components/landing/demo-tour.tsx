@@ -364,7 +364,7 @@ function AnnouncementsDemo() {
         {variant === 'banner' && (
           <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between bg-[var(--tk-primary)] px-4 py-2.5">
             <p className="text-[12px] font-medium text-white">
-              Version 2.0 is here — check out the new features!
+              Version 2.0 is here, check out the new features!
             </p>
             <button
               type="button"
@@ -1198,7 +1198,7 @@ function SurveysDemo() {
 const aiPrompts = [
   {
     q: 'How do I trigger a tour after a user logs in?',
-    a: "Call startTour('onboarding') inside a useEffect that depends on your auth state. The tour engine waits for the target element to mount — no need to manually orchestrate timing.",
+    a: "Call startTour('onboarding') inside a useEffect that depends on your auth state. The tour engine waits for the target element to mount, no need to manually orchestrate timing.",
     sources: ['docs/core/useTour', 'guides/auth-integration'],
   },
   {
@@ -1208,7 +1208,7 @@ const aiPrompts = [
   },
   {
     q: 'Can I use this with React Server Components?',
-    a: 'Yes. The tour components are client-side ("use client"), but they hydrate safely inside Server Components. Put <Tour /> in any client boundary — no SSR work needed.',
+    a: 'Yes. The tour components are client-side ("use client"), but they hydrate safely inside Server Components. Put <Tour /> in any client boundary, no SSR work needed.',
     sources: ['guides/nextjs-app-router', 'docs/react/ssr'],
   },
 ]
@@ -1449,7 +1449,7 @@ export function DemoTour() {
           measure="max-w-[512px]"
           title="Try before you install"
         >
-          Interactive demos for every package. No signup, no sandbox — just click through and see
+          Interactive demos for every package. No signup, no sandbox, just click through and see
           what ships.
         </SectionHead>
 

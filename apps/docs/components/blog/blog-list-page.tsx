@@ -44,7 +44,7 @@ export function BlogListPage({ page }: BlogListPageProps) {
         ]}
       />
       <ItemListJsonLd
-        name={page === 1 ? 'userTourKit blog' : `userTourKit blog — page ${page}`}
+        name={page === 1 ? 'userTourKit blog' : `userTourKit blog, page ${page}`}
         url={pageHref(page)}
         items={posts.map((post) => ({
           url: `/blog/${post.slug}`,

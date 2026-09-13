@@ -92,12 +92,12 @@ export default async function BlogPostPage({ params }: PageProps) {
     {
       question: 'What is userTourKit?',
       answer:
-        'userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling. Its core tree-shakes to the hooks you import — under 4 KB for a single one — and it ships with WCAG 2.1 AA accessibility.',
+        'userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling. Its core tree-shakes to the hooks you import, under 4 KB for a single one, and it ships with WCAG 2.1 AA accessibility.',
     },
     {
       question: 'How is userTourKit licensed and priced?',
       answer:
-        'userTourKit is free in development, evaluation, testing and CI — every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited.',
+        'userTourKit is free in development, evaluation, testing and CI. Every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited.',
     },
   ]
   const faqItems = extractedFaqs.length > 0 ? extractedFaqs : fallbackFaqs
@@ -241,11 +241,11 @@ export default async function BlogPostPage({ params }: PageProps) {
               </tbody>
             </table>
 
-            <h2>1. userTourKit — Best headless React tour library</h2>
+            <h2>1. userTourKit, Best headless React tour library</h2>
             <p>
               userTourKit is a source-available headless React library for building product tours,
               onboarding checklists, hints, announcements, and in-app messaging. Its core
-              tree-shakes to the hooks you import — under 4 KB for a single one — and it ships with
+              tree-shakes to the hooks you import, under 4 KB for a single one, and it ships with
               WCAG 2.1 AA accessibility by default.
             </p>
             <p>
@@ -262,10 +262,10 @@ export default async function BlogPostPage({ params }: PageProps) {
               <strong>Pricing:</strong> Free in development, one-time from $9.99 to ship
             </p>
             <p>
-              <strong>Verdict:</strong> [2 sentences — who should and shouldn&apos;t use this tool]
+              <strong>Verdict:</strong> [2 sentences, who should and shouldn&apos;t use this tool]
             </p>
 
-            <h2>2. [Tool] — Best for [qualifier]</h2>
+            <h2>2. [Tool], Best for [qualifier]</h2>
             <p>[Per-tool entry: definition, strengths, limitations, specs, pricing, verdict]</p>
 
             <h2>How to choose the right tool for your stack</h2>

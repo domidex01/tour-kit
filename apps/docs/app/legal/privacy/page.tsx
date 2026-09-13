@@ -5,10 +5,10 @@ import Link from 'next/link'
 
 const TITLE = 'Privacy Policy'
 const DESCRIPTION =
-  'How usertourkit.com handles visitor data — analytics, cookies, and third-party services.'
+  'How usertourkit.com handles visitor data, analytics, cookies, and third-party services.'
 
 export const metadata: Metadata = {
-  title: `${TITLE} — userTourKit`,
+  title: `${TITLE}, userTourKit`,
   description: DESCRIPTION,
   alternates: { canonical: '/legal/privacy' },
   openGraph: {
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
                 Polar.sh
               </a>
               ): for Pro license buyers, we receive your email and order ID to issue license keys.
-              Payment card data is handled entirely by Polar and Stripe — we never see it.
+              Payment card data is handled entirely by Polar and Stripe, we never see it.
             </li>
           </ul>
 
@@ -80,7 +80,7 @@ export default function PrivacyPage() {
           <h2>Third parties</h2>
           <ul>
             <li>
-              <strong>Vercel</strong> — hosting and analytics.{' '}
+              <strong>Vercel</strong>, hosting and analytics.{' '}
               <a
                 href="https://vercel.com/legal/privacy-policy"
                 target="_blank"
@@ -91,14 +91,14 @@ export default function PrivacyPage() {
               .
             </li>
             <li>
-              <strong>Polar.sh</strong> — payments and license management for Pro purchases.{' '}
+              <strong>Polar.sh</strong>, payments and license management for Pro purchases.{' '}
               <a href="https://polar.sh/legal/privacy" target="_blank" rel="noopener noreferrer">
                 Polar's privacy policy
               </a>
               .
             </li>
             <li>
-              <strong>Cloudflare</strong> — CDN and bot-management in front of the site.{' '}
+              <strong>Cloudflare</strong>, CDN and bot-management in front of the site.{' '}
               <a
                 href="https://www.cloudflare.com/privacypolicy/"
                 target="_blank"
@@ -120,7 +120,7 @@ export default function PrivacyPage() {
             >
               GitHub Issues
             </a>{' '}
-            (or in private if you prefer — include your order ID). We will delete personal data
+            (or in private if you prefer, include your order ID). We will delete personal data
             within 30 days, except where we are required by Polar/Stripe to retain it for tax
             records.
           </p>

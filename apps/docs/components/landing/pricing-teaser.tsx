@@ -27,9 +27,9 @@ const ICONS = [Code2, Zap, Users] as const
 
 /** True of every tier: the tiers differ only in how many projects a key covers. */
 const SHARED_FEATURES = [
-  'Serve it to end users — no badge',
+  'Serve it to end users, no badge',
   'Every package, no feature gates',
-  'All future updates — no subscription',
+  'All future updates, no subscription',
   'Converts to MIT on its Change Date',
 ] as const
 
@@ -65,7 +65,7 @@ export function PricingTeaser({ placement = 'home_teaser' }: PricingTeaserProps)
             </>
           }
         >
-          Every package is free while you build — development, evaluation, CI, the lot. A licence is
+          Every package is free while you build: development, evaluation, CI, the lot. A licence is
           for serving it to end users, and it is a one-time purchase, never a subscription: no
           renewals, no seats, no per-MAU invoice.
         </SectionHead>

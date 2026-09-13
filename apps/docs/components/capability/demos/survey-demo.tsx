@@ -26,7 +26,7 @@ const DEMO_SURVEY: SurveyConfig = {
   id: 'capability-demo-nps',
   type: 'nps',
   title: 'Quick question',
-  description: 'Two questions, in context — the live component.',
+  description: 'Two questions, in context, the live component.',
   displayMode: 'inline',
   questions: [
     {
@@ -45,7 +45,7 @@ const DEMO_SURVEY: SurveyConfig = {
       id: 'nps-reason',
       type: 'textarea',
       text: 'What is the main reason for your score?',
-      placeholder: 'Optional — tell us more…',
+      placeholder: 'Optional, tell us more…',
     },
   ],
 }
@@ -162,11 +162,11 @@ function DemoSurveyCard() {
       {state.isCompleted ? (
         <div className="space-y-3" aria-live="polite">
           <p className="text-[14px] font-semibold text-emerald-600 dark:text-emerald-400">
-            Thanks — response captured.
+            Thanks, response captured.
           </p>
           {result ? (
             <p className="text-[13px] leading-relaxed text-fd-muted-foreground">
-              That score makes you <strong>{npsBucket(result)}</strong> — classified live by{' '}
+              That score makes you <strong>{npsBucket(result)}</strong>, classified live by{' '}
               <code className="rounded bg-fd-muted px-1.5 py-0.5 font-mono text-[11.5px]">
                 calculateNPS()
               </code>

@@ -14,7 +14,7 @@ export function BlogPreview() {
         <div className="flex flex-wrap items-end justify-between gap-6">
           <SectionHead title="From the blog.">
             Technical deep-dives, honest comparisons, and shipping tutorials. No listicles, no
-            affiliate content — written for the engineers who will read the code.
+            affiliate content, written for the engineers who will read the code.
           </SectionHead>
           <Link
             href="/blog"

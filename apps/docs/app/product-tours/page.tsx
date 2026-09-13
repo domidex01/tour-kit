@@ -20,7 +20,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 
 const PAGE_PATH = '/product-tours'
-const PAGE_TITLE = 'Product Tours for React — Headless & Accessible | userTourKit'
+const PAGE_TITLE = 'Product Tours for React, Headless & Accessible | userTourKit'
 const PAGE_DESC =
   'React product tour library with headless hooks, pre-styled components, router adapters, and WCAG 2.1 AA accessibility. Free in development, one-time from $9.99 to ship.'
 // File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
@@ -84,10 +84,10 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'How accessible are the tours, actually?',
     answer:
-      'WCAG 2.1 AA: focus is trapped in the active step, Tab order is managed, Esc ends the tour, steps are announced to screen readers, and animations honor prefers-reduced-motion. Lighthouse accessibility scores 100 — it is a release gate, not an aspiration.',
+      'WCAG 2.1 AA: focus is trapped in the active step, Tab order is managed, Esc ends the tour, steps are announced to screen readers, and animations honor prefers-reduced-motion. Lighthouse accessibility scores 100, it is a release gate, not an aspiration.',
   },
   {
-    question: 'Headless hooks or styled components — which do I get?',
+    question: 'Headless hooks or styled components, which do I get?',
     answer:
       'Both. @tour-kit/react ships pre-styled, shadcn-native Tour/TourStep components for the fast path, and every behavior is available through headless hooks from @tour-kit/core when you want to render entirely your own UI.',
   },
@@ -123,7 +123,7 @@ export default function ProductToursPage() {
           eyebrow="@tour-kit/core + @tour-kit/react · Free in development"
           heading="Product tours your users"
           headingAccent="actually finish."
-          subhead="A React product tour library built headless-first — spotlight overlays, router-aware steps, and WCAG 2.1 AA accessibility, styled by your design system."
+          subhead="A React product tour library built headless-first, spotlight overlays, router-aware steps, and WCAG 2.1 AA accessibility, styled by your design system."
           primaryLabel="Build my first tour"
           primaryHref="/builder"
           secondaryLabel="View on GitHub"
@@ -137,7 +137,7 @@ export default function ProductToursPage() {
 
         <PainOutcomeStrip
           heading="Why tours get skipped"
-          subtext="Most product tours die one of three deaths: they break, they bloat, or they look like a foreign object. None of those are user problems — they're library problems."
+          subtext="Most product tours die one of three deaths: they break, they bloat, or they look like a foreign object. None of those are user problems, they're library problems."
           items={[
             {
               pain: 'Tours break on route changes',
@@ -150,7 +150,7 @@ export default function ProductToursPage() {
             {
               pain: '47KB to show three tooltips',
               painDetail:
-                'Legacy tour libraries ship more JavaScript than React itself — and your users pay the download.',
+                'Legacy tour libraries ship more JavaScript than React itself, and your users pay the download.',
               outcome: 'Under 4 KB tree-shaken',
               outcomeDetail:
                 'Import one hook from the headless core and you ship under 4 KB; the rest tree-shakes away. Styled components stay under 12 KB gzipped. Code-splits cleanly behind a dynamic import.',
@@ -158,10 +158,10 @@ export default function ProductToursPage() {
             {
               pain: 'Looks like a browser extension',
               painDetail:
-                'Injected CSS and fixed themes make every tour look bolted on — brand teams notice.',
+                'Injected CSS and fixed themes make every tour look bolted on, brand teams notice.',
               outcome: 'Your components, your tokens',
               outcomeDetail:
-                'Headless hooks plus shadcn-native styled components — the tour is indistinguishable from your product.',
+                'Headless hooks plus shadcn-native styled components, the tour is indistinguishable from your product.',
             },
           ]}
         />
@@ -188,7 +188,7 @@ export default function ProductToursPage() {
           <div className="mx-auto max-w-[1120px]">
             <SectionHead size="section" title="Two ways in. Same engine.">
               Start with the styled components and eject to headless when the design team comes
-              knocking — both packages share the same core and the same licence.
+              knocking, both packages share the same core and the same licence.
             </SectionHead>
 
             <div className="mt-14 grid gap-6 md:grid-cols-2">
@@ -197,11 +197,11 @@ export default function ProductToursPage() {
                   @tour-kit/react
                 </h3>
                 <p className="mb-4 text-[13px] text-fd-muted-foreground">
-                  Pre-styled components — the fast path
+                  Pre-styled components, the fast path
                 </p>
                 <p className="mb-5 text-[14px] leading-[1.6] text-fd-muted-foreground">
-                  Drop-in Tour, TourStep, spotlight overlay, and card — shadcn-native styling,
-                  router adapters, and sensible defaults. Most teams ship with this.
+                  Drop-in Tour, TourStep, spotlight overlay, and card, shadcn-native styling, router
+                  adapters, and sensible defaults. Most teams ship with this.
                 </p>
                 <Link
                   href="/docs/react"
@@ -217,10 +217,10 @@ export default function ProductToursPage() {
                   @tour-kit/core
                 </h3>
                 <p className="mb-4 text-[13px] text-fd-muted-foreground">
-                  Headless engine — total control
+                  Headless engine, total control
                 </p>
                 <p className="mb-5 text-[14px] leading-[1.6] text-fd-muted-foreground">
-                  Hooks, positioning, focus management, and state with zero UI opinions — render
+                  Hooks, positioning, focus management, and state with zero UI opinions, render
                   every pixel yourself, in any framework wrapper.
                 </p>
                 <Link
@@ -242,12 +242,12 @@ export default function ProductToursPage() {
             {
               title: 'Headless or pre-styled',
               description:
-                'Styled Tour/TourStep components for speed, headless hooks for control — same engine underneath.',
+                'Styled Tour/TourStep components for speed, headless hooks for control, same engine underneath.',
             },
             {
               title: 'WCAG 2.1 AA accessible',
               description:
-                'Focus trap, keyboard navigation, screen-reader announcements, reduced-motion — Lighthouse a11y 100.',
+                'Focus trap, keyboard navigation, screen-reader announcements, reduced-motion, Lighthouse a11y 100.',
             },
             {
               title: 'The code lands in your repo',
@@ -257,12 +257,12 @@ export default function ProductToursPage() {
             {
               title: 'Router adapters',
               description:
-                'Next.js App & Pages Router, React Router, TanStack Router — multi-page tours that survive navigation.',
+                'Next.js App & Pages Router, React Router, TanStack Router, multi-page tours that survive navigation.',
             },
             {
               title: 'Progress persistence',
               description:
-                'localStorage by default, or your API via a one-line storage adapter — returning users resume, not restart.',
+                'localStorage by default, or your API via a one-line storage adapter, returning users resume, not restart.',
             },
             {
               title: 'Tour analytics',
@@ -276,10 +276,10 @@ export default function ProductToursPage() {
         <CtaBand
           placement="tours_after_features"
           eyebrow="Free in development"
-          heading="Build your first tour — free in development, no signup."
+          heading="Build your first tour, free in development, no signup."
           subtext="Install the package and ship a tour today. Pro packages add checklists, announcements, and surveys when you need them."
           ctaLabel="Build my first tour"
-          reassurance="Free in development — no signup, no credit card."
+          reassurance="Free in development, no signup, no credit card."
         />
 
         <ComparisonTeaser

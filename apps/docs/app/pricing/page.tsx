@@ -7,7 +7,7 @@ import { BreadcrumbJsonLd, FAQJsonLd, ProductJsonLd } from '@/lib/structured-dat
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 
-const PRICING_TITLE = 'Pricing — userTourKit'
+const PRICING_TITLE = 'Pricing, userTourKit'
 const PRICING_DESCRIPTION =
   'One-time pricing for userTourKit: $9.99, $49.99 or $299.99 for 1, 5 or unlimited projects. Free in development under BSL 1.1, a licence key in production. No subscriptions, and every version converts to MIT on its Change Date.'
 const PRICING_OG_IMAGE = `/api/og?title=${encodeURIComponent('Pricing')}&category=PRICING`
@@ -81,7 +81,7 @@ export default function PricingPage() {
           development, evaluation, testing and CI, on localhost and in preview environments. Serving
           it to end users of a deployed application needs a key. Each published version converts to
           the MIT licence on its Change Date, so nothing you install can be taken away. Every tier
-          gets the whole library — they differ only in how many projects one key covers.
+          gets the whole library, they differ only in how many projects one key covers.
         </PageHero>
 
         {/* Gap/hero-body 3880:1536 — a flat 32px between the band and the chips. */}

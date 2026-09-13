@@ -6,7 +6,7 @@ import { useState } from 'react'
 const FAQ_ITEMS = [
   {
     q: 'Does it work with React 19, Next.js App Router, and Tailwind?',
-    a: 'Yes to all three. First-class adapters ship for the Next.js App Router, Pages Router, React Router, and TanStack Router. No inline styles fighting Tailwind, no CSS injection, no global reset. shadcn/ui is the reference stack — if it renders in your app, userTourKit targets it.',
+    a: 'Yes to all three. First-class adapters ship for the Next.js App Router, Pages Router, React Router, and TanStack Router. No inline styles fighting Tailwind, no CSS injection, no global reset. shadcn/ui is the reference stack, if it renders in your app, userTourKit targets it.',
   },
   {
     q: 'Does it play nice with SSR and React Server Components?',
@@ -14,7 +14,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Should we just build our own?',
-    a: 'A production-grade tour engine — positioning, focus trap, keyboard nav, router integration, WCAG 2.1 AA — is 2–4 weeks of senior engineering time. At market rates that is $6,400–$24,000. userTourKit is $0 while you build it and a one-time $9.99 when you ship it. Ship the product, not the widget.',
+    a: 'A production-grade tour engine, positioning, focus trap, keyboard nav, router integration, WCAG 2.1 AA, is 2–4 weeks of senior engineering time. At market rates that is $6,400–$24,000. userTourKit is $0 while you build it and a one-time $9.99 when you ship it. Ship the product, not the widget.',
   },
   {
     q: 'What does a licence actually cover? Any seats, MAU, or usage caps?',
@@ -22,31 +22,31 @@ const FAQ_ITEMS = [
   },
   {
     q: 'We already pay Appcues, Userpilot, or Pendo. Why switch?',
-    a: 'Three reasons. (1) Cost — a one-time line item from $9.99 versus $3,000–$48,000 per year. (2) Design — your components and tokens, not their iframe overlay fighting your CSS. (3) Control — tours live in your bundle, authenticated by your auth, logged by your logging. No vendor raising prices on you next quarter.',
+    a: 'Three reasons. (1) Cost, a one-time line item from $9.99 versus $3,000–$48,000 per year. (2) Design, your components and tokens, not their iframe overlay fighting your CSS. (3) Control, tours live in your bundle, authenticated by your auth, logged by your logging. No vendor raising prices on you next quarter.',
   },
   {
     q: 'Can PMs and non-engineers create tours without filing a ticket?',
-    a: 'Honestly, ask yourself how often that actually happens today. Most SaaS tour editors still need engineering to fix CSS, wire up dynamic targets, or handle SPA routing. With userTourKit, steps are just config — pair with a feature flag or a CMS-driven JSON feed and PMs can edit the copy without touching code. Or wire it to the (Pro) AI assistant and they can generate flows from a prompt.',
+    a: 'Honestly, ask yourself how often that actually happens today. Most SaaS tour editors still need engineering to fix CSS, wire up dynamic targets, or handle SPA routing. With userTourKit, steps are just config, pair with a feature flag or a CMS-driven JSON feed and PMs can edit the copy without touching code. Or wire it to the (Pro) AI assistant and they can generate flows from a prompt.',
   },
   {
     q: 'How does it handle progress, completion, and returning users?',
-    a: 'Out of the box, progress persists to localStorage keyed by tour ID — a returning user picks up where they left off, or skips tours they already finished. Swap in a custom storage adapter (cookies, your API, a server session) in a single line when you need cross-device or authenticated persistence.',
+    a: 'Out of the box, progress persists to localStorage keyed by tour ID, a returning user picks up where they left off, or skips tours they already finished. Swap in a custom storage adapter (cookies, your API, a server session) in a single line when you need cross-device or authenticated persistence.',
   },
   {
     q: 'What if my target element is not on the page yet, or gets removed?',
-    a: 'The positioner uses a MutationObserver and re-queries on route changes — tours survive async mounts, route transitions, and conditional rendering. If a target disappears mid-tour, you pick: skip the step, pause until it returns, or fall back to a centered dialog. All three are one-line configs.',
+    a: 'The positioner uses a MutationObserver and re-queries on route changes, tours survive async mounts, route transitions, and conditional rendering. If a target disappears mid-tour, you pick: skip the step, pause until it returns, or fall back to a centered dialog. All three are one-line configs.',
   },
   {
     q: 'Does it phone home or track my users?',
-    a: "No. The library ships zero telemetry — no analytics pings, no license check beacons during user sessions (activation happens once per domain and caches for 72 hours). Pro analytics are opt-in and route through your own PostHog, Mixpanel, Amplitude, or GA4. Your users' data never touches our infrastructure.",
+    a: "No. The library ships zero telemetry, no analytics pings, no license check beacons during user sessions (activation happens once per domain and caches for 72 hours). Pro analytics are opt-in and route through your own PostHog, Mixpanel, Amplitude, or GA4. Your users' data never touches our infrastructure.",
   },
   {
     q: 'How painful is migrating from React Joyride or Shepherd?',
-    a: 'Tour step configs map over near-directly — target selectors, titles, content, and placement keys are the same shape. The typical 5–10 step tour ports in under an hour. Migration guides with before/after diffs live in the docs for Joyride, Shepherd, Intro.js, and Driver.js.',
+    a: 'Tour step configs map over near-directly, target selectors, titles, content, and placement keys are the same shape. The typical 5–10 step tour ports in under an hour. Migration guides with before/after diffs live in the docs for Joyride, Shepherd, Intro.js, and Driver.js.',
   },
   {
     q: 'What happens if the maintainer disappears?',
-    a: 'BSL 1.1 grants you the right to copy, modify and redistribute the source today. The code is in your node_modules and on GitHub — fork it, freeze it, patch it, your call. Each published version also converts to the MIT licence on its Change Date. Unlike a SaaS where your tours vanish the day an invoice bounces, the worst case here is "no new features." You keep shipping.',
+    a: 'BSL 1.1 grants you the right to copy, modify and redistribute the source today. The code is in your node_modules and on GitHub, fork it, freeze it, patch it, your call. Each published version also converts to the MIT licence on its Change Date. Unlike a SaaS where your tours vanish the day an invoice bounces, the worst case here is "no new features." You keep shipping.',
   },
 ]
 
