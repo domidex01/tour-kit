@@ -52,8 +52,9 @@ function copyFiles(): string[] {
 }
 
 /** Indices of em dashes that are user-facing copy on one line. */
-function userFacing(line: string, inBlock: boolean): { hits: number[]; inBlock: boolean } {
+function userFacing(line: string, blockAtStart: boolean): { hits: number[]; inBlock: boolean } {
   const hits: number[] = []
+  let inBlock = blockAtStart
   let quote: string | null = null
   let i = 0
   while (i < line.length) {
