@@ -27,7 +27,7 @@ import dynamic from 'next/dynamic'
  */
 const HOME_TITLE = 'userTourKit — Product Tours, Checklists & In-App Messaging for React'
 const HOME_DESC =
-  'The open-source onboarding toolkit for React: product tours, feature hints, checklists, announcements, and surveys. Headless, accessible, yours.'
+  'The onboarding toolkit for React: product tours, feature hints, checklists, announcements, and surveys. Headless, accessible, yours.'
 
 export const metadata: Metadata = {
   title: { absolute: HOME_TITLE },
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     'headless react onboarding',
     'in-app messaging react',
     'shadcn ui tour',
-    'open source onboarding library',
+    'source available onboarding library',
     'user onboarding react',
   ],
   alternates: { canonical: '/' },
