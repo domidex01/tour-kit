@@ -4,6 +4,10 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 const TITLE = 'Privacy Policy'
+
+// Bumped by hand when the policy actually changes. Deriving this from
+// `new Date()` made every build claim the policy had just been reviewed.
+const LAST_UPDATED = '2026-09-13'
 const DESCRIPTION =
   'How usertourkit.com handles visitor data — analytics, cookies, and third-party services.'
 
@@ -37,9 +41,7 @@ export default function PrivacyPage() {
           <h1 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
             {TITLE}
           </h1>
-          <p className="text-[15px] text-fd-muted-foreground">
-            Last updated: {new Date().toISOString().split('T')[0]}
-          </p>
+          <p className="text-[15px] text-fd-muted-foreground">Last updated: {LAST_UPDATED}</p>
         </header>
 
         <article className="prose prose-neutral dark:prose-invert max-w-none">
@@ -53,9 +55,10 @@ export default function PrivacyPage() {
           <h2>What we collect</h2>
           <ul>
             <li>
-              <strong>Aggregate analytics</strong> (Vercel Analytics): page views, referrers,
-              country-level geography, device type. No cross-site tracking, no personal identifiers,
-              no advertising cookies.
+              <strong>Aggregate analytics</strong> (Google Analytics 4): page views, referrers,
+              country-level geography, device type, and which pricing and call-to-action links get
+              clicked. No advertising or remarketing features are enabled, and we do not upload
+              customer data to Google.
             </li>
             <li>
               <strong>Error telemetry</strong> (server logs): request paths, response codes, and
@@ -73,20 +76,23 @@ export default function PrivacyPage() {
 
           <h2>Cookies</h2>
           <p>
-            We do not set tracking cookies. Vercel may set a functional cookie to preserve your
-            theme preference and a first-party analytics identifier that resets every 24 hours.
+            Google Analytics sets first-party <code>_ga</code> cookies so a returning visitor is not
+            counted twice. They are analytics cookies, not advertising cookies, and they are not
+            shared with ad networks. Your light or dark theme preference is stored in your browser
+            and never leaves your device.
           </p>
+          <p>We do not run session recording, heatmaps, or any cross-site tracking.</p>
 
           <h2>Third parties</h2>
           <ul>
             <li>
-              <strong>Vercel</strong> — hosting and analytics.{' '}
+              <strong>Google</strong>, analytics only (Google Analytics 4).{' '}
               <a
-                href="https://vercel.com/legal/privacy-policy"
+                href="https://policies.google.com/privacy"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Vercel's privacy policy
+                Google's privacy policy
               </a>
               .
             </li>
