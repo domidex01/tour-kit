@@ -13,6 +13,15 @@ const config = {
   output: 'standalone',
   reactStrictMode: true,
   trailingSlash: false,
+  // PostHog addresses its endpoints with a trailing slash (/ingest/e/), and
+  // Next's automatic canonicalisation answered those with a 308. Every event
+  // cost two round trips, and the ones posthog-js fires as the page unloads —
+  // which includes the Buy click that navigates away to Polar, the single
+  // event this funnel exists to measure — are the least likely to survive a
+  // redirect. Turning the automatic behaviour off would also drop trailing
+  // slash canonicalisation for the ~604 content pages, so the redirect below
+  // puts it back for everything except /ingest.
+  skipTrailingSlashRedirect: true,
   poweredByHeader: false,
   transpilePackages: ['@tour-kit/core', '@tour-kit/react', '@tour-kit/hints'],
   images: {
@@ -28,10 +37,28 @@ const config = {
         source: '/blog/:slug.mdx',
         destination: '/llms.mdx/blog/:slug',
       },
+      // PostHog, reverse-proxied through our own origin so that ad-blockers do
+      // not eat a developer audience's events. Static assets and ingestion are
+      // different hosts upstream, and the assets rule has to come first or the
+      // catch-all below swallows it.
+      {
+        source: '/ingest/static/:path*',
+        destination: 'https://eu-assets.i.posthog.com/static/:path*',
+      },
+      {
+        source: '/ingest/:path*',
+        destination: 'https://eu.i.posthog.com/:path*',
+      },
     ]
   },
   async redirects() {
     return [
+      {
+        // Restores what skipTrailingSlashRedirect turns off, minus /ingest.
+        source: '/:path((?!ingest/).+)/',
+        destination: '/:path',
+        permanent: true,
+      },
       {
         source: '/:path*',
         has: [{ type: 'host', value: 'www.usertourkit.com' }],

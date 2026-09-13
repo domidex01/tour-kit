@@ -1,8 +1,8 @@
 'use client'
 
 import type { CapabilitySlug } from '@/components/capability/types'
+import { trackEvent } from '@/lib/analytics'
 import { STARTER_PRICE, type TierId } from '@/lib/pricing'
-import { sendGAEvent } from '@next/third-parties/google'
 import type { ReactNode } from 'react'
 
 /**
@@ -40,7 +40,7 @@ export function TrackedBuyButton({
       rel="noopener noreferrer"
       className={className}
       onClick={() => {
-        sendGAEvent('event', 'pricing_buy_clicked', {
+        trackEvent('pricing_buy_clicked', {
           placement,
           destination: href,
           value,

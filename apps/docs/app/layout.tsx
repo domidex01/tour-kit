@@ -1,4 +1,5 @@
 import './globals.css'
+import { PostHogAnalytics } from '@/components/analytics/posthog-analytics'
 import { SaleAnnouncementBanner } from '@/components/sale-announcement-banner'
 import { SkipNav } from '@/components/skip-nav'
 import { WebMcp } from '@/components/webmcp'
@@ -99,6 +100,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </RootProvider>
       </body>
       {GA_ID ? <GoogleAnalytics gaId={GA_ID} /> : null}
+      <PostHogAnalytics />
     </html>
   )
 }

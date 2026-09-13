@@ -1,3 +1,4 @@
+import { POSTHOG_ENABLED } from '@/lib/analytics'
 import { baseOptions } from '@/lib/layout.shared'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
@@ -60,6 +61,14 @@ export default function PrivacyPage() {
               clicked. No advertising or remarketing features are enabled, and we do not upload
               customer data to Google.
             </li>
+            {POSTHOG_ENABLED ? (
+              <li>
+                <strong>Product analytics</strong> (PostHog, EU region): the same page views and
+                link clicks, plus the campaign tags on inbound links so we can tell which referrals
+                lead somewhere. Anonymous visitors get no stored profile, and the data never leaves
+                the EU.
+              </li>
+            ) : null}
             <li>
               <strong>Error telemetry</strong> (server logs): request paths, response codes, and
               error stack traces. Retained for 30 days.
@@ -81,6 +90,13 @@ export default function PrivacyPage() {
             shared with ad networks. Your light or dark theme preference is stored in your browser
             and never leaves your device.
           </p>
+          {POSTHOG_ENABLED ? (
+            <p>
+              PostHog sets no cookies at all. It keeps an anonymous identifier in your browser's
+              local storage so repeat visits are not double-counted, which you can clear at any time
+              from your browser settings.
+            </p>
+          ) : null}
           <p>We do not run session recording, heatmaps, or any cross-site tracking.</p>
 
           <h2>Third parties</h2>
@@ -96,6 +112,15 @@ export default function PrivacyPage() {
               </a>
               .
             </li>
+            {POSTHOG_ENABLED ? (
+              <li>
+                <strong>PostHog</strong>, product analytics, hosted in the EU.{' '}
+                <a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer">
+                  PostHog's privacy policy
+                </a>
+                .
+              </li>
+            ) : null}
             <li>
               <strong>Polar.sh</strong>, payments and license management for Pro purchases.{' '}
               <a href="https://polar.sh/legal/privacy" target="_blank" rel="noopener noreferrer">
