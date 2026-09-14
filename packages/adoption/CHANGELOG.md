@@ -1,5 +1,20 @@
 # @tour-kit/adoption
 
+## 3.0.2
+
+### Patch Changes
+
+- Updated dependencies [db05873]
+- Updated dependencies [f62631b]
+- Updated dependencies [e70e310]
+- Updated dependencies [9d1cba1]
+- Updated dependencies [978338b]
+- Updated dependencies [1a6e295]
+- Updated dependencies [3c13df3]
+  - @tour-kit/analytics@0.13.0
+  - @tour-kit/core@3.0.0
+  - @tour-kit/license@1.4.0
+
 ## 3.0.1
 
 ### Patch Changes

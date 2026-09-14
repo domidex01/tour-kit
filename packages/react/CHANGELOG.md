@@ -1,5 +1,73 @@
 # @tour-kit/react
 
+## 3.0.0
+
+### Major Changes
+
+- f62631b: Relicense `core`, `react` and `hints` from MIT to the Business Source License
+  1.1, bringing the published packages in line with what usertourkit.com has been
+  telling people since the pricing change.
+
+  Production use now requires a userTourKit licence key. Development, evaluation,
+  testing, CI and any non-production environment stay free and need no key — that
+  is the Additional Use Grant, written into each package's `LICENSE.md`.
+
+  Each published version converts to MIT on its Change Date, four years after that
+  version ships. BSL 1.1's own terms cap it there ("or the fourth anniversary of
+  the first publicly available distribution of a specific version, whichever comes
+  first"), so a version's conversion date cannot drift even if the stamped date in
+  a later release is not bumped.
+
+  Nothing is retroactive. Every version published up to and including 2.1.0 was
+  released under MIT, and an MIT grant cannot be withdrawn — those versions stay
+  MIT forever, and anyone already depending on them is unaffected until they
+  choose to upgrade.
+
+- 1a6e295: The production licence badge reaches `@tour-kit/react` and `@tour-kit/hints`.
+
+  **This changes behaviour for every existing install.** A consumer who
+  upgrades and has no licence key configured will see a small
+  `userTourKit · Unlicensed` badge in the bottom-right of their **production**
+  deployment. It did not appear before. Nothing renders differently on
+  localhost, `127.0.0.1`, `*.local`, or on preview/ephemeral deploy URLs, and
+  nothing fails to render anywhere — `LicenseGate` is a soft gate that layers a
+  badge over the feature rather than replacing it.
+
+  `TourProvider` and `TourKitProvider` are now owned by `@tour-kit/react`
+  instead of being re-exported from `@tour-kit/core`. Props and behaviour are
+  identical and a type test asserts it, so imports do not change; the badge
+  simply reaches the documented single-tour quickstart, which previously
+  rendered none. `MultiTourKitProvider` and `HintsProvider` are wrapped too.
+  With all of them plus a Pro package mounted together you still get exactly one
+  badge — `LicenseWatermark` elects a single owner.
+
+  In `@tour-kit/license`:
+
+  - A project means a registrable domain. `foo.com` and `app.foo.com` now cost
+    one activation slot instead of two, on both the activation and the
+    validation side. Existing activations keep working: the stored label is
+    normalised at comparison time, not migrated.
+  - The badge and the dev-only console warning name the current price.
+  - The badge no longer appears on a development host even when a
+    `<LicenseProvider>` is mounted with an empty key. The licence grants
+    development, evaluation, testing and CI use without charge, so the old
+    behaviour had the runtime contradicting the terms. The console warning
+    still fires, so a missing env var is still visible.
+
+### Patch Changes
+
+- Updated dependencies [db05873]
+- Updated dependencies [f62631b]
+- Updated dependencies [e70e310]
+- Updated dependencies [9d1cba1]
+- Updated dependencies [978338b]
+- Updated dependencies [1a6e295]
+- Updated dependencies [3c13df3]
+  - @tour-kit/analytics@0.13.0
+  - @tour-kit/core@3.0.0
+  - @tour-kit/license@1.4.0
+  - @tour-kit/media@0.13.5
+
 ## 2.1.0
 
 ### Patch Changes
