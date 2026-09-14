@@ -9,6 +9,7 @@ import type { CapabilityFaqItem } from '@/components/capability/types'
 import { CapabilityWebPageJsonLd } from '@/components/capability/web-page-json-ld'
 import { CtaBand } from '@/components/landing/cta-band'
 import { Footer } from '@/components/landing/footer'
+import { SectionHead } from '@/components/landing/section-head'
 import { SocialProof } from '@/components/landing/social-proof'
 import { baseOptions } from '@/lib/layout.shared'
 import { BreadcrumbJsonLd, FAQJsonLd, ProductJsonLd } from '@/lib/structured-data'
@@ -19,9 +20,9 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 
 const PAGE_PATH = '/product-tours'
-const PAGE_TITLE = 'Product Tours for React — Headless & Accessible | userTourKit'
+const PAGE_TITLE = 'Product Tours for React, Headless & Accessible | userTourKit'
 const PAGE_DESC =
-  'React product tour library with headless hooks, pre-styled components, router adapters, and WCAG 2.1 AA accessibility. Free and MIT licensed.'
+  'React product tour library with headless hooks, pre-styled components, router adapters, and WCAG 2.1 AA accessibility. Free in development, one-time from $9.99 to ship.'
 // File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
 // which blocks Twitter/Facebook crawlers from fetching share images.
 const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
@@ -73,7 +74,7 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'Is the product tour library really free for commercial use?',
     answer:
-      '@tour-kit/core and @tour-kit/react are MIT licensed — free forever, commercial use included, no watermark, no MAU caps. Pro packages (checklists, announcements, surveys, analytics) are a separate $99 one-time license when you need them.',
+      'Tour Kit is source-available under BSL 1.1: free for development, evaluation, testing and CI, with no feature gates and no MAU caps. A production deployment needs a one-time licence key, from $9.99 for a single project.',
   },
   {
     question: 'Does it survive route changes and async-mounted targets?',
@@ -83,17 +84,17 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'How accessible are the tours, actually?',
     answer:
-      'WCAG 2.1 AA: focus is trapped in the active step, Tab order is managed, Esc ends the tour, steps are announced to screen readers, and animations honor prefers-reduced-motion. Lighthouse accessibility scores 100 — it is a release gate, not an aspiration.',
+      'WCAG 2.1 AA: focus is trapped in the active step, Tab order is managed, Esc ends the tour, steps are announced to screen readers, and animations honor prefers-reduced-motion. Lighthouse accessibility scores 100, it is a release gate, not an aspiration.',
   },
   {
-    question: 'Headless hooks or styled components — which do I get?',
+    question: 'Headless hooks or styled components, which do I get?',
     answer:
       'Both. @tour-kit/react ships pre-styled, shadcn-native Tour/TourStep components for the fast path, and every behavior is available through headless hooks from @tour-kit/core when you want to render entirely your own UI.',
   },
   {
     question: 'How big is it, and what does that cost my users?',
     answer:
-      'The core engine is under 8KB gzipped and the React components under 12KB — roughly a sixth of react-joyride. Tours code-split cleanly because everything is tree-shakeable ESM.',
+      'Everything is tree-shakeable ESM: import one hook and you ship under 4 KB of core, and the React components stay under 12 KB gzipped. Tours code-split cleanly behind a dynamic import, so a route that never shows a tour never downloads one.',
   },
 ]
 
@@ -119,16 +120,16 @@ export default function ProductToursPage() {
       <main id="main-content" className="flex flex-1 flex-col">
         <CapabilityHero
           slug="tours"
-          eyebrow="@tour-kit/core + @tour-kit/react · Free & MIT"
+          eyebrow="@tour-kit/core + @tour-kit/react · Free in development"
           heading="Product tours your users"
           headingAccent="actually finish."
-          subhead="A React product tour library built headless-first — spotlight overlays, router-aware steps, and WCAG 2.1 AA accessibility, styled by your design system."
+          subhead="A React product tour library built headless-first, spotlight overlays, router-aware steps, and WCAG 2.1 AA accessibility, styled by your design system."
           primaryLabel="Build my first tour"
           primaryHref="/builder"
           secondaryLabel="View on GitHub"
           secondaryHref="https://github.com/domidex01/tour-kit"
           installCmd="pnpm add @tour-kit/react"
-          factsLine="< 8KB core gzipped · TypeScript strict · WCAG 2.1 AA · own your code"
+          factsLine="Tree-shakeable core · TypeScript strict · WCAG 2.1 AA · own your code"
         />
 
         {/* Live demo — the real Tour running on this page */}
@@ -136,7 +137,7 @@ export default function ProductToursPage() {
 
         <PainOutcomeStrip
           heading="Why tours get skipped"
-          subtext="Most product tours die one of three deaths: they break, they bloat, or they look like a foreign object. None of those are user problems — they're library problems."
+          subtext="Most product tours die one of three deaths: they break, they bloat, or they look like a foreign object. None of those are user problems, they're library problems."
           items={[
             {
               pain: 'Tours break on route changes',
@@ -149,18 +150,18 @@ export default function ProductToursPage() {
             {
               pain: '47KB to show three tooltips',
               painDetail:
-                'Legacy tour libraries ship more JavaScript than React itself — and your users pay the download.',
-              outcome: 'Under 8KB, tree-shakeable',
+                'Legacy tour libraries ship more JavaScript than React itself, and your users pay the download.',
+              outcome: 'Under 4 KB tree-shaken',
               outcomeDetail:
-                'The headless core is < 8KB gzipped; styled components add < 12KB. Code-splits cleanly behind a dynamic import.',
+                'Import one hook from the headless core and you ship under 4 KB; the rest tree-shakes away. Styled components stay under 12 KB gzipped. Code-splits cleanly behind a dynamic import.',
             },
             {
               pain: 'Looks like a browser extension',
               painDetail:
-                'Injected CSS and fixed themes make every tour look bolted on — brand teams notice.',
+                'Injected CSS and fixed themes make every tour look bolted on, brand teams notice.',
               outcome: 'Your components, your tokens',
               outcomeDetail:
-                'Headless hooks plus shadcn-native styled components — the tour is indistinguishable from your product.',
+                'Headless hooks plus shadcn-native styled components, the tour is indistinguishable from your product.',
             },
           ]}
         />
@@ -183,53 +184,48 @@ export default function ProductToursPage() {
         />
 
         {/* core vs react — one buyer intent, two install styles (plan §2) */}
-        <section className="bg-[#EDF6FB] px-6 py-20 sm:px-8 md:py-28 lg:px-12 dark:bg-fd-muted/30">
+        <section className="px-6 py-36 sm:px-8 lg:px-12">
           <div className="mx-auto max-w-[1120px]">
-            <div className="mb-14 max-w-lg">
-              <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-                Two ways in. Same engine.
-              </h2>
-              <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
-                Start with the styled components and eject to headless when the design team comes
-                knocking — both packages share the same core and the same MIT license.
-              </p>
-            </div>
+            <SectionHead size="section" title="Two ways in. Same engine.">
+              Start with the styled components and eject to headless when the design team comes
+              knocking, both packages share the same core and the same licence.
+            </SectionHead>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="rounded-xl border border-fd-border bg-fd-card p-7 transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <div className="mt-14 grid gap-6 md:grid-cols-2">
+              <div className="rounded-xl border border-[var(--tk-card-edge)] bg-fd-card p-7 transition-all hover:-translate-y-0.5 hover:shadow-md">
                 <h3 className="mb-1 font-mono text-[14px] font-bold text-fd-foreground">
                   @tour-kit/react
                 </h3>
                 <p className="mb-4 text-[13px] text-fd-muted-foreground">
-                  Pre-styled components — the fast path
+                  Pre-styled components, the fast path
                 </p>
                 <p className="mb-5 text-[14px] leading-[1.6] text-fd-muted-foreground">
-                  Drop-in Tour, TourStep, spotlight overlay, and card — shadcn-native styling,
-                  router adapters, and sensible defaults. Most teams ship with this.
+                  Drop-in Tour, TourStep, spotlight overlay, and card, shadcn-native styling, router
+                  adapters, and sensible defaults. Most teams ship with this.
                 </p>
                 <Link
                   href="/docs/react"
-                  className="inline-flex items-center gap-1.5 font-mono text-[13px] font-semibold text-[#0197f6] transition-colors hover:opacity-80"
+                  className="inline-flex items-center gap-1.5 font-mono text-[13px] font-semibold text-[var(--color-fd-primary)] transition-colors hover:opacity-80"
                 >
                   React docs
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                 </Link>
               </div>
 
-              <div className="rounded-xl border border-fd-border bg-fd-card p-7 transition-all hover:-translate-y-0.5 hover:shadow-md">
+              <div className="rounded-xl border border-[var(--tk-card-edge)] bg-fd-card p-7 transition-all hover:-translate-y-0.5 hover:shadow-md">
                 <h3 className="mb-1 font-mono text-[14px] font-bold text-fd-foreground">
                   @tour-kit/core
                 </h3>
                 <p className="mb-4 text-[13px] text-fd-muted-foreground">
-                  Headless engine — total control
+                  Headless engine, total control
                 </p>
                 <p className="mb-5 text-[14px] leading-[1.6] text-fd-muted-foreground">
-                  Hooks, positioning, focus management, and state with zero UI opinions — render
+                  Hooks, positioning, focus management, and state with zero UI opinions, render
                   every pixel yourself, in any framework wrapper.
                 </p>
                 <Link
                   href="/docs/core"
-                  className="inline-flex items-center gap-1.5 font-mono text-[13px] font-semibold text-[#0197f6] transition-colors hover:opacity-80"
+                  className="inline-flex items-center gap-1.5 font-mono text-[13px] font-semibold text-[var(--color-fd-primary)] transition-colors hover:opacity-80"
                 >
                   Core docs
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -246,27 +242,27 @@ export default function ProductToursPage() {
             {
               title: 'Headless or pre-styled',
               description:
-                'Styled Tour/TourStep components for speed, headless hooks for control — same engine underneath.',
+                'Styled Tour/TourStep components for speed, headless hooks for control, same engine underneath.',
             },
             {
               title: 'WCAG 2.1 AA accessible',
               description:
-                'Focus trap, keyboard navigation, screen-reader announcements, reduced-motion — Lighthouse a11y 100.',
+                'Focus trap, keyboard navigation, screen-reader announcements, reduced-motion, Lighthouse a11y 100.',
             },
             {
               title: 'The code lands in your repo',
               description:
-                'MIT licensed, free forever. Tours are TypeScript in your bundle, not a script tag from a vendor.',
+                'Free while you build, one-time when you ship. Tours are TypeScript in your bundle, not a script tag from a vendor.',
             },
             {
               title: 'Router adapters',
               description:
-                'Next.js App & Pages Router, React Router, TanStack Router — multi-page tours that survive navigation.',
+                'Next.js App & Pages Router, React Router, TanStack Router, multi-page tours that survive navigation.',
             },
             {
               title: 'Progress persistence',
               description:
-                'localStorage by default, or your API via a one-line storage adapter — returning users resume, not restart.',
+                'localStorage by default, or your API via a one-line storage adapter, returning users resume, not restart.',
             },
             {
               title: 'Tour analytics',
@@ -279,18 +275,23 @@ export default function ProductToursPage() {
 
         <CtaBand
           placement="tours_after_features"
-          eyebrow="Free & open source"
-          heading="Build your first tour — free & MIT, no signup."
+          eyebrow="Free in development"
+          heading="Build your first tour, free in development, no signup."
           subtext="Install the package and ship a tour today. Pro packages add checklists, announcements, and surveys when you need them."
           ctaLabel="Build my first tour"
-          reassurance="Free & MIT-licensed — no signup, no credit card."
+          reassurance="Free in development, no signup, no credit card."
         />
 
         <ComparisonTeaser
           heading="The third option between SaaS and DIY"
           rows={[
-            { label: 'Cost', tourKit: 'Free (MIT)', saas: '$200–900/mo', oss: 'Free' },
-            { label: 'Bundle impact', tourKit: '< 8KB', saas: 'External script', oss: '30–50KB' },
+            { label: 'Cost', tourKit: 'Free in dev, from $9.99', saas: '$200–900/mo', oss: 'Free' },
+            {
+              label: 'Bundle impact',
+              tourKit: 'Under 4 KB per hook',
+              saas: 'External script',
+              oss: '30–50KB',
+            },
             { label: 'Headless mode', tourKit: 'yes', saas: 'no', oss: 'no' },
           ]}
         />
@@ -308,7 +309,7 @@ export default function ProductToursPage() {
           slug="tours"
           heading="Own your onboarding."
           headingAccent="Ship it today."
-          subtext="Free, MIT, under 8KB. The tour library you'd have built with three spare weeks."
+          subtext="Free in development, tree-shakeable to the hook you call. The tour library you'd have built with three spare weeks."
           installCmd="pnpm add @tour-kit/react"
           primaryLabel="Get started"
           primaryHref="/builder"

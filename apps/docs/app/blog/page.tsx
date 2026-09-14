@@ -1,7 +1,7 @@
 import { BlogListPage } from '@/components/blog/blog-list-page'
 import type { Metadata } from 'next'
 
-const BLOG_TITLE = 'Blog — userTourKit'
+const BLOG_TITLE = 'Blog, userTourKit'
 const BLOG_DESC =
   'Guides, comparisons, and insights on product tours, onboarding, and developer experience from the userTourKit team.'
 

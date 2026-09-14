@@ -40,7 +40,7 @@ export function BlogPagination({ currentPage, totalPages }: BlogPaginationProps)
           aria-current={page === currentPage ? 'page' : undefined}
           className={`inline-flex h-11 w-11 items-center justify-center rounded-md text-sm font-medium transition-colors ${
             page === currentPage
-              ? 'bg-[#0197f6] text-white'
+              ? 'bg-[var(--tk-cta)] text-[var(--tk-cta-ink)]'
               : 'border border-fd-border text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground'
           }`}
         >

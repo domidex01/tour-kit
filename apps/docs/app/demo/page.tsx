@@ -7,9 +7,9 @@ import Link from 'next/link'
 import { DemoClient } from './demo-client'
 
 const SITE_URL = 'https://usertourkit.com'
-const DEMO_TITLE = 'Live Demo — Interactive Product Tour Playground'
+const DEMO_TITLE = 'Live Demo, Interactive Product Tour Playground'
 const DEMO_DESCRIPTION =
-  'Try Tour Kit in your browser. Click through a working product tour over a mock SaaS dashboard with persistent hint beacons, focus trap, and full keyboard navigation. No signup, no install — built with @tour-kit/react and @tour-kit/hints.'
+  'Try Tour Kit in your browser. Click through a working product tour over a mock SaaS dashboard with persistent hint beacons, focus trap, and full keyboard navigation. No signup, no install, built with @tour-kit/react and @tour-kit/hints.'
 const DEMO_OG_IMAGE = `/api/og?title=${encodeURIComponent('Live Demo')}&subtitle=${encodeURIComponent('Interactive product tour playground')}&category=DEMO`
 
 export const metadata: Metadata = {
@@ -27,9 +27,9 @@ export const metadata: Metadata = {
     'tour kit demo',
   ],
   openGraph: {
-    title: 'Tour Kit — Live Interactive Demo',
+    title: 'Tour Kit, Live Interactive Demo',
     description:
-      'Click through a working product tour built with Tour Kit. Headless React, WCAG 2.1 AA, MIT-licensed core.',
+      'Click through a working product tour built with Tour Kit. Headless React, WCAG 2.1 AA, free in development.',
     url: '/demo',
     type: 'website',
     siteName: 'userTourKit',
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Tour Kit — Live Interactive Demo',
+    title: 'Tour Kit, Live Interactive Demo',
     description: 'Try a working product tour built with Tour Kit, in your browser.',
     images: [DEMO_OG_IMAGE],
   },
@@ -47,12 +47,12 @@ const FAQS = [
   {
     question: 'How do I install Tour Kit after trying the demo?',
     answer:
-      'Run `pnpm add @tour-kit/core @tour-kit/react` (npm install and bun add work too). The free MIT-licensed core requires only React 18 or 19 and Node 18+. Add @tour-kit/hints for the persistent beacon shown in the demo.',
+      'Run `pnpm add @tour-kit/core @tour-kit/react` (npm install and bun add work too). The core requires only React 18 or 19 and Node 18+, and needs no licence key to develop against. Add @tour-kit/hints for the persistent beacon shown in the demo.',
   },
   {
     question: 'Does Tour Kit work with Next.js, Remix, Vite, or React Router?',
     answer:
-      'Yes. Tour Kit ships first-class router adapters for Next.js (App Router and Pages Router) and React Router v6/v7. For Vite, Remix, Astro, and plain React, the generic useTour API works out of the box — no adapter required.',
+      'Yes. Tour Kit ships first-class router adapters for Next.js (App Router and Pages Router) and React Router v6/v7. For Vite, Remix, Astro, and plain React, the generic useTour API works out of the box, no adapter required.',
   },
   {
     question: 'Is the demo accessible? What about keyboard navigation?',
@@ -62,7 +62,7 @@ const FAQS = [
   {
     question: 'Is the demo using paid features?',
     answer:
-      'No. The demo uses only the free MIT-licensed packages: @tour-kit/core, @tour-kit/react, and @tour-kit/hints. Pro features (checklists, announcements, surveys, adoption tracking, analytics, AI chat, media embeds, scheduling) are documented separately and require a one-time license.',
+      'No. Nothing on this page needs a key, and neither does anything you build locally. Development, evaluation, testing and CI are free for every package. A one-time licence key, from $9.99, is for serving Tour Kit to end users of a deployed application.',
   },
 ]
 
@@ -110,7 +110,7 @@ export default function DemoPage() {
         ]}
       />
       <SoftwareSourceCodeJsonLd
-        title="Tour Kit quickstart — 4-step product tour"
+        title="Tour Kit quickstart, 4-step product tour"
         description="Working source for a 4-step Tour Kit product tour over a mock SaaS dashboard, including a persistent Hint beacon. Demonstrates the @tour-kit/react and @tour-kit/hints public API."
         url="/demo"
         programmingLanguage="TypeScript"
@@ -142,7 +142,7 @@ export default function DemoPage() {
                 Esc
               </kbd>{' '}
               to verify focus trap and keyboard navigation. The demo is built entirely with the free
-              MIT-licensed packages — no signup, no install, no paid tier.
+              Free in development, no signup, no install, no key.
             </p>
           </div>
         </header>
@@ -169,7 +169,7 @@ export default function DemoPage() {
             </h2>
             <p className="mt-2 max-w-2xl text-fd-muted-foreground">
               Each step exercises a different Tour Kit primitive. The same components ship in the
-              published npm packages — copy the source from the demo and you have a working tour in
+              published npm packages, copy the source from the demo and you have a working tour in
               your own app in under two minutes.
             </p>
             <dl className="mt-8 grid gap-6 sm:grid-cols-2">
@@ -196,7 +196,7 @@ export default function DemoPage() {
                   Focus trap, keyboard nav, ARIA live regions
                 </dt>
                 <dd className="mt-1 text-sm text-fd-muted-foreground">
-                  Every TourCard implements WCAG 2.1 AA — Tab and Shift+Tab cycle inside the card,
+                  Every TourCard implements WCAG 2.1 AA, Tab and Shift+Tab cycle inside the card,
                   Escape closes the tour, and step changes announce via <code>aria-live</code> for
                   screen readers.
                 </dd>
@@ -230,7 +230,7 @@ export default function DemoPage() {
               >
                 <h3 className="font-semibold text-fd-foreground">Install Tour Kit</h3>
                 <p className="mt-1 text-sm text-fd-muted-foreground">
-                  <code>pnpm add @tour-kit/core @tour-kit/react</code> — read the 2-minute
+                  <code>pnpm add @tour-kit/core @tour-kit/react</code>, read the 2-minute
                   quickstart.
                 </p>
               </Link>
@@ -258,7 +258,7 @@ export default function DemoPage() {
               >
                 <h3 className="font-semibold text-fd-foreground">Unlock Pro features</h3>
                 <p className="mt-1 text-sm text-fd-muted-foreground">
-                  Checklists, announcements, surveys, AI chat, and analytics — one-time $99.
+                  Checklists, announcements, surveys, AI chat, and analytics, one-time from $9.99.
                 </p>
               </Link>
             </div>

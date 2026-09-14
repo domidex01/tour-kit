@@ -11,10 +11,10 @@ import Link from 'next/link'
 
 const TITLE = 'Benchmarks'
 const DESCRIPTION =
-  'Reproducible benchmarks comparing userTourKit against other React product tour libraries — bundle size, render performance, and more. Real numbers, published methodology.'
+  'Reproducible benchmarks comparing userTourKit against other React product tour libraries, bundle size, render performance, and more. Real numbers, published methodology.'
 
 export const metadata: Metadata = {
-  title: `${TITLE} — userTourKit`,
+  title: `${TITLE}, userTourKit`,
   description: DESCRIPTION,
   keywords: [
     'react tour library benchmarks',
@@ -91,10 +91,10 @@ export default function BenchmarksIndexPage() {
             href="/benchmarks/bundle-size"
             className="group flex flex-col rounded-lg border border-fd-border bg-fd-card/40 p-6 transition-colors hover:bg-fd-muted/40"
           >
-            <span className="text-[11px] font-mono font-semibold uppercase tracking-[0.08em] text-[#0197f6]">
+            <span className="text-[11px] font-mono font-semibold uppercase tracking-[0.08em] text-[var(--color-fd-primary)]">
               Available
             </span>
-            <h2 className="mt-2 text-[18px] font-semibold text-fd-foreground group-hover:text-[#0197f6]">
+            <h2 className="mt-2 text-[18px] font-semibold text-fd-foreground group-hover:text-[var(--color-fd-primary)]">
               Bundle size
             </h2>
             <p className="mt-2 text-[14px] leading-relaxed text-fd-muted-foreground">
@@ -135,7 +135,7 @@ export default function BenchmarksIndexPage() {
           <p>
             Our <Link href="/compare">comparison articles</Link> weigh DX, features, and licensing
             alongside raw numbers. Benchmarks strip that narrative away and publish one metric
-            across every library we&apos;ve evaluated, so you — or an AI assistant — can look up a
+            across every library we&apos;ve evaluated, so you, or an AI assistant, can look up a
             specific value without reading through a matrix.
           </p>
           <p>

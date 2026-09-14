@@ -1,25 +1,51 @@
-import { ArrowRight, Check, Code2, Sparkles, Zap } from 'lucide-react'
-import Link from 'next/link'
+import { ArrowRight, Check, Code2, Sparkles, Users, Zap } from 'lucide-react'
 
 import {
   type BuyButtonPlacement,
   TrackedBuyButton,
 } from '@/components/analytics/tracked-buy-button'
-import { POLAR_CHECKOUT_URL } from '@/lib/polar-config'
+import { SectionHead } from '@/components/landing/section-head'
+import { checkoutUrl } from '@/lib/polar-config'
+import { TIERS, formatPrice, formatProjects } from '@/lib/pricing'
 
-const FREE_HIGHLIGHTS = [
-  'Product tours & spotlight overlays',
-  'Persistent hints & beacons',
-  'Full TypeScript, WCAG 2.1 AA',
-  'Unlimited sites — MIT licensed',
-]
+/**
+ * Figma 3945:2175 (dark) / 3792:2175 (light) — three 352x400 plan cards on a
+ * 32px gutter, which is exactly the 1120 container.
+ *
+ * The cards are DERIVED from `TIERS` rather than written out here. The Figma
+ * frames carried placeholder names and prices ("Core $39 / Pro $99 / Team
+ * $299") that never matched any pricing the product has had, and a hardcoded
+ * copy is how the site came to advertise a price checkout does not charge.
+ * `TIERS` is the single source `structured-data.tsx` also reads, so the markup
+ * Google sees cannot drift from the rendered card.
+ *
+ * Every tier now has its own Polar SKU (`POLAR_CHECKOUT_URLS` is typed
+ * `Record<TierId, string>`), so all three cards are `TrackedBuyButton`s — the
+ * design's "only Pro checks out, the rest route to /pricing" no longer holds.
+ */
+const ICONS = [Code2, Zap, Users] as const
 
-const PRO_HIGHLIGHTS = [
-  'Everything in Free',
-  'Analytics, checklists, announcements',
-  'Feature adoption & scheduling',
-  'All future updates — no subscription',
-]
+/** True of every tier: the tiers differ only in how many projects a key covers. */
+const SHARED_FEATURES = [
+  'Serve it to end users, no badge',
+  'Every package, no feature gates',
+  'All future updates, no subscription',
+  'Converts to MIT on its Change Date',
+] as const
+
+const PLANS = TIERS.map((tier, i) => ({
+  id: tier.id,
+  name: tier.name,
+  scope: formatProjects(tier.projects),
+  price: formatPrice(tier.price),
+  icon: ICONS[i % ICONS.length],
+  features: SHARED_FEATURES,
+  cta: `Get ${tier.name}`,
+  href: checkoutUrl(tier.id),
+  featured: tier.highlight,
+  /** Per-tier GA conversion value; without it every card reports Starter's. */
+  value: tier.price,
+}))
 
 interface PricingTeaserProps {
   /** Buy-click analytics dimension; capability pages pass `<slug>_teaser`. */
@@ -28,124 +54,123 @@ interface PricingTeaserProps {
 
 export function PricingTeaser({ placement = 'home_teaser' }: PricingTeaserProps) {
   return (
-    <section className="px-6 py-28 sm:px-8 md:py-36 lg:px-12">
+    <section className="px-6 py-36 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
-        {/* Header — left-aligned to alternate with Packages (right) */}
-        <div className="mb-16 max-w-lg">
-          <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            Own your code.
-            <br />
-            Pay once, not forever.
-          </h2>
-          <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
-            Three MIT packages cover most tours, hints, and onboarding. Need analytics, checklists,
-            or announcements? The full suite is a{' '}
-            <strong className="text-fd-foreground">$99 one-time</strong> license — not a monthly
-            invoice.
-          </p>
-        </div>
+        <SectionHead
+          title={
+            <>
+              Own your code.
+              <br />
+              Pay once, when you ship.
+            </>
+          }
+        >
+          Every package is free while you build: development, evaluation, CI, the lot. A licence is
+          for serving it to end users, and it is a one-time purchase, never a subscription: no
+          renewals, no seats, no per-MAU invoice.
+        </SectionHead>
 
-        <div className="grid gap-6 md:grid-cols-2 md:gap-8">
-          {/* Free tier */}
-          <div className="group flex flex-col rounded-xl border border-fd-border bg-fd-card p-8 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-fd-border bg-fd-muted">
-                <Code2 className="h-5 w-5 text-fd-muted-foreground" aria-hidden="true" />
+        {/* 352 / 352 / 352 on a 32px gutter. Three across only from `lg`: at
+            `md` each column is ~230px and the feature rows wrap mid-phrase. */}
+        <div className="mt-16 grid gap-8 lg:grid-cols-3">
+          {PLANS.map((plan) => {
+            const Icon = plan.icon
+            const label = (
+              <>
+                {plan.cta}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </>
+            )
+            const buttonBase =
+              'mt-8 inline-flex h-12 items-center justify-center gap-2.5 rounded-lg px-6 text-[15px] font-semibold leading-6 transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]'
+
+            return (
+              <div
+                key={plan.id}
+                className={`relative flex flex-col rounded-3xl bg-fd-muted p-8 transition-all duration-300 hover:-translate-y-0.5 ${
+                  plan.featured
+                    ? 'border-2 border-[var(--color-fd-primary)] hover:shadow-lg'
+                    : 'border border-[var(--tk-card-edge)] hover:shadow-md'
+                }`}
+              >
+                {plan.featured ? (
+                  <span className="absolute -top-3.5 right-6 inline-flex items-center gap-1.5 rounded-full bg-[var(--tk-cta)] px-3 py-1 text-[11px] font-semibold leading-[17px] text-[var(--tk-cta-ink)]">
+                    <Sparkles className="h-3 w-3" aria-hidden="true" />
+                    Most popular
+                  </span>
+                ) : null}
+
+                <div className="flex h-12 items-center gap-3">
+                  <span
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
+                      plan.featured ? 'bg-[var(--tk-cta)]' : 'bg-fd-secondary'
+                    }`}
+                  >
+                    <Icon
+                      className={`h-5 w-5 ${
+                        plan.featured ? 'text-[var(--tk-cta-ink)]' : 'text-fd-muted-foreground'
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </span>
+                  <span>
+                    <span className="block text-[18px] font-bold leading-7 text-fd-foreground">
+                      {plan.name}
+                    </span>
+                    <span className="block text-[13px] leading-5 text-fd-muted-foreground">
+                      {plan.scope}
+                    </span>
+                  </span>
+                </div>
+
+                <p className="mt-6 flex items-baseline gap-1.5">
+                  <span className="text-[36px] font-extrabold leading-10 tracking-[-0.02em] text-fd-foreground">
+                    {plan.price}
+                  </span>
+                  <span className="text-[15px] leading-6 text-fd-muted-foreground">one-time</span>
+                </p>
+
+                <ul className="mt-6 flex flex-1 flex-col gap-3">
+                  {plan.features.map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-2.5 text-[14px] leading-[21px] text-fd-muted-foreground"
+                    >
+                      <Check
+                        className={`mt-[2px] h-4 w-4 shrink-0 ${
+                          plan.featured
+                            ? 'text-[var(--color-fd-primary)]'
+                            : 'text-[var(--tk-success)]'
+                        }`}
+                        aria-hidden="true"
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                {plan.featured ? (
+                  <TrackedBuyButton
+                    href={plan.href}
+                    placement={placement}
+                    value={plan.value}
+                    className={`${buttonBase} bg-[var(--tk-cta)] text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 hover:brightness-110 hover:shadow-xl hover:shadow-[color:var(--color-fd-primary)]/30`}
+                  >
+                    {label}
+                  </TrackedBuyButton>
+                ) : (
+                  <TrackedBuyButton
+                    href={plan.href}
+                    placement={placement}
+                    value={plan.value}
+                    className={`${buttonBase} border border-[var(--tk-hairline)] text-fd-foreground hover:bg-fd-secondary hover:shadow-md`}
+                  >
+                    {label}
+                  </TrackedBuyButton>
+                )}
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-fd-foreground">Free forever</h3>
-                <p className="text-[13px] text-fd-muted-foreground">3 MIT packages</p>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
-                $0
-              </span>
-              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">unlimited sites</span>
-            </div>
-
-            <ul className="mb-8 flex-1 space-y-3">
-              {FREE_HIGHLIGHTS.map((item) => (
-                <li
-                  key={item}
-                  className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
-                >
-                  <Check
-                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
-                    aria-hidden="true"
-                  />
-                  {item}
-                </li>
-              ))}
-            </ul>
-
-            <Link
-              href="/builder"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-fd-border bg-fd-background/60 px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
-            >
-              Start free
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </div>
-
-          {/* Pro tier */}
-          <div className="group relative flex flex-col rounded-xl border-2 border-[var(--tk-primary)] bg-fd-card p-8 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
-            <div className="absolute -top-3 right-6 inline-flex items-center gap-1.5 rounded-full bg-[var(--tk-primary)] px-3 py-1 text-[11px] font-semibold text-white shadow-sm shadow-[var(--tk-primary)]/20">
-              <Sparkles className="h-3 w-3" aria-hidden="true" />
-              One-time purchase
-            </div>
-
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--tk-primary)]/10 ring-1 ring-[var(--tk-primary)]/20">
-                <Zap className="h-5 w-5 text-[var(--tk-primary)]" aria-hidden="true" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-fd-foreground">Pro</h3>
-                <p className="text-[13px] text-fd-muted-foreground">8 extended packages</p>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
-                $99
-              </span>
-              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">5 sites included</span>
-            </div>
-
-            <ul className="mb-8 flex-1 space-y-3">
-              {PRO_HIGHLIGHTS.map((item) => (
-                <li
-                  key={item}
-                  className="flex items-start gap-2.5 text-[14px] text-fd-muted-foreground"
-                >
-                  <Check
-                    className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tk-primary)]"
-                    aria-hidden="true"
-                  />
-                  {item}
-                </li>
-              ))}
-            </ul>
-
-            <TrackedBuyButton
-              href={POLAR_CHECKOUT_URL}
-              placement={placement}
-              className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--tk-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--tk-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--tk-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
-            >
-              Buy Pro license
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </TrackedBuyButton>
-          </div>
-        </div>
-
-        <div className="mt-8">
-          <Link
-            href="/pricing"
-            className="font-mono text-[13px] font-semibold text-[var(--tk-primary)] underline underline-offset-4 transition-colors hover:opacity-80"
-          >
-            See full pricing &rarr;
-          </Link>
+            )
+          })}
         </div>
       </div>
     </section>

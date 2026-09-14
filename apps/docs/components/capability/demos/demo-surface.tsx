@@ -18,7 +18,7 @@ export function DemoSurface({
   contentClassName,
 }: DemoSurfaceProps) {
   return (
-    <div className="overflow-hidden rounded-xl border border-white/20 bg-fd-card/80 shadow-2xl shadow-[#02182b]/10 backdrop-blur-xl dark:border-white/10">
+    <div className="overflow-hidden rounded-xl border border-white/20 bg-fd-card/80 shadow-2xl shadow-[color:var(--color-fd-foreground)]/10 backdrop-blur-xl dark:border-white/10">
       {/* Browser chrome */}
       <div className="flex items-center gap-2 border-b border-fd-border/50 bg-fd-muted/30 px-4 py-2.5 backdrop-blur-sm">
         <div className="flex gap-1.5" aria-hidden="true">

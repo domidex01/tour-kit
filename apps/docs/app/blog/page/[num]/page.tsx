@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (Number.isNaN(page) || page < 2 || page > totalPages) return {}
 
-  const title = `Blog — Page ${page} — userTourKit`
+  const title = `Blog, Page ${page}, userTourKit`
   const desc = `Page ${page} of guides, comparisons, and insights on product tours and onboarding from the userTourKit team.`
 
   return {

@@ -1,7 +1,7 @@
 ---
 title: "Can you use Tour Kit without the Pro license? (free vs Pro breakdown)"
 slug: "tour-kit-free-vs-pro"
-description: "See exactly what Tour Kit's free MIT packages include and when the $99 Pro license becomes worth it. Package-by-package comparison with code examples."
+description: "See exactly what Tour Kit's free MIT packages include and when the $9.99 Pro license becomes worth it. Package-by-package comparison with code examples."
 primary_keyword: "tour kit free vs pro"
 secondary_keywords: ["tour kit pricing breakdown", "tour kit open source free", "tour kit pro license", "tour kit MIT packages"]
 category: "Build vs Buy"
@@ -25,11 +25,11 @@ npm install @tour-kit/core @tour-kit/react
 
 ## What is Tour Kit's free vs Pro model?
 
-Tour Kit uses an open-core licensing model where the foundational packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free, while nine extended packages (analytics, checklists, surveys, announcements, media, scheduling, adoption, AI, license validation) require a one-time $99 Pro license. Unlike SaaS onboarding tools that charge $129-$599 per month, Tour Kit's Pro is a single payment with no MAU limits, no seat limits, and no recurring fees. This follows the same pattern as AG Grid, MUI X, and Tailwind CSS, where the open-source core is production-ready and the paid tier adds specialized capabilities.
+Tour Kit uses an open-core licensing model where the foundational packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free, while nine extended packages (analytics, checklists, surveys, announcements, media, scheduling, adoption, AI, license validation) require a one-time $9.99 Pro license. Unlike SaaS onboarding tools that charge $129-$599 per month, Tour Kit's Pro is a single payment with no MAU limits, no seat limits, and no recurring fees. This follows the same pattern as AG Grid, MUI X, and Tailwind CSS, where the open-source core is production-ready and the paid tier adds specialized capabilities.
 
 ## Why this breakdown matters for your team
 
-Picking the wrong tier wastes either money or developer time. Teams that buy Pro when the free packages would have been enough overpay for features they never use. Teams that stick with Free when they need analytics or checklists spend 20-40 hours rebuilding what Pro provides out of the box (at $100/hour, that's $2,000-$4,000 in developer time versus $99).
+Picking the wrong tier wastes either money or developer time. Teams that buy Pro when the free packages would have been enough overpay for features they never use. Teams that stick with Free when they need analytics or checklists spend 20-40 hours rebuilding what Pro provides out of the box (at $100/hour, that's $2,000-$4,000 in developer time versus $9.99).
 
 As of April 2026, 78% of finance decision-makers report increased scrutiny of recurring software costs ([Getmonetizely, 2026](https://www.getmonetizely.com/articles/why-are-one-time-pricing-models-making-a-comeback-in-saas)). Understanding exactly what ships for free helps your team make that call without guessing.
 
@@ -126,7 +126,7 @@ That's a lot. For many teams, it's enough.
 
 ## What does Pro add?
 
-The Pro license ($99 one-time per project) adds nine additional packages. These cover the features you'd normally build yourself after the basic tour is working: analytics, checklists, announcements, surveys, and more.
+The Pro license ($9.99 one-time per project) adds nine additional packages. These cover the features you'd normally build yourself after the basic tour is working: analytics, checklists, announcements, surveys, and more.
 
 <table>
   <thead>
@@ -187,7 +187,7 @@ The Pro license ($99 one-time per project) adds nine additional packages. These 
 
 Every Pro package is optional. Install only what you need, and tree-shaking removes the rest. The architecture is modular by design: Pro packages import from `@tour-kit/core` but the free packages never import from Pro.
 
-## When does Pro become worth the $99?
+## When does Pro become worth the $9.99?
 
 The honest answer: when you'd spend more than a few hours building the equivalent yourself. Developer time at US market rates runs $75-150/hour. If `@tour-kit/analytics` saves you four hours of wiring up PostHog event callbacks, the math already works.
 
@@ -221,7 +221,7 @@ Tour Kit follows the open-core pattern used by AG Grid, MUI X, and Tailwind CSS.
       <td>Tour Kit</td>
       <td>Core tours, hints, components (MIT)</td>
       <td>Analytics, checklists, surveys, announcements, media, scheduling, AI</td>
-      <td>$99 one-time per project</td>
+      <td>$9.99 one-time per project</td>
     </tr>
     <tr>
       <td>React Joyride</td>
@@ -264,7 +264,7 @@ Tour Kit follows the open-core pattern used by AG Grid, MUI X, and Tailwind CSS.
 
 Two things stand out. First, Tour Kit's free tier is more complete than most open-core offerings. AG Grid Community doesn't include row grouping or server-side row models. MUI X Community doesn't include the Date Range Picker. Tour Kit Free includes the entire tour engine, every hook, every component, every router adapter.
 
-Second, $99 one-time is lower than one month of most SaaS alternatives. Appcues starts at $249/month. Over three years, that's $8,964 versus $99.
+Second, $9.99 one-time is lower than one month of most SaaS alternatives. Appcues starts at $249/month. Over three years, that's $8,964 versus $9.99.
 
 Appcues and Pendo are different products, to be fair. They include a visual builder, a no-code editor, and a managed backend. Tour Kit requires React developers. If your team doesn't have them, Tour Kit isn't the right tool regardless of pricing.
 
@@ -279,13 +279,13 @@ The MIT license on Tour Kit's free packages means:
 
 Pro packages use a proprietary license tied to a Polar.sh license key. One key covers one project (defined as a single deployable application). You get up to 5 domain activations per key (enough for production, staging, preview, and a couple of development environments). Localhost and `*.local` domains bypass activation entirely during development.
 
-No MAU limit, no seat limit, no usage cap. $99 is the total cost. Updates and patches are included for the major version you purchased.
+No MAU limit, no seat limit, no usage cap. $9.99 is the total cost. Updates and patches are included for the major version you purchased.
 
 ## Common mistakes when choosing a tier
 
-**Buying Pro before you need it.** If your app is in early development and you just need a basic onboarding tour, start with Free. You can add Pro packages later without any migration. Premature purchasing is low-cost ($99 isn't devastating), but it adds complexity you may not need yet.
+**Buying Pro before you need it.** If your app is in early development and you just need a basic onboarding tour, start with Free. You can add Pro packages later without any migration. Premature purchasing is low-cost ($9.99 isn't devastating), but it adds complexity you may not need yet.
 
-**Building Pro features from scratch to avoid the $99.** We've seen teams spend 40+ hours rebuilding analytics integration, checklist state management, or survey fatigue prevention. At $100/hour, that's $4,000 in developer time to avoid a $99 purchase. Run the math before committing to DIY.
+**Building Pro features from scratch to avoid the $9.99.** We've seen teams spend 40+ hours rebuilding analytics integration, checklist state management, or survey fatigue prevention. At $100/hour, that's $4,000 in developer time to avoid a $9.99 purchase. Run the math before committing to DIY.
 
 **Assuming Free means limited.** Tour Kit's free tier includes the full position engine, every accessibility feature, all router adapters, headless mode, and the complete component library. It's not a demo. Some teams evaluate Pro thinking they need it for basic tours when Free already covers their use case entirely.
 
@@ -300,7 +300,7 @@ Tour Kit Free and Pro are additive, not replacements. Pro packages import from `
 No. The free packages are standard MIT open source with no restrictions. The watermark mechanism exists in the Pro packages for unlicensed usage of Pro features. It doesn't touch the free tier.
 
 **What happens if my Pro license expires?**
-It doesn't expire. The $99 is a one-time purchase, not a subscription. You keep access to every Pro package version released under that major version. When Tour Kit releases a new major version (v2, v3), you'd purchase a new license if you want to upgrade. But v1 Pro continues working indefinitely.
+It doesn't expire. The $9.99 is a one-time purchase, not a subscription. You keep access to every Pro package version released under that major version. When Tour Kit releases a new major version (v2, v3), you'd purchase a new license if you want to upgrade. But v1 Pro continues working indefinitely.
 
 **Can I use Tour Kit Free in a client project I'm building for someone else?**
 Yes. MIT allows this without restriction. The Pro license is per-project, so if the client needs Pro features, the license would be tied to their project domain.
@@ -310,7 +310,7 @@ No. The free packages are actively maintained alongside Pro. Security patches, R
 
 ---
 
-**Get started with Tour Kit.** The free packages cover most product tour use cases out of the box. Install them now and evaluate whether Pro features would save you enough development time to justify the $99.
+**Get started with Tour Kit.** The free packages cover most product tour use cases out of the box. Install them now and evaluate whether Pro features would save you enough development time to justify the $9.99.
 
 ```bash
 npm install @tour-kit/core @tour-kit/react @tour-kit/hints
@@ -323,7 +323,7 @@ Full documentation: [https://usertourkit.com/docs](https://usertourkit.com/docs)
   "@context": "https://schema.org",
   "@type": "TechArticle",
   "headline": "Can you use Tour Kit without the Pro license? (free vs Pro breakdown)",
-  "description": "See exactly what Tour Kit's free MIT packages include and when the $99 Pro license becomes worth it. Package-by-package comparison with code examples.",
+  "description": "See exactly what Tour Kit's free MIT packages include and when the $9.99 Pro license becomes worth it. Package-by-package comparison with code examples.",
   "author": {
     "@type": "Person",
     "name": "domidex01",
@@ -376,7 +376,7 @@ Full documentation: [https://usertourkit.com/docs](https://usertourkit.com/docs)
       "name": "What happens if my Tour Kit Pro license expires?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit Pro licenses don't expire. The $99 is a one-time purchase. You keep access to every Pro package version released under that major version indefinitely."
+        "text": "Tour Kit Pro licenses don't expire. The $9.99 is a one-time purchase. You keep access to every Pro package version released under that major version indefinitely."
       }
     },
     {

@@ -36,7 +36,7 @@ export function CompareArticleCrossLinks({ current, siblings }: CompareCrossLink
         <Link href="/blog/tour-kit-comparison-index" className={LINK_CLASS}>
           userTourKit comparison index
         </Link>{' '}
-        — our pillar page covering every tour library we&apos;ve benchmarked. To get started with
+        , our pillar page covering every tour library we&apos;ve benchmarked. To get started with
         userTourKit itself, follow the{' '}
         <Link href="/docs/getting-started" className={LINK_CLASS}>
           getting started guide
@@ -171,11 +171,11 @@ export function BlogPostCrossLinks({ current, siblings }: BlogPostCrossLinksProp
         <strong className="text-fd-foreground">Keep reading.</strong>{' '}
         {pillar && !isOwnPillar && (
           <>
-            For the broader topic, our pillar article —{' '}
+            For the broader topic, our pillar article,{' '}
             <Link href={`/blog/${pillar.slug}`} className={LINK_CLASS}>
               {pillar.anchorText}
             </Link>{' '}
-            — ties every post in this series together.{' '}
+            , ties every post in this series together.{' '}
           </>
         )}
         {first && (

@@ -1,6 +1,7 @@
 import { BlogCta } from '@/components/blog/blog-cta'
 import { BlogPagination } from '@/components/blog/pagination'
 import { Footer } from '@/components/landing/footer'
+import { PageHero } from '@/components/landing/page-hero'
 import {
   getBlogCategories,
   getFeaturedBlogPosts,
@@ -43,7 +44,7 @@ export function BlogListPage({ page }: BlogListPageProps) {
         ]}
       />
       <ItemListJsonLd
-        name={page === 1 ? 'userTourKit blog' : `userTourKit blog — page ${page}`}
+        name={page === 1 ? 'userTourKit blog' : `userTourKit blog, page ${page}`}
         url={pageHref(page)}
         items={posts.map((post) => ({
           url: `/blog/${post.slug}`,
@@ -51,81 +52,44 @@ export function BlogListPage({ page }: BlogListPageProps) {
         }))}
       />
 
-      {/* Hero banner */}
-      <div className="relative overflow-hidden border-b border-fd-border/50 dark:border-fd-border">
-        <div className="relative z-10 mx-auto max-w-[1400px] px-6 pb-8 pt-16 sm:px-8 sm:pb-20 sm:pt-32 lg:px-12">
-          <h1 className="mb-2 text-3xl font-bold text-fd-foreground sm:text-4xl">Blog</h1>
-          {/* Mobile: tight intro keeps post cards above the fold */}
-          <p className="max-w-2xl text-[15px] leading-relaxed text-fd-muted-foreground sm:hidden">
-            Tutorials, comparisons, and field notes on React product tours and onboarding. New
-            articles weekly.
-          </p>
-          {/* Desktop: full intro */}
-          <p className="hidden max-w-2xl text-[15px] leading-relaxed text-fd-muted-foreground sm:block">
-            Practical writing on product tours, user onboarding, feature adoption, and developer-led
-            growth. Every post is engineered for the people who actually ship the code: tutorials
-            with copy-pasteable React snippets, head-to-head comparisons against tools like React
-            Joyride, Shepherd.js, Driver.js, Appcues, and Pendo, build-vs-buy breakdowns,
-            accessibility deep-dives, and field notes from teams running production onboarding
-            flows. New articles ship weekly. Skim by category below or subscribe to the RSS feed for
-            everything as it drops.
-          </p>
+      <PageHero
+        heading="Blog"
+        footer={
           <Link
             href="/blog/feed.xml"
-            className="mt-3 inline-flex items-center gap-1.5 text-[13px] text-fd-muted-foreground transition-colors hover:text-fd-foreground"
+            className="inline-flex items-center gap-1.5 text-[13px] text-fd-muted-foreground transition-colors hover:text-fd-foreground"
           >
             <Rss className="h-3.5 w-3.5" aria-hidden="true" />
             RSS feed
           </Link>
-        </div>
-        <div
-          className="pointer-events-none absolute inset-0 -z-0"
-          style={{
-            maskImage: 'linear-gradient(to bottom, white 40%, transparent)',
-            WebkitMaskImage: 'linear-gradient(to bottom, white 40%, transparent)',
-          }}
-        >
-          <link
-            rel="preload"
-            as="image"
-            href="/blog-hero-light.avif"
-            media="(prefers-color-scheme: light)"
-          />
-          <link
-            rel="preload"
-            as="image"
-            href="/blog-hero-dark.avif"
-            media="(prefers-color-scheme: dark)"
-          />
-          <img
-            src="/blog-hero-light.avif"
-            alt=""
-            aria-hidden="true"
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-            className="h-full w-full object-cover opacity-60 dark:hidden"
-          />
-          <img
-            src="/blog-hero-dark.avif"
-            alt=""
-            aria-hidden="true"
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-            className="hidden h-full w-full object-cover opacity-60 dark:block"
-          />
-        </div>
-      </div>
+        }
+      >
+        {/* Two intros, not one: the frame draws a single paragraph, but the
+            short one keeps the first post cards above the fold on a phone.
+            Spans rather than <p>s — PageHero already wraps this in one. */}
+        <span className="sm:hidden">
+          Tutorials, comparisons, and field notes on React product tours and onboarding. New
+          articles weekly.
+        </span>
+        <span className="hidden sm:inline">
+          Practical writing on product tours, user onboarding, feature adoption, and developer-led
+          growth. Every post is engineered for the people who actually ship the code: tutorials with
+          copy-pasteable React snippets, head-to-head comparisons against tools like React Joyride,
+          Shepherd.js, Driver.js, Appcues, and Pendo, build-vs-buy breakdowns, accessibility
+          deep-dives, and field notes from teams running production onboarding flows. New articles
+          ship weekly. Skim by category below or subscribe to the RSS feed for everything as it
+          drops.
+        </span>
+      </PageHero>
 
       <main id="main-content" className="mx-auto w-full max-w-[1400px] px-6 py-10 sm:px-8 lg:px-12">
-        {/* Category filters */}
-        <nav className="mb-8 flex flex-wrap gap-1.5" aria-label="Filter by category">
+        {/* Category filters — centred under the band, as the frame draws them. */}
+        <nav className="mb-10 flex flex-wrap justify-center gap-2" aria-label="Filter by category">
           {categories.map((cat) => (
             <Link
               key={cat}
               href={`/blog/category/${slugifyCategory(cat)}`}
-              className="rounded-lg border border-fd-border/50 px-3 py-1.5 text-[12px] font-medium text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground dark:border-fd-border"
+              className="rounded-lg border border-[var(--tk-card-edge)] px-3 py-1.5 text-[12px] font-medium text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
             >
               {cat}
             </Link>
@@ -136,10 +100,10 @@ export function BlogListPage({ page }: BlogListPageProps) {
         {featured.length > 0 && (
           <section className="mb-10">
             <div className="mb-4 flex items-center gap-2">
-              <Star className="h-4 w-4 text-[#0197f6]" aria-hidden="true" />
+              <Star className="h-4 w-4 text-[var(--color-fd-primary)]" aria-hidden="true" />
               <h2 className="text-sm font-semibold text-fd-foreground">Featured</h2>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {featured.map((post) => (
                 <FeaturedCard
                   key={post.slug}
@@ -156,7 +120,7 @@ export function BlogListPage({ page }: BlogListPageProps) {
         )}
 
         {/* Card grid — a native CTA card is spliced in after the 6th post on page 1 */}
-        <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
           {posts.flatMap((post, i) => {
             const card = (
               <BlogCard
@@ -177,9 +141,11 @@ export function BlogListPage({ page }: BlogListPageProps) {
         </div>
 
         <BlogPagination currentPage={currentPage} totalPages={totalPages} />
-
-        <BlogCta variant="band" placement="blog_index_footer" />
       </main>
+
+      {/* Outside <main>'s column: the frame runs the closing band's backdrop
+          art to both page edges, the way every other page closes. */}
+      <BlogCta variant="band" placement="blog_index_footer" fullBleed />
       <Footer />
     </HomeLayout>
   )
@@ -203,9 +169,11 @@ function FeaturedCard({
   return (
     <Link
       href={`/blog/${slug}`}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-[#0197f6]/30 bg-gradient-to-b from-[#0197f6]/5 to-transparent p-4 transition-all hover:border-[#0197f6]/50 hover:shadow-md hover:shadow-[#0197f6]/5 dark:from-[#0197f6]/10"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--color-fd-primary)]/30 bg-gradient-to-b from-[var(--color-fd-primary)]/5 to-transparent p-4 transition-all hover:border-[var(--color-fd-primary)]/50 hover:shadow-md hover:shadow-[color:var(--color-fd-primary)]/5 dark:from-[var(--color-fd-primary)]/10"
     >
-      <span className="mb-2 text-[11px] font-semibold text-[#0197f6]">{category}</span>
+      <span className="mb-2 text-[11px] font-semibold text-[var(--color-fd-primary)]">
+        {category}
+      </span>
       {image && (
         <div className="relative mb-3 aspect-[1200/630] w-full overflow-hidden rounded-lg">
           <Image
@@ -221,7 +189,7 @@ function FeaturedCard({
       <span className="mt-1.5 text-sm leading-relaxed text-fd-muted-foreground line-clamp-2">
         {description}
       </span>
-      <span className="mt-auto inline-flex items-center gap-1 pt-4 text-xs font-medium text-[#0197f6]">
+      <span className="mt-auto inline-flex items-center gap-1 pt-4 text-xs font-medium text-[var(--color-fd-primary)]">
         Read article
         <ArrowRight
           className="h-3 w-3 transition-transform group-hover:translate-x-0.5"
@@ -262,7 +230,7 @@ function BlogCard({
   return (
     <Link
       href={`/blog/${slug}`}
-      className="group flex flex-col rounded-2xl border border-fd-border/50 bg-fd-card p-4 shadow-sm transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground dark:border-fd-border"
+      className="group flex flex-col rounded-2xl border border-[var(--tk-card-edge)] bg-fd-card p-4 shadow-sm transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
     >
       <span className="mb-2 text-[11px] font-medium text-fd-muted-foreground group-hover:text-fd-accent-foreground/70">
         {category}
@@ -282,7 +250,7 @@ function BlogCard({
       <span className="mt-1.5 text-sm leading-relaxed text-fd-muted-foreground line-clamp-2 group-hover:text-fd-accent-foreground/70">
         {description}
       </span>
-      <span className="mt-auto pt-4 text-xs text-[#0197f6]">
+      <span className="mt-auto pt-4 text-xs text-[var(--color-fd-primary)]">
         {formattedDate}
         {formattedDate && readingTime && ' · '}
         {readingTime}

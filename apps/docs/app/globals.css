@@ -36,6 +36,24 @@
 @theme {
   --animate-tour-pulse: tour-pulse 1.5s ease-in-out infinite;
 
+  /* Hero reveal. `hero.tsx` has always asked for these two classes but no
+     keyframes were ever declared, so the elements simply rendered static
+     (STYLEGUIDE.md "Known Issues" #2). Both are wrapped for reduced motion
+     below. */
+  --animate-fade-in-up: fade-in-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in-up-delay-2: fade-in-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   @keyframes tour-pulse {
     0%,
     100% {
@@ -67,9 +85,16 @@
   --color-ring: var(--color-fd-ring);
 }
 
-/* Apply Geist fonts */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-fade-in-up-delay-2 {
+    animation: none;
+  }
+}
+
+/* Fonts: Host Grotesk for text + display, Geist Mono for code */
 body {
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-host-grotesk), system-ui, sans-serif;
 }
 
 code,
@@ -101,148 +126,263 @@ img {
   height: auto;
 }
 
-@layer base {
-  :root {
-    /* ========================================
-       PRIMARY COLORS
-       ======================================== */
-    --color-fd-primary: #0056ff;
-    --color-fd-primary-foreground: #fff;
+/* NOTE ON THE CASCADE — do not wrap this in @layer.
+   fumadocs-ui/css/lib/default-colors.css declares its own `:root` and `.dark`
+   UNLAYERED, and unlayered CSS beats every layered rule regardless of source
+   order. These overrides used to sit in `@layer base`, which meant they lost
+   silently: the site rendered fumadocs' neutral greys while globals.css looked
+   like it was setting the brand. That is why the old landing page hardcoded
+   #0197f6 everywhere instead of using the token. Declared unlayered, these win
+   on source order because the fumadocs @import sits at the top of this file. */
 
-    /* ========================================
-       BACKGROUND & SURFACE
-       ======================================== */
-    --color-fd-background: #fbfcfe;
-    --color-fd-foreground: #000023;
+/* ==========================================================================
+   DESIGN TOKENS — userTourKit
+   Source: Figma "TailwindCSS v4 Design System (Community)"
+     file 6VwCdAiNHSTOHaOWOB0Zmo
+     · 3945:1460  Home · Dark   — the canonical style
+     · 3792:1460  Home · Light
+     · 3830:1460  Pricing · Light
 
-    /* ========================================
-       MUTED
-       ======================================== */
-    --color-fd-muted: #f3f4f6;
-    --color-fd-muted-foreground: #2b2e33;
+   The palette is Tailwind v4's own `slate` + `indigo` defaults, so every
+   value here is a stock Tailwind colour — there is no bespoke ramp to keep
+   in sync. Hex is written out rather than referenced so the tokens survive
+   a Tailwind major without silently shifting.
 
-    /* ========================================
-       CARDS & POPOVERS
-       ======================================== */
-    --color-fd-card: #f8f9fb;
-    --color-fd-card-foreground: #000023;
-    --color-fd-popover: #fbfcfe;
-    --color-fd-popover-foreground: #000023;
+   LIGHT lives on :root, DARK under `.dark`. Dark is what the site boots in
+   (see RootProvider in app/layout.tsx); light is the toggle.
+   ========================================================================== */
+:root {
+  /* ---- Brand -------------------------------------------------------- */
+  --color-fd-primary: #4f39f6; /* indigo-600 — links, accents, ring */
+  --color-fd-primary-foreground: #ffffff; /* 6.5:1 on indigo-600 */
 
-    /* ========================================
-       BORDERS & RINGS
-       ======================================== */
-    --color-fd-border: #d0d3d8;
-    --color-fd-ring: #0056ff;
+  /* ---- Ground & ink -------------------------------------------------- */
+  --color-fd-background: #ffffff;
+  --color-fd-foreground: #020618; /* slate-950 — 20.2:1 on white */
 
-    /* ========================================
-       SECONDARY (Light Blue)
-       ======================================== */
-    --color-fd-secondary: #e8f1ff;
-    --color-fd-secondary-foreground: #0056ff;
+  /* ---- Muted: section bands + secondary copy -------------------------- */
+  --color-fd-muted: #f8fafc; /* slate-50 */
+  --color-fd-muted-foreground: #62748e; /* slate-500 — 4.8:1 on white */
 
-    /* ========================================
-       ACCENT
-       ======================================== */
-    --color-fd-accent: #f0f6ff;
-    --color-fd-accent-foreground: #000023;
+  /* ---- Raised surfaces ------------------------------------------------ */
+  --color-fd-card: #ffffff;
+  --color-fd-card-foreground: #020618;
+  --color-fd-popover: #ffffff;
+  --color-fd-popover-foreground: #020618;
 
-    /* ========================================
-       DESTRUCTIVE
-       ======================================== */
-    --color-fd-destructive: #861309;
-    --color-fd-destructive-foreground: #fff;
+  /* ---- Lines ----------------------------------------------------------
+     Two tiers, because the design uses two: `border` is the quiet divider
+     between content, `hairline` is the visible edge on a control (button,
+     input, badge, kbd) where WCAG 1.4.11 wants 3:1 against the ground. */
+  --color-fd-border: #e2e8f0; /* slate-200 — dividers */
+  --tk-hairline: #62748e; /* slate-500 — control edges, 4.8:1 */
+  --color-fd-ring: #4f39f6;
 
-    /* ========================================
-       CUSTOM TOURKIT TOKENS
-       ======================================== */
-    --tk-primary: #0197f6;
-    --tk-primary-container: #c6dfff;
-    --tk-secondary: #a1790d;
-    --tk-tertiary: #d5ba8a;
-    --tk-surface: #fbfcfe;
-    --tk-surface-variant: #f8f9fb;
-    --tk-container: #f8f9fb;
-    --tk-container-dim: #f3f4f6;
-    --tk-outline: #45484d;
-    --tk-outline-variant: #9b9ea5;
-    --tk-error: #861309;
-    --tk-success: #005900;
-    --tk-warning: #835c00;
-    --tk-on-surface: #000023;
-    --tk-on-surface-variant: #2b2e33;
-  }
+  /* ---- Navbar chrome (Figma 3830:1599 · light, 3945:1461 · dark) --------
+     Both values are read off the *rendered* Figma frame, not its code export:
+     the export reports a layer's colour but not its opacity, so it calls
+     every navbar edge a solid slate-400 when the pixels are slate-400 at 25%.
+     Sampled #e2e7ed here and #161c2f in dark, on the bar rule, the kbd chips
+     and the theme toggle alike — one wash for all four.
 
-  .dark {
-    /* ========================================
-       PRIMARY COLORS (Dark)
-       ======================================== */
-    --color-fd-primary: #5c9aff;
-    --color-fd-primary-foreground: #000023;
+     This is deliberately NOT --tk-hairline, which stays at full strength
+     because it edges controls elsewhere on the site that have no fill of
+     their own. Every navbar control is identified by its fill (the pill, the
+     chips, the toggle's selected half), so the edge is free to whisper. */
+  --tk-navbar-edge: rgb(144 161 185 / 0.25); /* slate-400 @25% */
+  --tk-nav-link: rgb(69 85 108 / 0.93); /* slate-600 @93% — 6.3:1 on white */
 
-    /* ========================================
-       BACKGROUND & SURFACE (Dark)
-       ======================================== */
-    --color-fd-background: #151618;
-    --color-fd-foreground: #edeef2;
+  /* ---- Card edges ------------------------------------------------------
+     Every card on the home page — package, plan, blog, compare, extension,
+     FAQ rule — is drawn with a slate-400 edge at low alpha. Read off the
+     RENDERED frame, not the code export: the export reports the layer as a
+     solid slate-400 (#90a1b9) because it drops layer opacity, while the
+     pixels measure #dde3eb on the light ground and #20293e on the dark one.
+     Those are that same slate-400 at 25% and 20%.
 
-    /* ========================================
-       MUTED (Dark)
-       ======================================== */
-    --color-fd-muted: #292c30;
-    --color-fd-muted-foreground: #9b9ea5;
+     Not --color-fd-border: that one also edges Fumadocs' own chrome through
+     the docs, and its dark value (#314158) is a visible step heavier than the
+     design draws here. Not --tk-navbar-edge either — the same value today,
+     but that token is pinned to the navbar and free to move with it. */
+  --tk-card-edge: rgb(144 161 185 / 0.25); /* slate-400 @25% */
 
-    /* ========================================
-       CARDS & POPOVERS (Dark)
-       ======================================== */
-    --color-fd-card: #1e2023;
-    --color-fd-card-foreground: #edeef2;
-    --color-fd-popover: #1e2023;
-    --color-fd-popover-foreground: #edeef2;
+  /* ---- Code ink --------------------------------------------------------
+     The landing page's own highlighter (components/landing/syntax-highlight)
+     shipped one hardcoded dark ramp, which was right while every code panel
+     was a dark window floating on the page. The Figma frames draw those
+     panels on the page ground — slate-50 in light mode, where that ramp's
+     plain token measures 1.4:1 — so the ramp flips with the theme now.
+     Every value below clears 4.5:1 on slate-50. */
+  --tk-code-plain: #334155; /* slate-700 — 9.6:1 */
+  --tk-code-keyword: #7c3aed; /* violet-600 — 5.8:1 */
+  --tk-code-string: #047857; /* emerald-700 — 5.1:1 */
+  --tk-code-comment: #64748b; /* slate-500 — 4.6:1 */
+  --tk-code-component: #2563eb; /* blue-600 — 5.2:1 */
+  --tk-code-tag: #0e7490; /* cyan-700 — 5.0:1 */
+  --tk-code-attr: #9333ea; /* purple-600 — 5.0:1 */
+  --tk-code-func: #b45309; /* amber-700 — 4.9:1 */
+  --tk-code-number: #c2410c; /* orange-700 — 5.4:1 */
+  --tk-code-bracket: #64748b; /* slate-500 — punctuation is still text */
 
-    /* ========================================
-       BORDERS & RINGS (Dark)
-       ======================================== */
-    --color-fd-border: #d3d3d5;
-    --color-fd-ring: #5c9aff;
+  /* ---- Raised control surfaces ------------------------------------------
+     `secondary` is a control at rest (the search pill, a secondary button),
+     `accent` is that same control one step up on hover or when selected.
+     Both are slate, not indigo: the design draws every raised control in the
+     neutral ramp and reserves indigo for ink and the CTA fill. These two used
+     to be theme-swapped — indigo-200 here and slate-800 in `.dark` — which is
+     why the light-mode search pill rendered lavender. */
+  --color-fd-secondary: #f1f5f9; /* slate-100 — 16.9:1 with the ink below */
+  --color-fd-secondary-foreground: #020618; /* slate-950 */
+  --color-fd-accent: #e2e8f0; /* slate-200 — hover, 15.0:1 */
+  --color-fd-accent-foreground: #020618;
 
-    /* ========================================
-       SECONDARY (Dark - Golden Amber)
-       ======================================== */
-    --color-fd-secondary: #edeef2;
-    --color-fd-secondary-foreground: #000;
+  --color-fd-destructive: #9f0712; /* red-800 — 8.2:1 on white */
+  --color-fd-destructive-foreground: #ffffff;
 
-    /* ========================================
-       ACCENT (Dark)
-       ======================================== */
-    --color-fd-accent: #1a3a5c;
-    --color-fd-accent-foreground: #c6dfff;
+  /* ---- Solid CTA ------------------------------------------------------
+     Split from --color-fd-primary on purpose. The brand ink and the CTA
+     fill cannot be the same colour in both themes and still clear 4.5:1:
+     a fill light enough to carry white text is too dark to read as a link
+     on a dark ground, and vice versa. See the .dark block. */
+  --tk-cta: #4f39f6; /* indigo-600 — white text at 6.5:1 */
+  --tk-cta-ink: #ffffff;
 
-    /* ========================================
-       DESTRUCTIVE (Dark)
-       ======================================== */
-    --color-fd-destructive: #ff6b6b;
-    --color-fd-destructive-foreground: #151618;
+  /* ---- Decorative glow (hero / CTA washes) ----------------------------
+     The PEAK of the blurred ellipses behind the hero, CTA, pricing and
+     closing bands, solved off the rendered frames rather than guessed: at the
+     ellipse core, sampled across the CTA band, the light frame ramps from
+     a≈0.34 at x=0 to a≈0.05 by x=260 and reaches 0 near the middle. It was
+     0.12, which rendered the washes about a third as strong as the design
+     draws them, peaking 270px inside the edge instead of on it. */
+  --tk-glow: rgb(79 57 246 / 0.34);
 
-    /* ========================================
-       CUSTOM TOURKIT TOKENS (Dark)
-       ======================================== */
-    --tk-primary: #0197f6;
-    --tk-primary-container: #1a3a5c;
-    --tk-secondary: #c9a033;
-    --tk-tertiary: #e8d4b0;
-    --tk-surface: #151618;
-    --tk-surface-variant: #1e2023;
-    --tk-container: #1e2023;
-    --tk-container-dim: #292c30;
-    --tk-outline: #9b9ea5;
-    --tk-outline-variant: #45484d;
-    --tk-error: #ff6b6b;
-    --tk-success: #4caf50;
-    --tk-warning: #f5b800;
-    --tk-on-surface: #edeef2;
-    --tk-on-surface-variant: #9b9ea5;
-  }
+  /* The capability-page hero (ToursHero 3880:2674 and its four siblings) is
+     the one band drawn STRONGER than --tk-glow: a 545x589 ellipse under a
+     400px blur, median-sampled off the dark frame at a≈0.64 peak against
+     --tk-glow's 0.49. It sits where the home hero puts its preview panel, so
+     there is nothing for it to wash out. Scaled here by the same 0.34/0.49
+     the light frame applies to the CTA bloom. */
+  --tk-hero-glow: rgb(79 57 246 / 0.44);
+
+  /* ---- Legacy --tk-* surface tokens ------------------------------------
+     Still read by ~110 call sites across the landing and capability
+     components. Re-pointed at the indigo system so those flip with the
+     rest of the site instead of stranding the old blue. */
+  --tk-primary: #4f39f6;
+  --tk-primary-container: #e0e7ff; /* indigo-100 */
+  --tk-secondary: #a1790d;
+  --tk-tertiary: #d5ba8a;
+  --tk-surface: #ffffff;
+  --tk-surface-variant: #f8fafc;
+  --tk-container: #f8fafc;
+  --tk-container-dim: #f1f5f9;
+  --tk-outline: #62748e;
+  --tk-outline-variant: #cad5e2;
+  --tk-error: #9f0712;
+  --tk-success: #007a55; /* emerald-700 — 4.6:1 on white */
+  --tk-warning: #835c00;
+  --tk-on-surface: #020618;
+  --tk-on-surface-variant: #62748e;
+
+  /* Was referenced in features / packages / comparison-table / social-proof
+     but never declared, so those accents rendered colourless. */
+  --landing-accent: var(--color-fd-primary);
+}
+
+.dark {
+  /* ---- Brand -------------------------------------------------------- */
+  /* indigo-400. Reads at 6.5:1 on the slate-950 ground, where the light
+     theme's indigo-600 would fall to 1.5:1. */
+  --color-fd-primary: #7c86ff;
+  --color-fd-primary-foreground: #020618; /* 6.5:1 on indigo-400 */
+
+  /* ---- Ground & ink -------------------------------------------------- */
+  --color-fd-background: #020618; /* slate-950 */
+  --color-fd-foreground: #ebebeb; /* 16.4:1 */
+
+  /* ---- Muted: section bands + secondary copy -------------------------- */
+  --color-fd-muted: #0f172b; /* slate-900 */
+  --color-fd-muted-foreground: #b3b3b3; /* 9.4:1 */
+
+  /* ---- Raised surfaces ------------------------------------------------ */
+  --color-fd-card: #0f172b; /* slate-900 */
+  --color-fd-card-foreground: #ebebeb;
+  --color-fd-popover: #0f172b;
+  --color-fd-popover-foreground: #ebebeb;
+
+  /* ---- Lines ----------------------------------------------------------- */
+  --color-fd-border: #314158; /* slate-700 — dividers */
+  --tk-hairline: #62748e; /* slate-500 — control edges, 4.3:1 */
+  --color-fd-ring: #7c86ff;
+
+  /* ---- Navbar chrome --------------------------------------------------- */
+  --tk-navbar-edge: rgb(98 116 142 / 0.2); /* slate-500 @20% */
+  --tk-nav-link: rgb(179 179 179 / 0.8); /* 5.8:1 on slate-950 */
+
+  /* ---- Card edges ------------------------------------------------------
+     slate-400 @20%, which composites to the #20293e the dark frame measures.
+     Slate-400 and not the navbar's slate-500: at the same alpha slate-500
+     lands on #171d33, a step too dim to read as an edge on slate-950. */
+  --tk-card-edge: rgb(144 161 185 / 0.2);
+
+  /* ---- Code ink --------------------------------------------------------
+     The original ramp, unchanged — it was authored against a dark panel and
+     this is the theme that still has one. */
+  --tk-code-plain: #abb2bf;
+  --tk-code-keyword: #c4a7e7;
+  --tk-code-string: #a8cc8c;
+  --tk-code-comment: #8b93a3; /* was #5c6370 — 2.4:1 on the panel it sits on */
+  --tk-code-component: #89b4fa;
+  --tk-code-tag: #7fb4ca;
+  --tk-code-attr: #cba6f7;
+  --tk-code-func: #e2cca9;
+  --tk-code-number: #f5a97f;
+  --tk-code-bracket: #8b93a3; /* was #5a5a6e — 2.2:1 */
+
+  /* ---- Raised control surfaces ----------------------------------------- */
+  --color-fd-secondary: #1d293d; /* slate-800 — 11.7:1 with the ink below */
+  --color-fd-secondary-foreground: #ebebeb;
+  --color-fd-accent: #314158; /* slate-700 — hover, 8.0:1 */
+  --color-fd-accent-foreground: #ebebeb;
+
+  --color-fd-destructive: #ff6467; /* red-400 — 6.6:1 on slate-950 */
+  --color-fd-destructive-foreground: #020618;
+
+  /* ---- Solid CTA -------------------------------------------------------
+     indigo-500, not the indigo-400 the mockup fills with: white on
+     indigo-400 measures 3.1:1, which fails AA for a 14px semibold label.
+     indigo-500 is the lightest step that clears 4.5:1 and is visually a
+     hair's breadth from the mockup. */
+  --tk-cta: #615fff; /* 4.6:1 with white */
+  --tk-cta-ink: #ffffff;
+
+  /* ---- Decorative glow --------------------------------------------------
+     Same solve on the dark frame: a≈0.49 at x=0 falling to a≈0.05 by x=260,
+     on the SAME hue as light — indigo-600, not the indigo-400 the rest of the
+     dark theme uses. A decorative bloom is not ink, so it keeps the saturated
+     brand hue in both themes. */
+  --tk-glow: rgb(79 57 246 / 0.49);
+  /* Measured peak of the capability hero's ellipse — see the light block. */
+  --tk-hero-glow: rgb(79 57 246 / 0.64);
+
+  /* ---- Legacy --tk-* surface tokens ------------------------------------ */
+  --tk-primary: #7c86ff;
+  --tk-primary-container: #312c85; /* indigo-900 */
+  --tk-secondary: #c9a033;
+  --tk-tertiary: #e8d4b0;
+  --tk-surface: #020618;
+  --tk-surface-variant: #0f172b;
+  --tk-container: #0f172b;
+  --tk-container-dim: #1d293d;
+  --tk-outline: #62748e;
+  --tk-outline-variant: #314158;
+  --tk-error: #ff6467;
+  --tk-success: #5ee9b5; /* emerald-300 — 11.9:1 on slate-950 */
+  --tk-warning: #f5b800;
+  --tk-on-surface: #ebebeb;
+  --tk-on-surface-variant: #b3b3b3;
+
+  --landing-accent: var(--color-fd-primary);
 }
 
 /* ========================================
@@ -256,9 +396,30 @@ img {
    Driven by `data-tk-theme="<id>"` on a wrapper.
    See components/landing/style-switcher.tsx.
    ======================================== */
+/* Each preset is a whole design language, not a recolour: surface, radius,
+   border weight, shadow behaviour and typeface all move together. Four of the
+   six used to be a white card with a different button, which is not much of a
+   demo for "it adapts to any style".
+
+   --tk-on-primary is chosen per preset, and per mode where the hue needs it, so
+   the 11px Next label clears 4.5:1 everywhere. Light hues (forest's emerald,
+   ember's amber) take dark ink; dark hues take white. Three presets used to
+   fail: forest at 2.54:1, crimson 3.76:1, iris 4.47:1. Held by
+   design-tokens.test.ts.
+
+   --tk-card-dot is the INACTIVE progress dot. It used to be the site's
+   --color-fd-muted, a site token on a themed card, which made the dots
+   invisible on ember in both modes. */
+
+/* Soft modern SaaS — the brand preset and the hero's default. This is the card
+   the Figma hero frames draw, so its values are pinned to them. */
 [data-tk-theme="ocean"] {
-  --tk-primary: #0197f6;
-  --tk-on-primary: #ffffff;
+  /* --tk-cta, not --color-fd-primary: this fill carries the white 11px Next
+     label, and the mockup's indigo-400 measures 3.1:1 there. --tk-cta is the
+     token that exists for exactly that — indigo-600 light, indigo-500 dark,
+     both clearing 4.5:1 — and is a hair's breadth from the mockup. */
+  --tk-primary: var(--tk-cta);
+  --tk-on-primary: var(--tk-cta-ink);
   --tk-radius: 0.75rem;
   --tk-card-border-width: 1px;
   --tk-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -267,6 +428,7 @@ img {
   --tk-card-muted: #57687a;
   --tk-card-border: rgb(2 24 43 / 0.1);
   --tk-card-shadow: 0 14px 36px -14px rgb(2 24 43 / 0.22);
+  --tk-card-dot: rgb(2 24 43 / 0.14);
 }
 .dark [data-tk-theme="ocean"] {
   --tk-card-bg: rgb(13 23 35 / 0.92);
@@ -274,68 +436,88 @@ img {
   --tk-card-muted: rgb(255 255 255 / 0.64);
   --tk-card-border: rgb(255 255 255 / 0.12);
   --tk-card-shadow: 0 14px 36px -14px rgb(0 0 0 / 0.65);
+  --tk-card-dot: rgb(255 255 255 / 0.2);
 }
 
+/* Glass — the widest radius, a tinted lavender surface rather than white, and a
+   bright inner edge instead of a border, floating on a large violet bloom.
+   Violet, not indigo: as indigo it was a straight clone of ocean. */
 [data-tk-theme="iris"] {
-  --tk-primary: #6366f1;
+  --tk-primary: #7c3aed;
   --tk-on-primary: #ffffff;
   --tk-radius: 1rem;
   --tk-card-border-width: 1px;
   --tk-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --tk-card-bg: #ffffff;
-  --tk-card-fg: #1e1b35;
-  --tk-card-muted: #6b6790;
-  --tk-card-border: rgb(99 102 241 / 0.28);
-  --tk-card-shadow: 0 24px 48px -16px rgb(99 102 241 / 0.35);
+  --tk-card-bg: #f6f4ff;
+  --tk-card-fg: #241a4d;
+  --tk-card-muted: #6d64a0;
+  --tk-card-border: rgb(255 255 255 / 0.9);
+  --tk-card-shadow: 0 28px 60px -20px rgb(124 58 237 / 0.45), 0 2px 10px -2px rgb(124 58 237 / 0.16);
+  --tk-card-dot: rgb(124 58 237 / 0.22);
 }
 .dark [data-tk-theme="iris"] {
-  --tk-card-bg: rgb(24 22 46 / 0.94);
-  --tk-card-fg: #ffffff;
-  --tk-card-muted: rgb(199 196 255 / 0.72);
-  --tk-card-border: rgb(129 123 255 / 0.38);
-  --tk-card-shadow: 0 26px 50px -16px rgb(99 102 241 / 0.55);
+  --tk-primary: #a78bfa;
+  --tk-on-primary: #1a1036;
+  --tk-card-bg: rgb(30 24 58 / 0.95);
+  --tk-card-fg: #f4f1ff;
+  --tk-card-muted: rgb(203 195 255 / 0.74);
+  --tk-card-border: rgb(167 139 250 / 0.3);
+  --tk-card-shadow: 0 30px 64px -20px rgb(124 58 237 / 0.65);
+  --tk-card-dot: rgb(167 139 250 / 0.28);
 }
 
-/* Forest is the "always-light" friendly card — the same in both modes,
-   which is exactly why it pops dramatically against a dark site. */
+/* Friendly — the "always-light" card, identical in both modes, which is exactly
+   why it pops against a dark site. Mint surface, generous radius, green ring.
+   The rounded face only resolves on Apple platforms; elsewhere the tint and the
+   geometry carry the identity. */
 [data-tk-theme="forest"] {
   --tk-primary: #10b981;
-  --tk-on-primary: #ffffff;
-  --tk-radius: 0.625rem;
+  --tk-on-primary: #04291d;
+  --tk-radius: 0.875rem;
   --tk-card-border-width: 1px;
-  --tk-font: ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
-  --tk-card-bg: #ffffff;
-  --tk-card-fg: #0b1f17;
-  --tk-card-muted: #5b6b63;
-  --tk-card-border: rgb(16 185 129 / 0.3);
-  --tk-card-shadow: 0 16px 32px -14px rgb(16 185 129 / 0.28);
+  --tk-font: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", Quicksand, Nunito, system-ui,
+    sans-serif;
+  --tk-card-bg: #f0fdf6;
+  --tk-card-fg: #04291d;
+  --tk-card-muted: #4a6b5e;
+  --tk-card-border: rgb(16 185 129 / 0.35);
+  --tk-card-shadow: 0 14px 34px -12px rgb(16 185 129 / 0.35);
+  --tk-card-dot: rgb(4 41 29 / 0.16);
 }
 .dark [data-tk-theme="forest"] {
-  --tk-card-border: rgb(16 185 129 / 0.32);
-  --tk-card-shadow: 0 18px 36px -14px rgb(16 185 129 / 0.4);
+  --tk-card-border: rgb(16 185 129 / 0.45);
+  --tk-card-shadow: 0 18px 40px -12px rgb(16 185 129 / 0.45);
 }
 
+/* Bold — tight radius, a full-strength 2px accent border and a short hard
+   shadow. Reads as confident rather than as an error state. */
 [data-tk-theme="crimson"] {
-  --tk-primary: #ef4444;
+  --tk-primary: #dc2626;
   --tk-on-primary: #ffffff;
-  --tk-radius: 0.5rem;
-  --tk-card-border-width: 1.5px;
+  --tk-radius: 0.375rem;
+  --tk-card-border-width: 2px;
   --tk-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --tk-card-bg: #fff5f5;
-  --tk-card-fg: #3b0a0a;
-  --tk-card-muted: #9a5a5a;
-  --tk-card-border: #ef4444;
-  --tk-card-shadow: 0 0 0 1px rgb(239 68 68 / 0.22), 0 22px 46px -14px rgb(239 68 68 / 0.32);
+  --tk-card-bg: #fff1f1;
+  --tk-card-fg: #450a0a;
+  --tk-card-muted: #8f4b4b;
+  --tk-card-border: #dc2626;
+  --tk-card-shadow: 0 16px 34px -16px rgb(220 38 38 / 0.45);
+  --tk-card-dot: rgb(69 10 10 / 0.18);
 }
 .dark [data-tk-theme="crimson"] {
-  --tk-card-bg: #1a0c0e;
-  --tk-card-fg: #fff5f5;
+  --tk-primary: #f87171;
+  --tk-on-primary: #3f0a0a;
+  --tk-card-bg: #1c0b0d;
+  --tk-card-fg: #ffecec;
   --tk-card-muted: rgb(254 205 205 / 0.78);
-  --tk-card-shadow: 0 0 0 1px rgb(239 68 68 / 0.3), 0 22px 46px -12px rgb(239 68 68 / 0.55);
+  --tk-card-border: #f87171;
+  --tk-card-shadow: 0 18px 38px -14px rgb(248 113 113 / 0.5);
+  --tk-card-dot: rgb(255 236 236 / 0.22);
 }
 
-/* Brutalist: paper card in light, near-black in dark — bold border + hard
-   amber offset shadow in both. */
+/* Brutalist — square corners, a 2px ink border and a hard amber offset with no
+   blur. The border is the ink colour, not the accent, so the offset shadow is
+   the only amber on the card's edge and the effect stays sharp. */
 [data-tk-theme="ember"] {
   --tk-primary: #f59e0b;
   --tk-on-primary: #1a1205;
@@ -345,32 +527,44 @@ img {
   --tk-card-bg: #fffdf5;
   --tk-card-fg: #1a1205;
   --tk-card-muted: #6b5a2a;
-  --tk-card-border: #f59e0b;
+  --tk-card-border: #1a1205;
   --tk-card-shadow: 5px 5px 0 0 #f59e0b;
+  --tk-card-dot: rgb(26 18 5 / 0.2);
 }
 .dark [data-tk-theme="ember"] {
   --tk-card-bg: #0b0b0c;
   --tk-card-fg: #fff7ed;
   --tk-card-muted: rgb(253 230 138 / 0.72);
+  --tk-card-border: #fff7ed;
+  --tk-card-shadow: 5px 5px 0 0 #f59e0b;
+  --tk-card-dot: rgb(255 247 237 / 0.25);
 }
 
+/* Editorial — serif, almost square, a hairline rule and no shadow at all, so it
+   sits on the page rather than floating. The accent is ink, not slate: at
+   slate-500 the Next button read as disabled. */
 [data-tk-theme="graphite"] {
-  --tk-primary: #64748b;
+  --tk-primary: #1e293b;
   --tk-on-primary: #ffffff;
-  --tk-radius: 0.375rem;
+  --tk-radius: 0.125rem;
   --tk-card-border-width: 1px;
   --tk-font: ui-serif, Georgia, "Times New Roman", serif;
   --tk-card-bg: #ffffff;
-  --tk-card-fg: #1e293b;
-  --tk-card-muted: #64748b;
-  --tk-card-border: rgb(100 116 139 / 0.25);
+  --tk-card-fg: #16181d;
+  --tk-card-muted: #5c6672;
+  --tk-card-border: rgb(22 24 29 / 0.18);
   --tk-card-shadow: none;
+  --tk-card-dot: rgb(22 24 29 / 0.16);
 }
 .dark [data-tk-theme="graphite"] {
-  --tk-card-bg: rgb(17 19 24 / 0.92);
+  --tk-primary: #e2e8f0;
+  --tk-on-primary: #0f172b;
+  --tk-card-bg: rgb(17 19 24 / 0.95);
   --tk-card-fg: #f1f5f9;
   --tk-card-muted: rgb(148 163 184 / 0.82);
-  --tk-card-border: rgb(148 163 184 / 0.22);
+  --tk-card-border: rgb(226 232 240 / 0.22);
+  --tk-card-shadow: none;
+  --tk-card-dot: rgb(226 232 240 / 0.22);
 }
 
 /* ========================================
@@ -545,6 +739,81 @@ img {
   :root {
     --fd-layout-width: 1400px;
   }
+}
+
+/* ========================================
+   NAVBAR CHROME — Figma 3945:1461 (dark) · 3830:1599 (light)
+   ========================================
+   Fumadocs already renders the design's geometry — a 56px bar, a 240x35
+   search pill, 6px kbd chips, a 60x34 theme toggle, 32px social hit areas —
+   and baseOptions() already carries the same seven links and three icons,
+   because the design was drawn from this site's own IA. So the navbar needs
+   no component of its own; what it needs is for each control to read the
+   colour the design gives it.
+
+   Every rule below is pinned to a stable hook — [data-search-full],
+   [data-theme-toggle], `nav > ul`, a[aria-label] — rather than to a Tailwind
+   class or a blanket `#nd-nav button`, which also caught the hamburger, the menu
+   triggers and the social links and said nothing about which control it
+   meant. The mega-menu cards keep --color-fd-border on purpose: they are
+   content inside a panel, not chrome on the bar. */
+
+/* Every edge on the bar — its bottom rule, the search pill, the kbd chips and
+   the theme toggle — is one wash, which is how the design draws it. */
+#nd-nav > div,
+#nd-nav [data-search-full],
+#nd-nav [data-theme-toggle],
+#nd-nav kbd {
+  border-color: var(--tk-navbar-edge);
+}
+
+/* Nav links sit back from the wordmark. Redefining the variable on the list
+   (rather than setting `color`) keeps Fumadocs' own hover and data-[active]
+   branches intact — they resolve against this value. `nav > ul` is only the
+   primary list; the secondary icon list is nested a level deeper. */
+#nd-nav nav > ul {
+  --color-fd-muted-foreground: var(--tk-nav-link);
+}
+
+/* The search pill needs no fill rule. Fumadocs ships `bg-fd-secondary/50` and
+   the design renders slate-800 at 48.5% (dark) / slate-100 at 61% (light) —
+   the same wash. Only the token underneath was wrong, and that is fixed above.
+
+   kbd chips: 12px, and sans — the design sets them in Host Grotesk, while the
+   global `code, pre, kbd, samp` rule would otherwise put them in Geist Mono.
+   Docs-body kbd is untouched. */
+#nd-nav kbd {
+  font-family: inherit;
+  font-size: 12px;
+}
+
+/* Theme toggle. The design fills the selected half with the same surface as
+   the search pill, so `accent` is re-pointed at `secondary` for this control
+   only — Fumadocs marks the active half with bg-fd-accent and there is no
+   attribute to select it on. Padding drops 6px -> 5px because the glyph is
+   16px in the design and `size-6.5 p-1.5` leaves 14px in a 26px box. */
+#nd-nav [data-theme-toggle] {
+  --color-fd-accent: var(--color-fd-secondary);
+  --color-fd-accent-foreground: var(--color-fd-secondary-foreground);
+}
+
+#nd-nav [data-theme-toggle] > svg {
+  padding: 5px;
+}
+
+/* Social glyphs are brand ink, not foreground — sampled #7c86ff (dark) and
+   #4f39f6 (light) off the rendered frame, which is exactly
+   --color-fd-primary in each theme. They are the only coloured thing on the
+   right of the bar, which is what keeps the wordmark and the icon row reading
+   as one pair.
+
+   `a[aria-label]` is exactly the icon links and nothing else: Fumadocs sets
+   aria-label only for `type: 'icon'` items, and every text link in the bar
+   carries its name as text instead. app/__tests__/nav-links.test.ts pins that
+   every icon item declares a label, so this selector cannot go quietly empty.
+   It catches the mobile menu's copies of the same three icons too. */
+#nd-nav a[aria-label] {
+  color: var(--color-fd-primary);
 }
 
 /* ========================================

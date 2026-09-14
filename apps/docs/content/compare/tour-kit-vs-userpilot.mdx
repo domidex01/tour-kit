@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $99 one-time Pro fee. Userpilot is a no-code product adoption platform starting at $299/month. userTourKit suits React teams wanting code ownership and tiny bundles. Userpilot is better when non-technical PMs need to build onboarding flows without developers.
+userTourKit is a headless React library offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $9.99 one-time Pro fee. Userpilot is a no-code product adoption platform starting at $299/month. userTourKit suits React teams wanting code ownership and tiny bundles. Userpilot is better when non-technical PMs need to build onboarding flows without developers.
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade.
 
 ## What is Userpilot?
 
@@ -40,7 +40,7 @@ For developer teams that want to scatter contextual hints across an app and mana
 
 Userpilot includes checklists on all plans. You build them visually, assign tasks, and track completion through their dashboard. Straightforward and well-reviewed.
 
-userTourKit's `@tour-kit/checklists` (Pro, $99 one-time) takes a different tack. Tasks support dependency graphs with circular dependency detection and three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked tasks.
+userTourKit's `@tour-kit/checklists` (Pro, $9.99 one-time) takes a different tack. Tasks support dependency graphs with circular dependency detection and three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked tasks.
 
 Components include `ChecklistPanel`, `ChecklistLauncher`, and headless render props. State persists across sessions and integrates with the analytics package.
 
@@ -74,7 +74,7 @@ Userpilot gives PMs a point-and-click segmentation builder. userTourKit gives de
 
 Userpilot includes feature adoption tracking as part of their analytics suite. Their "Feature Tags" let you tag UI elements and measure click-through rates, adoption percentages, and time-to-adopt. The Growth plan ($249/month for 2,000 MAUs) includes this. It's genuinely useful for non-technical teams — PMs can tag features without code changes. But the data lives in Userpilot's dashboard, and MAU-based pricing means adoption tracking costs scale with your user base.
 
-userTourKit's `@tour-kit/adoption` ($99 Pro) takes a code-first approach to tracking feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+userTourKit's `@tour-kit/adoption` ($9.99 Pro) takes a code-first approach to tracking feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
 
 The trade-off: Userpilot's no-code tagging is faster to set up. userTourKit's approach gives you more granular control over adoption logic and keeps your data in your own analytics pipeline.
 
@@ -82,7 +82,7 @@ The trade-off: Userpilot's no-code tagging is faster to set up. userTourKit's ap
 
 Userpilot supports embedding YouTube and Vimeo videos in flows, modals, and slideouts through their visual builder. No native support for Loom, Wistia, GIF, or Lottie. Video insertion is done through the WYSIWYG editor — no programmatic control or URL auto-detection.
 
-userTourKit's `@tour-kit/media` ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` ($9.99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
 
 If you only need YouTube and Vimeo in a visual builder, Userpilot covers that. If you need broader platform support or programmatic media control in your React components, userTourKit handles more formats with less friction.
 
@@ -116,13 +116,13 @@ Userpilot's SPA integration also requires manual `userpilot.reload()` calls on e
 
 ### Licensing and pricing
 
-userTourKit's core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free. Pro packages cost $99 one-time — that covers adoption, analytics, announcements, checklists, media, and scheduling. No MAU limits. No seat limits. Self-hosted by default.
+userTourKit's core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free. Pro packages cost $9.99 one-time — that covers adoption, analytics, announcements, checklists, media, and scheduling. No MAU limits. No seat limits. Self-hosted by default.
 
 Userpilot's pricing has three tiers. Starter at $299/month ($3,588/year) caps you at 2,000 MAUs and 3 seats. No custom CSS. No A/B testing. No webhooks or API access. No Resource Center. Analytics limited to trend reports. Growth at $799/month ($9,588/year) removes those restrictions. Enterprise pricing is custom, with Vendr reporting an average customer payment of $18,000/year and a range of $7,638 to $60,680.
 
 Userpilot's pricing has also climbed over time. G2 listings showed Starter at $249 as recently as January 2025. TrustRadius showed Growth at $499/month. The trajectory: Starter went from roughly $199 to $249 to $299, and Growth from $499 to $799.
 
-Over three years, the math works out to: userTourKit Pro costs $99 total. Userpilot Starter costs $10,764. Userpilot Growth costs $28,764. That's not a rounding error.
+Over three years, the math works out to: userTourKit Pro costs $9.99 total. Userpilot Starter costs $10,764. Userpilot Growth costs $28,764. That's not a rounding error.
 
 ## Side-by-side comparison table
 
@@ -130,8 +130,8 @@ Over three years, the math works out to: userTourKit Pro costs $99 total. Userpi
 |---|---|---|
 | Product tours | ✅ Built-in (core, MIT) | ✅ Built-in (all plans) |
 | Hints/hotspots | ✅ Built-in (&lt;5KB) | ✅ Built-in (all plans) |
-| Onboarding checklists | ✅ Pro ($99 one-time) | ✅ Built-in (all plans) |
-| Announcements | ✅ Pro ($99 one-time) | ✅ Built-in (all plans) |
+| Onboarding checklists | ✅ Pro ($9.99 one-time) | ✅ Built-in (all plans) |
+| Announcements | ✅ Pro ($9.99 one-time) | ✅ Built-in (all plans) |
 | Analytics | ✅ Pro (plugin-based) | ⚠️ Trends only on Starter; full on Growth+ |
 | Scheduling | ✅ Pro (timezone, recurring) | ⚙️ Segment-based targeting only |
 | Adoption tracking | ✅ Pro (usage + nudges) | ✅ Feature Tags (Growth+, MAU-priced) |
@@ -148,7 +148,7 @@ Over three years, the math works out to: userTourKit Pro costs $99 total. Userpi
 | Framework | React 18+ | Any (script tag) |
 | Mobile SDK | 🚫 Web only | ⚠️ Growth+ (iOS/Android) |
 | License | MIT (free tier) | Proprietary SaaS |
-| Pricing | Free + $99 one-time Pro | $299-$799+/month |
+| Pricing | Free + $9.99 one-time Pro | $299-$799+/month |
 
 Data verified March 2026. Sources: official documentation, npm, GitHub, G2.
 
@@ -164,7 +164,7 @@ If your organization runs native mobile apps and needs onboarding on iOS and And
 
 userTourKit wins for React teams that want onboarding to live in the same codebase as the product. If you're already using shadcn/ui or Tailwind, userTourKit's components slot directly into your design system through the `UnifiedSlot` pattern and CVA-based styling. No proprietary overlay fighting your CSS.
 
-The cost difference is hard to ignore for startups and growing teams. userTourKit Pro at $99 one-time versus Userpilot Growth at $9,588/year means your onboarding budget pays for itself on day one. No MAU caps mean you don't get penalized as your user base grows.
+The cost difference is hard to ignore for startups and growing teams. userTourKit Pro at $9.99 one-time versus Userpilot Growth at $9,588/year means your onboarding budget pays for itself on day one. No MAU caps mean you don't get penalized as your user base grows.
 
 For TypeScript-heavy codebases, userTourKit's strict mode support with full type inference is table stakes that Userpilot doesn't meet. And if you have Content Security Policy requirements, userTourKit's self-hosted architecture avoids the 15+ subdomain whitelist that Userpilot needs.
 
@@ -227,7 +227,7 @@ As of March 2026, the userpilot npm package sits at version 1.4.2. The Chrome ex
 ## Frequently asked questions
 
 **Is userTourKit free?**
-userTourKit's core packages (tours, hints, React components) are MIT-licensed and free. Pro packages covering analytics, checklists, announcements, scheduling, media, and adoption tracking cost $99 one-time. No monthly fees and no MAU limits.
+userTourKit's core packages (tours, hints, React components) are MIT-licensed and free. Pro packages covering analytics, checklists, announcements, scheduling, media, and adoption tracking cost $9.99 one-time. No monthly fees and no MAU limits.
 
 **What is the difference between userTourKit and Userpilot?**
 userTourKit is a headless React library where you write onboarding in code. Userpilot is a no-code SaaS platform with a visual builder. userTourKit gives developers full control over rendering and design system integration. Userpilot gives non-technical teams independence from engineering.
@@ -245,11 +245,11 @@ userTourKit's core is &lt;8KB gzipped, React package &lt;12KB, hints &lt;5KB. Us
 As of March 2026, the Userpilot npm package ships no `.d.ts` type definitions and no `@types/userpilot` package exists. userTourKit uses TypeScript strict mode with full type inference across all packages.
 
 **Is Userpilot open source?**
-No. Userpilot is a proprietary SaaS platform. userTourKit's core packages are MIT-licensed open source. Pro packages require a $99 one-time license.
+No. Userpilot is a proprietary SaaS platform. userTourKit's core packages are MIT-licensed open source. Pro packages require a $9.99 one-time license.
 
 **Which is better for enterprise use?**
 Depends on the team. Userpilot offers SAML SSO (Enterprise tier), mobile SDKs, and a Resource Center that reduces support tickets. userTourKit offers self-hosted deployment, WCAG 2.1 AA compliance with Lighthouse 100, and no vendor lock-in. Userpilot suits PM-led enterprise teams. userTourKit suits engineering-led teams with design system requirements.
 
 ## Final verdict
 
-Userpilot and userTourKit solve the same problem for different teams. Userpilot is a strong choice for PM-led organizations that want surveys, visual building, and bundled analytics, and can budget $800+/month. userTourKit is the better fit for React engineering teams that want headless architecture, TypeScript support, WCAG compliance, and a $99 total price tag. Your mileage may vary depending on who owns onboarding at your company.
+Userpilot and userTourKit solve the same problem for different teams. Userpilot is a strong choice for PM-led organizations that want surveys, visual building, and bundled analytics, and can budget $800+/month. userTourKit is the better fit for React engineering teams that want headless architecture, TypeScript support, WCAG compliance, and a $9.99 total price tag. Your mileage may vary depending on who owns onboarding at your company.

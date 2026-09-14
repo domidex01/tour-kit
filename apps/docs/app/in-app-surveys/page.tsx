@@ -20,7 +20,7 @@ import dynamic from 'next/dynamic'
 const PAGE_PATH = '/in-app-surveys'
 const PAGE_TITLE = 'In-App Surveys & NPS for React | userTourKit'
 const PAGE_DESC =
-  'In-app survey component for React — NPS, CSAT, CES with skip logic and fatigue prevention. Your design system. Runs free in dev, $99 once to ship.'
+  'In-app survey component for React, NPS, CSAT, CES with skip logic and fatigue prevention. Your design system. Runs free in dev, from $9.99 once to ship.'
 // File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
 // which blocks Twitter/Facebook crawlers from fetching share images.
 const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
@@ -81,7 +81,7 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'Does skip logic work, or is every survey linear?',
     answer:
-      'Skip logic is built in — route to different questions based on previous answers, including arbitrary function predicates. The flow engine tracks visited steps so conditional chains can never loop forever.',
+      'Skip logic is built in, route to different questions based on previous answers, including arbitrary function predicates. The flow engine tracks visited steps so conditional chains can never loop forever.',
   },
   {
     question: 'How do you stop surveys from annoying users?',
@@ -91,7 +91,7 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'Which survey types and display modes ship in the box?',
     answer:
-      'NPS (0–10 with promoter/passive/detractor scoring), CSAT, CES, and fully custom flows — rating, text, single/multi-select, and boolean questions. Render any of them as a modal, slideout, banner, popover anchored to an element, or inline in the page.',
+      'NPS (0–10 with promoter/passive/detractor scoring), CSAT, CES, and fully custom flows, rating, text, single/multi-select, and boolean questions. Render any of them as a modal, slideout, banner, popover anchored to an element, or inline in the page.',
   },
   {
     question: 'Where do responses go? Do you store my user data?',
@@ -101,7 +101,7 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'What happens before I buy a license?',
     answer:
-      'Everything works. @tour-kit/surveys runs unlicensed in development and on localhost with full functionality; production shows a small watermark until you activate a $99 lifetime license that covers every Pro package.',
+      'Everything works. @tour-kit/surveys runs unlicensed in development and on localhost with full functionality, no feature gates. Production shows a small badge until you activate a one-time licence key, from $9.99 for a single project, which covers every Tour Kit package.',
   },
 ]
 
@@ -130,25 +130,25 @@ export default function InAppSurveysPage() {
           eyebrow="@tour-kit/surveys · Pro"
           heading="Ask in context."
           headingAccent="Hear the truth."
-          subhead="In-app microsurveys for React — NPS, CSAT, CES, and custom flows with skip logic and fatigue prevention, rendered in your own design system."
+          subhead="In-app microsurveys for React, NPS, CSAT, CES, and custom flows with skip logic and fatigue prevention, rendered in your own design system."
           primaryLabel="Try it free in dev"
           primaryHref="/docs/surveys"
           secondaryLabel="See pricing"
           secondaryHref="/pricing"
-          reassurance="Runs free in dev — pay once ($99) when you ship."
+          reassurance="Runs free in dev, one-time from $9.99 when you ship."
           factsLine="5 display modes · skip logic · NPS/CSAT/CES scoring · your repo, your code"
         />
 
         <DemoSection
           heading="Two questions. Real component."
-          subtext="Answer the NPS survey below — it is the live @tour-kit/surveys component, scored on the spot by calculateNPS(). No video, no signup wall."
+          subtext="Answer the NPS survey below, it is the live @tour-kit/surveys component, scored on the spot by calculateNPS(). No video, no signup wall."
         >
           <SurveyDemo />
         </DemoSection>
 
         <PainOutcomeStrip
           heading="Email surveys arrive too late"
-          subtext="Feedback is most honest seconds after the experience. Catch it in the product — without burning user goodwill."
+          subtext="Feedback is most honest seconds after the experience. Catch it in the product, without burning user goodwill."
           items={[
             {
               pain: 'Surveys land in inboxes, not moments',
@@ -156,7 +156,7 @@ export default function InAppSurveysPage() {
                 'Email NPS three weeks after onboarding measures memory, not experience. Response rates show it.',
               outcome: 'Ask at the moment of truth',
               outcomeDetail:
-                'Trigger in-product, right after the action — completion of onboarding, first export, a support interaction.',
+                'Trigger in-product, right after the action, completion of onboarding, first export, a support interaction.',
             },
             {
               pain: 'Survey fatigue burns trust',
@@ -164,7 +164,7 @@ export default function InAppSurveysPage() {
                 'Hand-rolled triggers fire on every visit until users learn to dismiss everything you show them.',
               outcome: 'Fatigue prevention in the engine',
               outcomeDetail:
-                'Global cooldowns, frequency rules, sampling, snooze, and session caps — enforced by the package, not a TODO.',
+                'Global cooldowns, frequency rules, sampling, snooze, and session caps, enforced by the package, not a TODO.',
             },
             {
               pain: 'Another tool, another data silo',
@@ -204,7 +204,7 @@ export default function InAppSurveysPage() {
             {
               title: 'WCAG 2.1 AA accessible',
               description:
-                'Keyboard operable rating scales, focus management, screen-reader announcements — surveys everyone can answer.',
+                'Keyboard operable rating scales, focus management, screen-reader announcements, surveys everyone can answer.',
             },
             {
               title: 'The code lands in your repo',
@@ -214,12 +214,12 @@ export default function InAppSurveysPage() {
             {
               title: 'Skip logic',
               description:
-                'Branch on previous answers with declarative rules or function predicates — cycle detection included.',
+                'Branch on previous answers with declarative rules or function predicates, cycle detection included.',
             },
             {
               title: 'NPS, CSAT & CES scoring',
               description:
-                'Built-in scoring with promoter/passive/detractor classification — calculated locally, reported to your analytics.',
+                'Built-in scoring with promoter/passive/detractor classification, calculated locally, reported to your analytics.',
             },
             {
               title: 'In-context targeting & media',
@@ -233,10 +233,10 @@ export default function InAppSurveysPage() {
         <CtaBand
           placement="surveys_after_features"
           eyebrow="Pro package"
-          heading="Try it free in dev — watermark until you license."
-          subtext="Full functionality in development and on localhost, no key required. One $99 license unlocks production for all Pro packages."
+          heading="Try it free in dev, watermark until you license."
+          subtext="Full functionality in development and on localhost, no key required. One licence from $9.99 unlocks production for every package."
           ctaLabel="Build my first survey"
-          reassurance="No signup, no credit card — install and go."
+          reassurance="No signup, no credit card, install and go."
           primaryHref="/builder"
         />
 
@@ -245,7 +245,7 @@ export default function InAppSurveysPage() {
         <ComparisonTeaser
           heading="Microsurveys without the platform tax"
           rows={[
-            { label: 'Cost', tourKit: '$99 once', saas: '$200–900/mo', oss: 'DIY time' },
+            { label: 'Cost', tourKit: 'From $9.99 once', saas: '$200–900/mo', oss: 'DIY time' },
             { label: 'Fatigue prevention', tourKit: 'yes', saas: 'partial', oss: 'no' },
             {
               label: 'Response data ownership',
@@ -282,7 +282,7 @@ export default function InAppSurveysPage() {
             {
               label: 'Product announcements',
               href: '/product-announcements',
-              description: 'Close the loop — announce what their feedback shipped.',
+              description: 'Close the loop, announce what their feedback shipped.',
             },
           ]}
         />

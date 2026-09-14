@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $99 one-time Pro fee. Chameleon is a SaaS product adoption platform starting at $279/month with a visual builder and CRM-based targeting. userTourKit fits React teams that want code ownership and design system parity. Chameleon is the better pick when product managers need to build and iterate on tours without developer involvement.
+userTourKit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $9.99 one-time Pro fee. Chameleon is a SaaS product adoption platform starting at $279/month with a visual builder and CRM-based targeting. userTourKit fits React teams that want code ownership and design system parity. Chameleon is the better pick when product managers need to build and iterate on tours without developer involvement.
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade. It ships with strict TypeScript, WCAG 2.1 AA compliance (Lighthouse Accessibility score: 100), and native support for shadcn/ui, Radix UI, and Base UI through its UnifiedSlot pattern.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade. It ships with strict TypeScript, WCAG 2.1 AA compliance (Lighthouse Accessibility score: 100), and native support for shadcn/ui, Radix UI, and Base UI through its UnifiedSlot pattern.
 
 ## What is Chameleon?
 
@@ -40,7 +40,7 @@ Developers get programmatic control through `useHint('feature-id')` for individu
 
 Chameleon offers "Launchers" for checklist-style onboarding, but the Startup plan caps you at a single Launcher. Need two checklists? That's a jump to Growth at $999/month. A G2 reviewer captured this frustration: "Plan based restrictions. I don't want to upgrade if I just want to use one more checklist on my plan."
 
-userTourKit's `@tour-kit/checklists` package (Pro, $99 one-time) supports unlimited checklists with task dependencies and circular dependency detection. Three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked tasks, and state persists across sessions. No per-checklist limits. No tier gating.
+userTourKit's `@tour-kit/checklists` package (Pro, $9.99 one-time) supports unlimited checklists with task dependencies and circular dependency detection. Three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked tasks, and state persists across sessions. No per-checklist limits. No tier gating.
 
 ### Announcements and banners
 
@@ -71,7 +71,7 @@ userTourKit's `@tour-kit/scheduling` package handles the time dimension: date ra
 
 Chameleon tracks feature adoption through its "Launchers" — persistent UI elements that guide users toward features they haven't discovered yet. Their analytics dashboard shows adoption funnels and completion rates. But this tracking requires the Growth plan ($1,180+/month), and it measures engagement with Chameleon's own UI elements rather than organic feature usage inside your application code.
 
-userTourKit's `@tour-kit/adoption` package ($99 Pro) measures actual feature usage against configurable criteria. The adoption calculator evaluates usage count versus required threshold, time since first use versus the adoption window, and recency of use versus a churn threshold. A nudge scheduler fires on time-based, usage-based, or event-based triggers while respecting cooldown periods. `IfNotAdopted` conditionally renders badges or prompts for users who haven't hit adoption criteria. `AdoptionDashboard` provides admins with a visual overview of adoption metrics across features.
+userTourKit's `@tour-kit/adoption` package ($9.99 Pro) measures actual feature usage against configurable criteria. The adoption calculator evaluates usage count versus required threshold, time since first use versus the adoption window, and recency of use versus a churn threshold. A nudge scheduler fires on time-based, usage-based, or event-based triggers while respecting cooldown periods. `IfNotAdopted` conditionally renders badges or prompts for users who haven't hit adoption criteria. `AdoptionDashboard` provides admins with a visual overview of adoption metrics across features.
 
 Chameleon's approach is more visual and PM-friendly. userTourKit's is more granular and code-driven. If your adoption strategy is tied to CRM segments and Chameleon's targeting engine, their Launchers integrate naturally. If you want to track whether users actually use a feature in your React code, userTourKit measures that directly.
 
@@ -79,7 +79,7 @@ Chameleon's approach is more visual and PM-friendly. userTourKit's is more granu
 
 Chameleon supports video embeds in tour steps and microsurveys — YouTube and Vimeo URLs render inline through their visual builder. There's no native support for Loom, Wistia, GIF players, or Lottie animations. Media configuration happens in Chameleon's dashboard rather than your codebase.
 
-userTourKit's `@tour-kit/media` package ($99 Pro) embeds video and animation directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image, and a headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` package ($9.99 Pro) embeds video and animation directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image, and a headless `MediaHeadless` render prop variant gives full control over the player UI.
 
 For teams that just need YouTube in a tooltip, Chameleon's builder is faster. userTourKit covers seven platforms with accessibility fallbacks, but you're writing code rather than pasting a URL in a dashboard.
 
@@ -109,7 +109,7 @@ According to Vendr's analysis of 27 Chameleon customers, the median annual contr
 
 Chameleon measures Monthly Tracked Users, meaning every unique user who *could* log in, not just those who interact with tours. One Capterra reviewer reported being charged for 5,000 users during beta testing when only 2 people were actively using the product.
 
-userTourKit's core packages (tours, hints, the headless architecture) are MIT-licensed and free. The Pro upgrade covering checklists, announcements, analytics, scheduling, plus media and adoption tracking costs $99 one-time. No MTU limits. No annual renewals. No escalation clauses. At 10,000 MAU over three years, Chameleon Growth costs roughly $52,500+. userTourKit costs $99.
+userTourKit's core packages (tours, hints, the headless architecture) are MIT-licensed and free. The Pro upgrade covering checklists, announcements, analytics, scheduling, plus media and adoption tracking costs $9.99 one-time. No MTU limits. No annual renewals. No escalation clauses. At 10,000 MAU over three years, Chameleon Growth costs roughly $52,500+. userTourKit costs $9.99.
 
 ## Side-by-side comparison table
 
@@ -117,7 +117,7 @@ userTourKit's core packages (tours, hints, the headless architecture) are MIT-li
 |---|---|---|
 | Product tours | ✅ Built-in (MIT) | ✅ Visual builder |
 | Hints/hotspots | ✅ Built-in, &lt;5KB (MIT) | ✅ Tooltips |
-| Onboarding checklists | ✅ Pro ($99 one-time) | ⚠️ 1 on Startup, unlimited on Growth |
+| Onboarding checklists | ✅ Pro ($9.99 one-time) | ⚠️ 1 on Startup, unlimited on Growth |
 | Announcements | ✅ Pro (5 variants) | ✅ Banners/modals |
 | Microsurveys | 🚫 Not available | ⚠️ 5 on Startup, unlimited on Growth |
 | Analytics | ✅ Pro (5 plugins) | ⚠️ Basic; needs Mixpanel/Amplitude |
@@ -136,7 +136,7 @@ userTourKit's core packages (tours, hints, the headless architecture) are MIT-li
 | Core bundle (gzipped) | &lt;8KB | ~18.5KB loader + CDN runtime |
 | Version control | ✅ Git-native | 🚫 Dashboard only |
 | License | MIT (free tier) | Proprietary SaaS |
-| Starting price | Free + $99 one-time Pro | $279/mo ($3,348/yr) |
+| Starting price | Free + $9.99 one-time Pro | $279/mo ($3,348/yr) |
 | SOC 2 | N/A (client-side library) | ✅ Growth+ |
 | Mobile SDK | 🚫 Web only | 🚫 Web only |
 
@@ -154,7 +154,7 @@ And if your procurement team requires SOC 2 reports or SAML SSO, Chameleon's Gro
 
 userTourKit wins when your team has React developers and wants tours that feel native to your application. If you're running shadcn/ui or Radix, userTourKit components render inside your design system rather than injecting a parallel CSS layer with `.chmln-*` prefixed elements. Tour definitions live in your codebase: version-controlled, code-reviewed, testable.
 
-The cost math is hard to argue with. A team paying $26,500/year (Vendr's median Chameleon contract) could buy userTourKit Pro for $99 and spend the remaining $26,401 on literally anything else. That's not a rounding error.
+The cost math is hard to argue with. A team paying $26,500/year (Vendr's median Chameleon contract) could buy userTourKit Pro for $9.99 and spend the remaining $26,401 on literally anything else. That's not a rounding error.
 
 userTourKit is also the better choice when accessibility is a contractual requirement. WCAG 2.1 AA compliance with Lighthouse 100 ships out of the box. And for performance-sensitive apps, a &lt;8KB core versus an 18.5KB+ loader (before the CDN runtime loads) translates directly to faster page interactions on mobile devices.
 
@@ -233,7 +233,7 @@ userTourKit is newer with a smaller community. You won't find years of Stack Ove
 ## Frequently asked questions
 
 **Is userTourKit free?**
-userTourKit's core packages (tours, hints, headless architecture) are MIT-licensed and free. The Pro upgrade adds checklists, announcements, analytics, scheduling, plus media and adoption tracking for a $99 one-time payment. No monthly fees. No MTU limits.
+userTourKit's core packages (tours, hints, headless architecture) are MIT-licensed and free. The Pro upgrade adds checklists, announcements, analytics, scheduling, plus media and adoption tracking for a $9.99 one-time payment. No monthly fees. No MTU limits.
 
 **What is the difference between userTourKit and Chameleon?**
 userTourKit is a code-first React library where developers define tours in TypeScript. Chameleon is a SaaS platform where product managers build tours through a visual Chrome extension and manage targeting via a web dashboard. The key difference is who owns the tour: engineers or PMs.

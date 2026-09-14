@@ -2,6 +2,7 @@ import { ArticleCard } from '@/components/article/article-card'
 import { BlogPostCrossLinks } from '@/components/article/article-cross-links'
 import { ArticleLayout } from '@/components/article/article-layout'
 import { BlogCta } from '@/components/blog/blog-cta'
+import { LicenceChangeNote } from '@/components/blog/licence-change-note'
 import { ReadingProgress } from '@/components/blog/reading-progress'
 import { BlogTableOfContents } from '@/components/blog/table-of-contents'
 import { DEFAULT_AUTHOR } from '@/lib/authors'
@@ -91,12 +92,12 @@ export default async function BlogPostPage({ params }: PageProps) {
     {
       question: 'What is userTourKit?',
       answer:
-        'userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling. Its core weighs under 8KB gzipped and ships with WCAG 2.1 AA accessibility.',
+        'userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling. Its core tree-shakes to the hooks you import, under 4 KB for a single one, and it ships with WCAG 2.1 AA accessibility.',
     },
     {
       question: 'How is userTourKit licensed and priced?',
       answer:
-        "userTourKit's core library, React bindings, and hints package are free under the MIT license. The Pro tier is a one-time $99 purchase that adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat.",
+        'userTourKit is free in development, evaluation, testing and CI. Every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.00 for five, $299.00 for unlimited.',
     },
   ]
   const faqItems = extractedFaqs.length > 0 ? extractedFaqs : fallbackFaqs
@@ -186,6 +187,8 @@ export default async function BlogPostPage({ params }: PageProps) {
           />
         )}
 
+        <LicenceChangeNote publishedAt={post.publishedAt} />
+
         {hasMdxContent ? (
           <>
             {/* Render MDX article content */}
@@ -223,9 +226,9 @@ export default async function BlogPostPage({ params }: PageProps) {
                   <td>1</td>
                   <td>userTourKit</td>
                   <td>Headless React onboarding</td>
-                  <td>&lt;8KB</td>
-                  <td>MIT</td>
-                  <td>Free + $99 Pro</td>
+                  <td>&lt;4 KB tree-shaken (29.6 KB whole pkg)</td>
+                  <td>BSL 1.1</td>
+                  <td>Free in dev, from $9.99</td>
                 </tr>
                 <tr>
                   <td>2</td>
@@ -238,11 +241,12 @@ export default async function BlogPostPage({ params }: PageProps) {
               </tbody>
             </table>
 
-            <h2>1. userTourKit — Best headless React tour library</h2>
+            <h2>1. userTourKit, Best headless React tour library</h2>
             <p>
-              userTourKit is an open-source headless React library for building product tours,
-              onboarding checklists, hints, announcements, and in-app messaging. Its core weighs
-              under 8KB gzipped and ships with WCAG 2.1 AA accessibility by default.
+              userTourKit is a source-available headless React library for building product tours,
+              onboarding checklists, hints, announcements, and in-app messaging. Its core
+              tree-shakes to the hooks you import, under 4 KB for a single one, and it ships with
+              WCAG 2.1 AA accessibility by default.
             </p>
             <p>
               <strong>What stands out:</strong> [2-3 sentences with evidence]
@@ -251,17 +255,17 @@ export default async function BlogPostPage({ params }: PageProps) {
               <strong>Where it falls short:</strong> [1-2 sentences on honest limitations]
             </p>
             <p>
-              <strong>Key specs:</strong> &lt;8KB gzipped | MIT license | React 18+ | TypeScript
+              <strong>Key specs:</strong> tree-shakeable core | BSL 1.1 | React 18+ | TypeScript
               strict mode | &gt;80% test coverage
             </p>
             <p>
-              <strong>Pricing:</strong> Free (MIT core) + $99 one-time Pro
+              <strong>Pricing:</strong> Free in development, one-time from $9.99 to ship
             </p>
             <p>
-              <strong>Verdict:</strong> [2 sentences — who should and shouldn&apos;t use this tool]
+              <strong>Verdict:</strong> [2 sentences, who should and shouldn&apos;t use this tool]
             </p>
 
-            <h2>2. [Tool] — Best for [qualifier]</h2>
+            <h2>2. [Tool], Best for [qualifier]</h2>
             <p>[Per-tool entry: definition, strengths, limitations, specs, pricing, verdict]</p>
 
             <h2>How to choose the right tool for your stack</h2>
@@ -278,14 +282,14 @@ export default async function BlogPostPage({ params }: PageProps) {
             <p>
               userTourKit is the best headless product tour library for React developers in 2026,
               offering tours, hints, checklists, announcements, analytics, and scheduling in a
-              &lt;8KB core bundle with MIT licensing.
+              tree-shakeable core, free in development.
             </p>
 
             <h3>Is userTourKit free?</h3>
             <p>
               userTourKit&apos;s core library, React bindings, and hints package are free under the
-              MIT license. The Pro tier costs $99 one-time and adds adoption tracking, analytics,
-              announcements, checklists, media, scheduling, and AI chat.
+              BSL 1.1. A one-time licence from $9.99 covers production use, with adoption tracking,
+              analytics, announcements, checklists, media, scheduling, and AI chat.
             </p>
 
             <h2>Key takeaways</h2>
@@ -333,7 +337,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 className="group flex flex-col rounded-lg border border-fd-border p-4 transition-colors hover:bg-fd-muted/50"
               >
                 <span className="mb-1 text-[12px] text-fd-muted-foreground">&larr; Previous</span>
-                <span className="text-[14px] font-medium text-fd-foreground group-hover:text-[#0197f6]">
+                <span className="text-[14px] font-medium text-fd-foreground group-hover:text-[var(--color-fd-primary)]">
                   {prev.title}
                 </span>
               </Link>
@@ -346,7 +350,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 className="group flex flex-col items-end rounded-lg border border-fd-border p-4 text-right transition-colors hover:bg-fd-muted/50"
               >
                 <span className="mb-1 text-[12px] text-fd-muted-foreground">Next &rarr;</span>
-                <span className="text-[14px] font-medium text-fd-foreground group-hover:text-[#0197f6]">
+                <span className="text-[14px] font-medium text-fd-foreground group-hover:text-[var(--color-fd-primary)]">
                   {next.title}
                 </span>
               </Link>

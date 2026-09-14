@@ -315,7 +315,7 @@ export function PainPoints() {
   const { ref, visible } = useStaggeredReveal(4)
 
   return (
-    <section className="relative overflow-hidden bg-[#02182b] px-6 py-24 sm:px-8 md:py-32 lg:px-12">
+    <section className="relative overflow-hidden bg-[var(--color-fd-foreground)] px-6 py-24 sm:px-8 md:py-32 lg:px-12">
       {/* Subtle gradient background */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-40 top-0 h-[500px] w-[500px] rounded-full bg-[#064a84] opacity-[0.15] blur-[120px]" />

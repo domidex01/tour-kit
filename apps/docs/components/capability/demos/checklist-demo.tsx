@@ -20,7 +20,7 @@ import { MaybeLicensed } from './maybe-licensed'
 const DEMO_CHECKLIST: ChecklistConfig = {
   id: 'capability-demo',
   title: 'Get started with Acme',
-  description: 'Click a task to complete it — this is the live component.',
+  description: 'Click a task to complete it, this is the live component.',
   dismissible: false,
   tasks: [
     {
@@ -36,7 +36,7 @@ const DEMO_CHECKLIST: ChecklistConfig = {
     {
       id: 'integration',
       title: 'Connect an integration',
-      description: 'Unlocks once your first project exists — task dependencies at work.',
+      description: 'Unlocks once your first project exists, task dependencies at work.',
       dependsOn: ['project'],
     },
     {
@@ -61,13 +61,13 @@ function DemoChecklistCard() {
       <div className="mt-3 flex items-center justify-between">
         <p className="font-mono text-[12px] text-fd-muted-foreground" aria-live="polite">
           {isComplete
-            ? 'All done — that state can fire confetti, a tour, or your API.'
+            ? 'All done, that state can fire confetti, a tour, or your API.'
             : `${progress.completed}/${progress.total} tasks · ${progress.percentage}%`}
         </p>
         <button
           type="button"
           onClick={reset}
-          className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-background px-2.5 py-1.5 font-mono text-[11px] font-semibold text-fd-muted-foreground transition-colors hover:bg-fd-muted hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+          className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-background px-2.5 py-1.5 font-mono text-[11px] font-semibold text-fd-muted-foreground transition-colors hover:bg-fd-muted hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
         >
           <RotateCcw className="h-3 w-3" aria-hidden="true" />
           Reset demo

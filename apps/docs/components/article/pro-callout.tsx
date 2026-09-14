@@ -28,7 +28,7 @@ const CROSS_SELL: Record<ProPackage, CrossSell> = {
   checklists: {
     name: '@tour-kit/checklists',
     title: 'Turn this tour into a guided onboarding checklist',
-    body: 'Multi-step onboarding with task dependencies and progress tracking — the natural next step after a tour.',
+    body: 'Multi-step onboarding with task dependencies and progress tracking, the natural next step after a tour.',
   },
   adoption: {
     name: '@tour-kit/adoption',
@@ -58,7 +58,7 @@ const CROSS_SELL: Record<ProPackage, CrossSell> = {
   analytics: {
     name: '@tour-kit/analytics',
     title: 'Pipe tour events into your analytics stack',
-    body: 'A plugin-based bridge to the tools you already use — one integration, every event.',
+    body: 'A plugin-based bridge to the tools you already use, one integration, every event.',
   },
   scheduling: {
     name: '@tour-kit/scheduling',
@@ -77,11 +77,11 @@ interface ProCalloutProps {
  * by the `proCrossSell` frontmatter field; see `app/docs/_page-logic.tsx`).
  *
  * The biggest conversion lever for Tour Kit Pro is *adoption*: the production
- * watermark only sells the one-time $99 license once a reader actually ships a
+ * badge only sells the one-time licence once a reader actually ships a
  * Pro package. Free-package docs are the largest engaged surface, so this routes
  * those readers toward the relevant Pro package. Keeps the same free-first voice
  * as the blog/home/docs CTAs — Pro packages run unlicensed in development; the
- * $99 license removes the production watermark when you ship.
+ * licence removes the production badge when you ship, from $9.99.
  *
  * Compact (`not-prose`, left of an end-of-page band) so it reads as part of the
  * article, not an interstitial. Distinct from `DocsCta` (the end-of-page footer
@@ -93,10 +93,10 @@ export function ProCallout({ package: pkg }: ProCalloutProps) {
   return (
     <aside
       aria-label={`Pro package: ${cross.name}`}
-      className="not-prose my-8 rounded-xl border border-[#0197f6]/30 bg-gradient-to-br from-[#0197f6]/5 to-transparent p-5 dark:from-[#0197f6]/10"
+      className="not-prose my-8 rounded-xl border border-[var(--color-fd-primary)]/30 bg-gradient-to-br from-[var(--color-fd-primary)]/5 to-transparent p-5 dark:from-[var(--color-fd-primary)]/10"
     >
       <div className="flex items-center gap-2">
-        <span className="inline-flex items-center rounded-full bg-[#0197f6] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+        <span className="inline-flex items-center rounded-full bg-[var(--tk-cta)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--tk-cta-ink)]">
           Pro
         </span>
         <code className="text-[12px] text-fd-muted-foreground">{cross.name}</code>
@@ -104,13 +104,13 @@ export function ProCallout({ package: pkg }: ProCalloutProps) {
       <p className="mt-2.5 font-semibold leading-snug text-fd-foreground">{cross.title}</p>
       <p className="mt-1 text-[14px] leading-relaxed text-fd-muted-foreground">{cross.body}</p>
       <p className="mt-1.5 text-[13px] leading-relaxed text-fd-muted-foreground">
-        Works unlicensed in development — a one-time $99 license removes the production watermark
+        Works unlicensed in development, a one-time licence from $9.99 removes the production badge
         when you ship.
       </p>
       <TrackedCtaLink
         href={`/docs/${pkg}`}
         placement="docs_pro_callout"
-        className="mt-3 inline-flex items-center gap-1 text-[13px] font-semibold text-[#0197f6] transition-opacity hover:opacity-80"
+        className="mt-3 inline-flex items-center gap-1 text-[13px] font-semibold text-[var(--color-fd-primary)] transition-opacity hover:opacity-80"
       >
         Explore {cross.name}
         <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

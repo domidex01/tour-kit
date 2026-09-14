@@ -1,4 +1,5 @@
 import type { ComparisonTeaserRow } from '@/components/capability/types'
+import { SectionHead } from '@/components/landing/section-head'
 import Link from 'next/link'
 
 interface ComparisonTeaserProps {
@@ -12,21 +13,21 @@ function Cell({ value, isTourKit = false }: { value: string; isTourKit?: boolean
   if (value === 'yes') {
     return (
       <span
-        className={`font-mono text-[13px] ${isTourKit ? 'font-semibold text-[#0197f6]' : 'text-emerald-600 dark:text-emerald-400'}`}
+        className={`text-[13px] ${isTourKit ? 'font-semibold text-[var(--color-fd-primary)]' : 'text-emerald-600 dark:text-emerald-400'}`}
       >
         &#10003;
       </span>
     )
   }
   if (value === 'no') {
-    return <span className="font-mono text-[13px] text-fd-muted-foreground/30">&mdash;</span>
+    return <span className="text-[13px] text-fd-muted-foreground/30">&mdash;</span>
   }
   if (value === 'partial') {
-    return <span className="font-mono text-[13px] text-amber-600/70 dark:text-amber-400/70">~</span>
+    return <span className="text-[13px] text-amber-600/70 dark:text-amber-400/70">~</span>
   }
   return (
     <span
-      className={`font-mono text-[13px] ${isTourKit ? 'font-semibold text-[#0197f6]' : 'text-fd-muted-foreground'}`}
+      className={`text-[13px] ${isTourKit ? 'font-semibold text-[var(--color-fd-primary)]' : 'text-fd-muted-foreground'}`}
     >
       {value}
     </span>
@@ -36,28 +37,30 @@ function Cell({ value, isTourKit = false }: { value: string; isTourKit?: boolean
 /** Compact 3-row excerpt of the home comparison table, linking to /compare. */
 export function ComparisonTeaser({ heading, rows }: ComparisonTeaserProps) {
   return (
-    <section className="px-6 py-16 sm:px-8 md:py-24 lg:px-12">
+    <section className="px-6 py-36 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
-        <div className="mb-10 max-w-lg">
-          <h2 className="mb-2 text-2xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-3xl">
-            {heading}
-          </h2>
-        </div>
+        <SectionHead size="section" title={heading} />
 
-        <div className="overflow-x-auto">
+        {/* Table chrome measured off the one table the design does specify,
+            the pricing frame's ComparisonTable (3880:1719): header cells on
+            the card fill inside `--tk-card-edge` rules, body rows transparent
+            over the page ground, and row rules a third lighter than the frame
+            — rgb(22 28 47), which is the same slate-400 at 14% rather than the
+            token's 20%. */}
+        <div className="mt-12 overflow-x-auto">
           <table className="w-full min-w-[540px] table-fixed border-collapse">
             <thead>
-              <tr className="border-b border-fd-border">
-                <th className="w-[40%] py-3 pr-6 text-left font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-fd-muted-foreground" />
-                <th className="w-[20%] bg-[#0197f6]/5 px-5 py-3 text-center">
-                  <span className="font-mono text-[13px] font-bold text-[#0197f6]">
+              <tr className="border-y border-[var(--tk-card-edge)] bg-fd-card">
+                <th className="w-[40%] px-6 py-3 text-left text-[13px] font-semibold text-fd-muted-foreground" />
+                <th className="w-[20%] bg-[var(--color-fd-primary)]/5 px-5 py-3 text-center">
+                  <span className="text-[13px] font-bold text-[var(--color-fd-primary)]">
                     userTourKit
                   </span>
                 </th>
-                <th className="w-[20%] px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">
+                <th className="w-[20%] px-5 py-3 text-center text-[13px] font-medium text-fd-muted-foreground">
                   SaaS platforms
                 </th>
-                <th className="w-[20%] px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">
+                <th className="w-[20%] px-5 py-3 text-center text-[13px] font-medium text-fd-muted-foreground">
                   OSS libraries
                 </th>
               </tr>
@@ -66,12 +69,12 @@ export function ComparisonTeaser({ heading, rows }: ComparisonTeaserProps) {
               {rows.map((row) => (
                 <tr
                   key={row.label}
-                  className="border-b border-fd-border/50 transition-colors hover:bg-fd-muted/20"
+                  className="border-b border-[var(--tk-card-edge)]/70 transition-colors hover:bg-fd-muted/20"
                 >
-                  <td className="py-4 pr-6 text-[14px] font-medium text-fd-foreground">
+                  <td className="px-6 py-4 text-[14px] font-medium text-fd-foreground">
                     {row.label}
                   </td>
-                  <td className="bg-[#0197f6]/5 px-5 py-4 text-center">
+                  <td className="bg-[var(--color-fd-primary)]/5 px-5 py-4 text-center">
                     <Cell value={row.tourKit} isTourKit />
                   </td>
                   <td className="px-5 py-4 text-center">
@@ -89,7 +92,7 @@ export function ComparisonTeaser({ heading, rows }: ComparisonTeaserProps) {
         <div className="mt-6">
           <Link
             href="/compare"
-            className="font-mono text-[13px] font-semibold text-[#0197f6] underline underline-offset-4 transition-colors hover:opacity-80"
+            className="text-[13px] font-semibold text-[var(--color-fd-primary)] underline underline-offset-4 transition-colors hover:opacity-80"
           >
             Full comparison &rarr;
           </Link>

@@ -1,30 +1,30 @@
 import Link from 'next/link'
 
 const TRUST_CHIPS = [
-  '< 8KB core gzipped',
+  'Under 4 KB tree-shaken',
   'WCAG 2.1 AA',
   'Lighthouse a11y 100',
   'TypeScript strict',
   '>80% test coverage',
-  'MIT core',
+  'Free in development',
   'React 19 ready',
   'shadcn-native',
 ]
 
 export function SocialProof() {
   return (
-    <section className="border-y border-fd-border bg-[#EDF6FB] dark:bg-fd-muted/20 px-6 py-16 sm:px-8 lg:px-12">
+    <section className="border-y border-fd-border bg-[var(--color-fd-muted)] dark:bg-fd-muted/20 px-6 py-16 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1120px] text-center">
-        <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[#0197f6]">
+        <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-fd-primary)]">
           The honest pitch
         </p>
         <h2 className="mb-4 text-2xl font-bold tracking-[-0.01em] text-fd-foreground sm:text-3xl">
           Why pick a fresh library?
         </h2>
         <p className="mx-auto mb-8 max-w-2xl text-[15px] leading-[1.6] text-fd-muted-foreground">
-          Tour Kit is new — no legacy API debt, no corporate-UX baggage, no AGPL contamination.
-          Built headless-first so you bring your own components and styles. Every chip below is a
-          measured technical fact, not a marketing claim.
+          Tour Kit is new, no legacy API debt, no corporate-UX baggage, no AGPL contamination. Built
+          headless-first so you bring your own components and styles. Every chip below is a measured
+          technical fact, not a marketing claim.
         </p>
         <ul className="mx-auto flex max-w-[900px] flex-wrap items-center justify-center gap-2">
           {TRUST_CHIPS.map((chip) => (

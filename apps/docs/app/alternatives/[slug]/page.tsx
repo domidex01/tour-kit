@@ -118,12 +118,12 @@ export default async function AlternativesPage({ params }: PageProps) {
             items={[
               {
                 question: `What is the best ${alt.competitor} alternative?`,
-                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, tiny bundle sizes (<8KB gzipped), and a $99 one-time price instead of recurring SaaS fees.`,
+                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, a core that tree-shakes to under 4 KB per hook, and a one-time price from $9.99 instead of recurring SaaS fees.`,
               },
               {
                 question: 'Is userTourKit free to use?',
                 answer:
-                  "userTourKit's core library, React bindings, and hints package are free under the MIT license. The Pro tier costs $99 one-time (not recurring) and adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat capabilities.",
+                  'userTourKit is free in development, evaluation, testing and CI. Every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.00 for five, $299.00 for unlimited. Not recurring.',
               },
               {
                 question: `Can I migrate from ${alt.competitor} to userTourKit?`,
@@ -146,22 +146,22 @@ export default async function AlternativesPage({ params }: PageProps) {
           <p>We scored each alternative across five criteria on a 1-10 scale:</p>
           <ol>
             <li>
-              <strong>Developer experience</strong> — API design, TypeScript support, React
+              <strong>Developer experience</strong>, API design, TypeScript support, React
               integration, documentation quality
             </li>
             <li>
-              <strong>Feature completeness</strong> — Tours, hints, checklists, announcements,
+              <strong>Feature completeness</strong>, Tours, hints, checklists, announcements,
               analytics, scheduling
             </li>
             <li>
-              <strong>Performance</strong> — Bundle size (gzipped), Lighthouse impact, tree-shaking
+              <strong>Performance</strong>, Bundle size (gzipped), Lighthouse impact, tree-shaking
             </li>
             <li>
-              <strong>Licensing and pricing</strong> — True cost over 3 years, license restrictions,
+              <strong>Licensing and pricing</strong>, True cost over 3 years, license restrictions,
               MAU limits
             </li>
             <li>
-              <strong>Maintenance health</strong> — Release frequency, GitHub activity, issue
+              <strong>Maintenance health</strong>, Release frequency, GitHub activity, issue
               response time
             </li>
           </ol>
@@ -173,20 +173,21 @@ export default async function AlternativesPage({ params }: PageProps) {
 
           <h2>The best {alt.competitor} alternatives</h2>
 
-          <h3>1. userTourKit — Best for headless React onboarding (recommended)</h3>
+          <h3>1. userTourKit, Best for headless React onboarding (recommended)</h3>
           <p>
-            <strong>Pricing:</strong> Free + $99 one-time Pro | <strong>License:</strong> MIT
+            <strong>Pricing:</strong> Free in dev, one-time from $9.99 to ship |{' '}
+            <strong>License:</strong> BSL 1.1
           </p>
           <p>
             We built userTourKit, so take this recommendation with appropriate skepticism.
-            userTourKit is an open-source headless React library for product tours, onboarding
-            checklists, hints, announcements, and in-app messaging with a &lt;8KB gzipped core.
+            userTourKit is a source-available headless React library for product tours, onboarding
+            checklists, hints, announcements, and in-app messaging with a tree-shakeable core.
           </p>
 
-          <h3>2. [Alternative 2] — Best for [use case]</h3>
+          <h3>2. [Alternative 2], Best for [use case]</h3>
           <p>[150-200 words per alternative entry]</p>
 
-          <h3>3. [Alternative 3] — Best for [use case]</h3>
+          <h3>3. [Alternative 3], Best for [use case]</h3>
           <p>[150-200 words per alternative entry]</p>
 
           <h2>How to choose the right {alt.competitor} alternative</h2>
@@ -198,7 +199,7 @@ export default async function AlternativesPage({ params }: PageProps) {
             items={[
               {
                 question: `What is the best ${alt.competitor} alternative?`,
-                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, tiny bundle sizes (<8KB gzipped), and a $99 one-time price instead of recurring SaaS fees.`,
+                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, a core that tree-shakes to under 4 KB per hook, and a one-time price from $9.99 instead of recurring SaaS fees.`,
               },
               {
                 question: `Is ${alt.competitor} free?`,
@@ -214,8 +215,8 @@ export default async function AlternativesPage({ params }: PageProps) {
           <h3>What is the best {alt.competitor} alternative?</h3>
           <p>
             userTourKit is the best {alt.competitor} alternative for React developers who want code
-            ownership, tiny bundle sizes (&lt;8KB gzipped), and a $99 one-time price instead of
-            recurring SaaS fees.
+            ownership, a core that tree-shakes to under 4 KB per hook, and a one-time price from
+            $9.99 instead of recurring SaaS fees.
           </p>
 
           <h3>Is {alt.competitor} free?</h3>
@@ -252,7 +253,7 @@ export default async function AlternativesPage({ params }: PageProps) {
         <div className="flex justify-center gap-4">
           <Link
             href="/builder"
-            className="rounded-lg bg-[#0197f6] px-5 py-2.5 text-[13px] font-semibold text-white transition-all hover:brightness-110"
+            className="rounded-lg bg-[var(--tk-cta)] px-5 py-2.5 text-[13px] font-semibold text-[var(--tk-cta-ink)] transition-all hover:brightness-110"
           >
             Get started
           </Link>

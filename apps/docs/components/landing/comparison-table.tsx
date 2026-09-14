@@ -1,10 +1,16 @@
+import { SectionHead } from '@/components/landing/section-head'
 import Link from 'next/link'
 
 type Support = 'yes' | 'no' | 'partial' | string
 
 const rows: { label: string; tourKit: Support; saas: Support; oss: Support }[] = [
   { label: 'Cost', tourKit: 'Free core', saas: '$200–900/mo', oss: 'Free' },
-  { label: 'Bundle impact', tourKit: '< 8KB', saas: 'External script', oss: '30–50KB' },
+  {
+    label: 'Bundle impact',
+    tourKit: 'Under 4 KB per hook',
+    saas: 'External script',
+    oss: '30–50KB',
+  },
   {
     label: 'Customization',
     tourKit: 'Your components',
@@ -23,21 +29,21 @@ function CellValue({ value, isTourKit = false }: { value: Support; isTourKit?: b
   if (value === 'yes') {
     return (
       <span
-        className={`font-mono text-[13px] ${isTourKit ? 'font-semibold text-[#0197f6]' : 'text-emerald-600 dark:text-emerald-400'}`}
+        className={`text-[14px] ${isTourKit ? 'font-semibold text-[var(--color-fd-primary)]' : 'text-[var(--tk-success)]'}`}
       >
         &#10003;
       </span>
     )
   }
   if (value === 'no') {
-    return <span className="font-mono text-[13px] text-fd-muted-foreground/30">&mdash;</span>
+    return <span className="text-[14px] text-fd-muted-foreground/40">&mdash;</span>
   }
   if (value === 'partial') {
-    return <span className="font-mono text-[13px] text-amber-600/70 dark:text-amber-400/70">~</span>
+    return <span className="text-[14px] text-amber-700 dark:text-amber-400">~</span>
   }
   return (
     <span
-      className={`font-mono text-[13px] ${isTourKit ? 'font-semibold text-[#0197f6]' : 'text-fd-muted-foreground'}`}
+      className={`text-[14px] ${isTourKit ? 'font-semibold text-[var(--color-fd-primary)]' : 'text-fd-muted-foreground'}`}
     >
       {value}
     </span>
@@ -46,33 +52,28 @@ function CellValue({ value, isTourKit = false }: { value: Support; isTourKit?: b
 
 export function ComparisonTable() {
   return (
-    <section className="px-6 py-20 sm:px-8 md:py-28 lg:px-12">
+    <section className="px-6 py-20 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
-        <div className="mb-12 max-w-lg">
-          <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            Stop renting your onboarding
-          </h2>
-          <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">
-            SaaS platforms charge hundreds a month for UI you can&apos;t customize. Open-source
-            alternatives ship bloated bundles without TypeScript or accessibility. userTourKit is
-            the third option.
-          </p>
-        </div>
+        <SectionHead title="Stop renting your onboarding">
+          SaaS platforms charge hundreds a month for UI you can&apos;t customize. Open-source
+          alternatives ship bloated bundles without TypeScript or accessibility. userTourKit is the
+          third option.
+        </SectionHead>
 
-        <div className="overflow-x-auto">
+        <div className="mt-12 max-w-[1059px] overflow-x-auto">
           <table className="w-full min-w-[540px] table-fixed border-collapse">
             <thead>
-              <tr className="border-b border-fd-border">
+              <tr className="border-b border-[var(--tk-card-edge)]">
                 <th className="w-[40%] py-3 pr-6 text-left font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-fd-muted-foreground" />
-                <th className="w-[20%] bg-[#0197f6]/5 px-5 py-3 text-center">
-                  <span className="font-mono text-[13px] font-bold text-[#0197f6]">
+                <th className="w-[20%] bg-[var(--color-fd-primary)]/5 px-5 py-3 text-center">
+                  <span className="text-[14px] font-bold text-[var(--color-fd-primary)]">
                     userTourKit
                   </span>
                 </th>
-                <th className="w-[20%] px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">
+                <th className="w-[20%] px-5 py-3 text-center text-[14px] text-fd-muted-foreground">
                   SaaS platforms
                 </th>
-                <th className="w-[20%] px-5 py-3 text-center font-mono text-[12px] font-medium text-fd-muted-foreground">
+                <th className="w-[20%] px-5 py-3 text-center text-[14px] text-fd-muted-foreground">
                   OSS libraries
                 </th>
               </tr>
@@ -81,12 +82,12 @@ export function ComparisonTable() {
               {rows.map((row) => (
                 <tr
                   key={row.label}
-                  className="border-b border-fd-border/50 transition-colors hover:bg-fd-muted/20"
+                  className="border-b border-[var(--tk-card-edge)] transition-colors hover:bg-fd-muted/40"
                 >
                   <td className="py-4 pr-6 text-[14px] font-medium text-fd-foreground">
                     {row.label}
                   </td>
-                  <td className="bg-[#0197f6]/5 px-5 py-4 text-center">
+                  <td className="bg-[var(--color-fd-primary)]/5 px-5 py-4 text-center">
                     <CellValue value={row.tourKit} isTourKit />
                   </td>
                   <td className="px-5 py-4 text-center">
@@ -101,10 +102,10 @@ export function ComparisonTable() {
           </table>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-6 max-w-[1059px]">
           <Link
             href="/compare"
-            className="font-mono text-[13px] font-semibold text-[#0197f6] underline underline-offset-4 transition-colors hover:opacity-80"
+            className="text-[14px] font-semibold text-[var(--color-fd-primary)] underline underline-offset-4 transition-colors hover:opacity-80"
           >
             See full comparison &rarr;
           </Link>

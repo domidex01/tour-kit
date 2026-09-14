@@ -7,7 +7,7 @@ import { ArrowUpRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-const ACCOUNT_TITLE = 'Manage your license — userTourKit'
+const ACCOUNT_TITLE = 'Manage your license, userTourKit'
 const ACCOUNT_DESCRIPTION =
   'Manage your userTourKit Pro license, view activated domains, download invoices, and update your subscription.'
 
@@ -44,7 +44,7 @@ export default function AccountPage() {
             <EmailPortalForm />
 
             <div className="mt-10 flex flex-col items-center gap-2">
-              <p className="text-[13px] text-fd-muted-foreground">Or sign in directly at Polar —</p>
+              <p className="text-[13px] text-fd-muted-foreground">Or sign in directly at Polar,</p>
               <Link
                 href={POLAR_PORTAL_URL}
                 target="_blank"
@@ -75,8 +75,8 @@ export default function AccountPage() {
           <div className="mx-auto mt-16 max-w-[720px] rounded-lg border border-fd-border bg-fd-card px-6 py-5 text-[14px] leading-[1.6] text-fd-muted-foreground">
             <p className="mb-2 font-semibold text-fd-foreground">Can&apos;t find your license?</p>
             <p>
-              Check your inbox for your Polar order confirmation — it contains your license key and
-              a direct link to the portal. If you still need help, email{' '}
+              Check your inbox for your Polar order confirmation, it contains your license key and a
+              direct link to the portal. If you still need help, email{' '}
               <a
                 href="mailto:support@usertourkit.com"
                 className="text-fd-foreground underline decoration-dotted underline-offset-4 hover:decoration-solid"

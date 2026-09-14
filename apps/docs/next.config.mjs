@@ -13,6 +13,15 @@ const config = {
   output: 'standalone',
   reactStrictMode: true,
   trailingSlash: false,
+  // PostHog addresses its endpoints with a trailing slash (/ingest/e/), and
+  // Next's automatic canonicalisation answered those with a 308. Every event
+  // cost two round trips, and the ones posthog-js fires as the page unloads —
+  // which includes the Buy click that navigates away to Polar, the single
+  // event this funnel exists to measure — are the least likely to survive a
+  // redirect. Turning the automatic behaviour off would also drop trailing
+  // slash canonicalisation for the ~604 content pages, so the redirect below
+  // puts it back for everything except /ingest.
+  skipTrailingSlashRedirect: true,
   poweredByHeader: false,
   transpilePackages: ['@tour-kit/core', '@tour-kit/react', '@tour-kit/hints'],
   images: {
@@ -28,10 +37,28 @@ const config = {
         source: '/blog/:slug.mdx',
         destination: '/llms.mdx/blog/:slug',
       },
+      // PostHog, reverse-proxied through our own origin so that ad-blockers do
+      // not eat a developer audience's events. Static assets and ingestion are
+      // different hosts upstream, and the assets rule has to come first or the
+      // catch-all below swallows it.
+      {
+        source: '/ingest/static/:path*',
+        destination: 'https://eu-assets.i.posthog.com/static/:path*',
+      },
+      {
+        source: '/ingest/:path*',
+        destination: 'https://eu.i.posthog.com/:path*',
+      },
     ]
   },
   async redirects() {
     return [
+      {
+        // Restores what skipTrailingSlashRedirect turns off, minus /ingest.
+        source: '/:path((?!ingest/).+)/',
+        destination: '/:path',
+        permanent: true,
+      },
       {
         source: '/:path*',
         has: [{ type: 'host', value: 'www.usertourkit.com' }],
@@ -142,12 +169,12 @@ const config = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://vercel.live https://www.googletagmanager.com https://mc.yandex.ru",
+              "script-src 'self' 'unsafe-inline' https://vercel.live https://www.googletagmanager.com",
               "style-src 'self'",
               "style-src-attr 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://github.com https://avatars.githubusercontent.com https://usertourkit.com https://www.google-analytics.com https://www.googletagmanager.com https://*.google.com https://mc.yandex.ru",
+              "img-src 'self' data: blob: https://github.com https://avatars.githubusercontent.com https://usertourkit.com https://www.google-analytics.com https://www.googletagmanager.com https://*.google.com",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.polar.sh https://vercel.live https://vitals.vercel-analytics.com https://www.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://www.google.com https://*.google.com https://mc.yandex.ru",
+              "connect-src 'self' https://api.polar.sh https://vercel.live https://vitals.vercel-analytics.com https://www.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://www.google.com https://*.google.com",
               "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.loom.com https://fast.wistia.net",
               "base-uri 'self'",
               "form-action 'self' https://buy.polar.sh",

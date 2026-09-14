@@ -30,6 +30,81 @@ const EPHEMERAL_HOST_PATTERNS: RegExp[] = [
 // Bare IPv4 / IPv6 hosts are never a licensed production domain.
 const IP_HOST = /^(?:\d{1,3}\.){3}\d{1,3}$|^\[?[0-9a-f]*:[0-9a-f:]+\]?$/i
 
+/**
+ * Multi-label public suffixes, for `toRegistrableDomain`.
+ *
+ * ponytail: a curated subset of the Public Suffix List, not the list itself.
+ * Ceiling — a host on an uncovered multi-label suffix normalises one label too
+ * short, so one key covers more than it should. Grow this table before reaching
+ * for `tldts`, which would blow the 8 KB budget for this package. The exposure
+ * still needs the key itself, so it is key-sharing amplification rather than an
+ * open door.
+ */
+const MULTI_LABEL_SUFFIXES: ReadonlySet<string> = new Set([
+  // ccTLD second levels
+  'co.uk',
+  'org.uk',
+  'me.uk',
+  'ac.uk',
+  'gov.uk',
+  'com.au',
+  'net.au',
+  'org.au',
+  'co.nz',
+  'co.za',
+  'co.in',
+  'co.jp',
+  'or.jp',
+  'ne.jp',
+  'co.kr',
+  'com.cn',
+  'com.hk',
+  'com.sg',
+  'com.tr',
+  'com.br',
+  'com.mx',
+  'com.ar',
+  'com.pl',
+  'com.ua',
+  // hosting suffixes where each subdomain is a different customer
+  'vercel.app',
+  'netlify.app',
+  'pages.dev',
+  'workers.dev',
+  'github.io',
+  'herokuapp.com',
+  'fly.dev',
+  'onrender.com',
+  'railway.app',
+  'web.app',
+  'firebaseapp.com',
+  'azurewebsites.net',
+  'cloudfront.net',
+])
+
+/**
+ * The domain a customer would call "their project". `app.foo.com` and
+ * `www.foo.com` both normalise to `foo.com`, so they cost one activation slot
+ * instead of two — which is what `/pricing` sells.
+ *
+ * Last two labels by default, which is right for every single-label TLD. The
+ * table above bumps to three where two labels would name a public suffix rather
+ * than a customer: without it `foo.co.uk` collapses to `co.uk` and one Starter
+ * key covers every site on the registry.
+ *
+ * Never throws, never returns `''`, and is idempotent — `f(f(x)) === f(x)` —
+ * because it is applied to the stored activation label as well as to the live
+ * hostname, and those two are normalised at different times.
+ */
+export function toRegistrableDomain(hostname: string): string {
+  const host = hostname.trim().toLowerCase().replace(/\.$/, '')
+  if (host.length === 0 || IP_HOST.test(host)) return host || hostname
+  const labels = host.split('.')
+  if (labels.length <= 2) return host
+  const candidate = labels.slice(-2).join('.')
+  return MULTI_LABEL_SUFFIXES.has(candidate) ? labels.slice(-3).join('.') : candidate
+}
+
 export function getCurrentDomain(): string | null {
   if (typeof window === 'undefined') return null
   return window.location.hostname
@@ -63,7 +138,9 @@ export function validateDomainAtRender(activationLabel: string): boolean {
   if (!currentDomain) return true // SSR — cannot check, assume ok
   if (isDevEnvironment()) return true // dev — always pass
 
-  if (currentDomain !== activationLabel) {
+  // Normalise both sides: the stored label may predate this normalisation, and
+  // `app.foo.com` must validate against a key activated on `foo.com`.
+  if (toRegistrableDomain(currentDomain) !== toRegistrableDomain(activationLabel)) {
     console.warn(
       `[tour-kit/license] Domain mismatch: license activated for "${activationLabel}" but running on "${currentDomain}". Components will render with a watermark. Activate this domain in your Polar dashboard or contact support.`
     )

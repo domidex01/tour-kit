@@ -1,16 +1,25 @@
 import type { ReactNode } from 'react'
 
+/**
+ * One ramp, resolved per theme in globals.css.
+ *
+ * These used to be the literal dark-terminal hexes, which was correct while
+ * every code panel on the landing page was a dark window floating on the page.
+ * The Figma frames draw those panels on the page ground instead — slate-50 in
+ * light mode — where the old `plain` (#abb2bf) lands at 1.4:1. Tokens let the
+ * ramp flip with the theme; the dark values below are unchanged.
+ */
 const colors = {
-  keyword: '#c4a7e7',
-  string: '#a8cc8c',
-  comment: '#5c6370',
-  component: '#89b4fa',
-  tag: '#7fb4ca',
-  attr: '#cba6f7',
-  func: '#e2cca9',
-  number: '#f5a97f',
-  bracket: '#5a5a6e',
-  plain: '#abb2bf',
+  keyword: 'var(--tk-code-keyword)',
+  string: 'var(--tk-code-string)',
+  comment: 'var(--tk-code-comment)',
+  component: 'var(--tk-code-component)',
+  tag: 'var(--tk-code-tag)',
+  attr: 'var(--tk-code-attr)',
+  func: 'var(--tk-code-func)',
+  number: 'var(--tk-code-number)',
+  bracket: 'var(--tk-code-bracket)',
+  plain: 'var(--tk-code-plain)',
 }
 
 type Token = { text: string; color: string }

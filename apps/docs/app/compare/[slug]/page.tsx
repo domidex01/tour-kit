@@ -124,17 +124,17 @@ export default async function ComparisonPage({ params }: PageProps) {
             items={[
               {
                 question: `What is the difference between userTourKit and ${comparison.competitor}?`,
-                answer: `userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling under an MIT license. ${comparison.competitor} is a monolithic tour component with inline styles.`,
+                answer: `userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling under one source-available licence. ${comparison.competitor} is a monolithic tour component with inline styles.`,
               },
               {
                 question: 'Is userTourKit free to use?',
                 answer:
-                  "userTourKit's core library, React bindings, and hints package are free under the MIT license. The Pro tier costs $99 one-time (not recurring) and adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat capabilities.",
+                  'userTourKit is free in development, evaluation, testing and CI. Every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.00 for five, $299.00 for unlimited. Not recurring.',
               },
               {
                 question: "What is userTourKit's bundle size?",
                 answer:
-                  "userTourKit's core package is under 8KB gzipped, the React package is under 12KB gzipped, and the hints package is under 5KB gzipped. This makes it one of the smallest product tour libraries available.",
+                  'userTourKit is tree-shakeable ESM: importing a single hook ships under 4 KB of core. Whole-package figures overstate the real cost, core v2.1.0 measures 29.6 KB gzipped with its dependencies, because a package of independent primitives measures its entire surface rather than the subset you import. See /benchmarks/bundle-size for the measured table.',
               },
               {
                 question: 'Does userTourKit work with Next.js and React 19?',
@@ -155,7 +155,7 @@ export default async function ComparisonPage({ params }: PageProps) {
           <h2>The bottom line</h2>
           <p>
             <strong>userTourKit is a headless React library</strong> offering tours, hints,
-            checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle.{' '}
+            checklists, announcements, analytics, and scheduling in a tree-shakeable core.{' '}
             <strong>{comparison.competitor}</strong> is [category description] focused on [primary
             capability]. userTourKit suits React teams wanting code ownership and tiny bundles;{' '}
             {comparison.competitor} is better when you need [honest competitor advantage].
@@ -163,13 +163,14 @@ export default async function ComparisonPage({ params }: PageProps) {
 
           <h2>What is userTourKit?</h2>
           <p>
-            userTourKit is an open-source headless React library for building product tours,
+            userTourKit is a source-available headless React library for building product tours,
             onboarding checklists, hints, announcements, and in-app messaging. Its
-            framework-agnostic core weighs under 8KB gzipped, ships with WCAG 2.1 AA accessibility
-            and Lighthouse 100 scores by default, and integrates natively with shadcn/ui, Radix UI,
-            and Base UI through its UnifiedSlot pattern. The MIT-licensed free tier includes tours,
-            React bindings, and hints. The $99 one-time Pro tier adds adoption tracking, analytics,
-            announcements, checklists, media, scheduling, and AI chat.
+            framework-agnostic core tree-shakes to the hooks you import, under 4 KB for a single
+            one, and ships with WCAG 2.1 AA accessibility and Lighthouse 100 scores by default, and
+            integrates natively with shadcn/ui, Radix UI, and Base UI through its UnifiedSlot
+            pattern. Free in development, it includes tours, React bindings, and hints. A one-time
+            licence from $9.99 covers production use, announcements, checklists, media, scheduling,
+            and AI chat.
           </p>
 
           <h2>What is {comparison.competitor}?</h2>
@@ -227,27 +228,27 @@ export default async function ComparisonPage({ params }: PageProps) {
               </tr>
               <tr>
                 <td>Hints/hotspots</td>
-                <td>Built-in (&lt;5KB)</td>
+                <td>Built-in (&lt;6.5 KB)</td>
                 <td>[Status]</td>
               </tr>
               <tr>
                 <td>Onboarding checklists</td>
-                <td>Pro ($99 one-time)</td>
+                <td>One-time, from $9.99</td>
                 <td>[Status]</td>
               </tr>
               <tr>
                 <td>Core bundle (gzipped)</td>
-                <td>&lt;8KB</td>
+                <td>&lt;4 KB tree-shaken (29.6 KB whole pkg)</td>
                 <td>[Size]</td>
               </tr>
               <tr>
                 <td>License</td>
-                <td>MIT (free tier)</td>
+                <td>BSL 1.1</td>
                 <td>[License]</td>
               </tr>
               <tr>
                 <td>Pricing</td>
-                <td>Free + $99 one-time Pro</td>
+                <td>Free in dev, from $9.99 to ship</td>
                 <td>[Pricing]</td>
               </tr>
             </tbody>
@@ -276,12 +277,12 @@ export default async function ComparisonPage({ params }: PageProps) {
             items={[
               {
                 question: `What is the difference between userTourKit and ${comparison.competitor}?`,
-                answer: `userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling under an MIT license. ${comparison.competitor} [brief differentiator].`,
+                answer: `userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling under one source-available licence. ${comparison.competitor} [brief differentiator].`,
               },
               {
                 question: 'Is userTourKit free to use?',
                 answer:
-                  "userTourKit's core library, React bindings, and hints package are free under the MIT license. The Pro tier costs $99 one-time (not recurring) and adds adoption tracking, analytics, announcements, checklists, media, scheduling, and AI chat capabilities.",
+                  'userTourKit is free in development, evaluation, testing and CI. Every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.00 for five, $299.00 for unlimited. Not recurring.',
               },
             ]}
           />
@@ -292,7 +293,7 @@ export default async function ComparisonPage({ params }: PageProps) {
           <h3>Is userTourKit free to use?</h3>
           <p>
             userTourKit&apos;s core library, React bindings, and hints package are free under the
-            MIT license. The Pro tier costs $99 one-time and adds adoption tracking, analytics,
+            BSL 1.1. A one-time licence from $9.99 covers production use, and adds no feature
             announcements, checklists, media, scheduling, and AI chat.
           </p>
 
@@ -317,7 +318,7 @@ export default async function ComparisonPage({ params }: PageProps) {
         <div className="flex justify-center gap-4">
           <Link
             href="/builder"
-            className="rounded-lg bg-[#0197f6] px-5 py-2.5 text-[13px] font-semibold text-white transition-all hover:brightness-110"
+            className="rounded-lg bg-[var(--tk-cta)] px-5 py-2.5 text-[13px] font-semibold text-[var(--tk-cta-ink)] transition-all hover:brightness-110"
           >
             Get started
           </Link>

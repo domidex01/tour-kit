@@ -21,8 +21,6 @@ export type StylePreset = {
   id: string
   /** Human-readable theme name, used for the a11y label + swatch tooltip. */
   label: string
-  /** Swatch / accent color (matches `--tk-primary` for this theme). */
-  accent: string
 }
 
 /**
@@ -32,12 +30,12 @@ export type StylePreset = {
  * different product. That's the pitch: the library adapts to *any* style.
  */
 export const STYLE_PRESETS: readonly StylePreset[] = [
-  { id: 'ocean', label: 'Ocean', accent: '#0197f6' },
-  { id: 'iris', label: 'Iris', accent: '#6366f1' },
-  { id: 'forest', label: 'Forest', accent: '#10b981' },
-  { id: 'crimson', label: 'Crimson', accent: '#ef4444' },
-  { id: 'ember', label: 'Ember', accent: '#f59e0b' },
-  { id: 'graphite', label: 'Graphite', accent: '#64748b' },
+  { id: 'ocean', label: 'Ocean' },
+  { id: 'iris', label: 'Iris' },
+  { id: 'forest', label: 'Forest' },
+  { id: 'crimson', label: 'Crimson' },
+  { id: 'ember', label: 'Ember' },
+  { id: 'graphite', label: 'Graphite' },
 ] as const
 
 /** Default preset id — the brand "Ocean" blue. */
@@ -77,10 +75,16 @@ export function StyleSwitcher({
             aria-label={`${preset.label} theme`}
             title={preset.label}
             onClick={() => onChange(preset.id)}
+            // `data-tk-theme` on the swatch itself, so it paints from the very
+            // --tk-primary the card will use — in whichever mode is active. The
+            // preset used to carry a hand-copied `accent` hex alongside the CSS,
+            // and the two drifted: ocean's dot rendered indigo while the card it
+            // selected painted cyan. There is only one value now.
+            data-tk-theme={preset.id}
             className={`relative h-5 w-5 rounded-full outline-none transition-transform duration-200 hover:scale-110 focus-visible:ring-2 focus-visible:ring-fd-ring focus-visible:ring-offset-2 focus-visible:ring-offset-fd-background ${
               isActive ? 'scale-110' : ''
             }`}
-            style={{ backgroundColor: preset.accent }}
+            style={{ backgroundColor: 'var(--tk-primary)' }}
           >
             {/* Active ring — drawn in the preset's own color */}
             <span
@@ -88,7 +92,7 @@ export function StyleSwitcher({
               className={`absolute -inset-1 rounded-full border-2 transition-opacity duration-200 ${
                 isActive ? 'opacity-100' : 'opacity-0'
               }`}
-              style={{ borderColor: preset.accent }}
+              style={{ borderColor: 'var(--tk-primary)' }}
             />
           </button>
         )

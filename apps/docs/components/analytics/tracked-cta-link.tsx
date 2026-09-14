@@ -1,7 +1,7 @@
 'use client'
 
 import type { CapabilityCtaPlacement } from '@/components/capability/types'
-import { sendGAEvent } from '@next/third-parties/google'
+import { trackEvent } from '@/lib/analytics'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
@@ -37,7 +37,7 @@ export function TrackedCtaLink({ href, placement, className, children }: Tracked
       href={href}
       className={className}
       onClick={() => {
-        sendGAEvent('event', 'cta_clicked', {
+        trackEvent('cta_clicked', {
           placement,
           destination: href,
         })

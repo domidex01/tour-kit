@@ -12,7 +12,7 @@ import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-const COMPARE_TITLE = 'Compare userTourKit — Side-by-Side Comparisons'
+const COMPARE_TITLE = 'Compare userTourKit, Side-by-Side Comparisons'
 const COMPARE_DESC =
   'Compare userTourKit with Shepherd.js, React Joyride, Driver.js, Intro.js, Appcues, Pendo, WalkMe, and more. Side-by-side feature, pricing, and performance comparisons.'
 const COMPARE_OG_IMAGE = `/api/og?title=${encodeURIComponent('Compare')}&category=COMPARE`
@@ -21,12 +21,12 @@ const COMPARE_FAQS = [
   {
     question: 'How does userTourKit compare to React Joyride and Shepherd.js?',
     answer:
-      'userTourKit is headless-first and ships under 8 KB for the core. React Joyride is the most established React-specific library but is heavier and uses its own UI runtime. Shepherd.js is framework-agnostic with strong popper-based positioning but no React-native primitives. See the head-to-head comparison pages for feature parity, bundle weight, and migration paths.',
+      'userTourKit is headless-first and tree-shakeable, importing one hook ships under 4 KB of core. React Joyride is the most established React-specific library; Shepherd.js is framework-agnostic with strong popper-based positioning but no React-native primitives. See the head-to-head comparison pages for feature parity, the measured bundle table at /benchmarks/bundle-size, and migration paths.',
   },
   {
     question: 'How does userTourKit compare to SaaS platforms like Appcues, Pendo, and WalkMe?',
     answer:
-      'SaaS platforms ship a no-code builder, hosted analytics, and an account-level dashboard for non-engineers — at a monthly per-MAU price that typically lands between $300 and $2,000+ for small teams. userTourKit is a code-first React library: lower running cost (free MIT core or $99 one-time Pro), full control over rendering and data, but no no-code builder. The comparison pages map use cases to the right tool.',
+      'SaaS platforms ship a no-code builder, hosted analytics, and an account-level dashboard for non-engineers, at a monthly per-MAU price that typically lands between $300 and $2,000+ for small teams. userTourKit is a code-first React library: lower running cost (free in development, a one-time licence from $9.99 to ship), full control over rendering and data, but no no-code builder. The comparison pages map use cases to the right tool.',
   },
   {
     question: 'What methodology do these comparisons use?',
@@ -108,10 +108,10 @@ export default function CompareHub() {
             Honest, data-driven comparisons between userTourKit and every major product tour library
             and onboarding platform. Each page covers feature parity, gzipped bundle weight,
             accessibility (WCAG 2.1 focus management, keyboard nav, screen-reader support), license
-            terms, framework fit, and the pricing model — so you can make the call that fits your
+            terms, framework fit, and the pricing model, so you can make the call that fits your
             stack and your team. Where it matters, we also walk through the migration path: API
             mappings, behavioral differences, and the gotchas that bite once you start replacing
-            code in production. No marketing language — just the trade-offs that actually inform a
+            code in production. No marketing language, just the trade-offs that actually inform a
             tooling choice.
           </p>
           <p className="mt-3 text-[14px] text-fd-muted-foreground">

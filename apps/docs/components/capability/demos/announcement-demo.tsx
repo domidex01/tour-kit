@@ -24,7 +24,7 @@ const DEMO_ANNOUNCEMENTS: AnnouncementConfig[] = [
     priority: 'high',
     title: 'Dark mode is here',
     description:
-      'This modal is the live @tour-kit/announcements component — focus-trapped, Esc to close, styled with this site’s own design tokens. Attach media, actions, scheduling, and audience rules in config.',
+      'This modal is the live @tour-kit/announcements component, focus-trapped, Esc to close, styled with this site’s own design tokens. Attach media, actions, scheduling, and audience rules in config.',
     frequency: 'always',
     autoShow: false,
     modalOptions: { size: 'md', closeOnEscape: true, showCloseButton: true },
@@ -54,13 +54,13 @@ function DemoTriggers() {
   return (
     <div className="mx-auto flex max-w-md flex-col items-center gap-6 text-center">
       <p className="text-[14px] text-fd-muted-foreground">
-        Press a button — what opens is the real component, not a recording.
+        Press a button, what opens is the real component, not a recording.
       </p>
       <div className="flex flex-wrap items-center justify-center gap-3">
         <button
           type="button"
           onClick={() => modal.show()}
-          className="inline-flex items-center gap-2 rounded-lg bg-[#0197f6] px-5 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-[#0197f6]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+          className="inline-flex items-center gap-2 rounded-lg bg-[var(--tk-cta)] px-5 py-2.5 text-[13px] font-semibold text-[var(--tk-cta-ink)] shadow-lg shadow-[color:var(--color-fd-primary)]/20 transition-all hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
         >
           <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
           Show modal announcement
@@ -68,7 +68,7 @@ function DemoTriggers() {
         <button
           type="button"
           onClick={() => toast.show()}
-          className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background px-5 py-2.5 text-[13px] font-semibold text-fd-foreground transition-all hover:-translate-y-0.5 hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+          className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background px-5 py-2.5 text-[13px] font-semibold text-fd-foreground transition-all hover:-translate-y-0.5 hover:bg-fd-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
         >
           <Bell className="h-3.5 w-3.5" aria-hidden="true" />
           Show toast

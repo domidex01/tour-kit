@@ -1,6 +1,7 @@
 'use client'
 
 import type { CapabilityFaqItem } from '@/components/capability/types'
+import { SectionHead } from '@/components/landing/section-head'
 import { useState } from 'react'
 
 interface CapabilityFaqProps {
@@ -21,16 +22,14 @@ export function CapabilityFaq({ idPrefix, heading, subtext, items }: CapabilityF
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (
-    <section className="px-6 py-20 sm:px-8 md:py-28 lg:px-12">
+    <section className="px-6 py-36 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
-        <div className="mx-auto mb-12 max-w-lg text-center">
-          <h2 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            {heading}
-          </h2>
-          <p className="text-[16px] leading-[1.6] text-fd-muted-foreground">{subtext}</p>
-        </div>
+        <SectionHead align="center" title={heading}>
+          {subtext}
+        </SectionHead>
 
-        <div className="mx-auto max-w-3xl divide-y divide-fd-border overflow-hidden rounded-xl border border-fd-border bg-fd-card">
+        {/* 768px in the frames (FaqAccordion 3880:1886), not `max-w-3xl`. */}
+        <div className="mx-auto mt-12 max-w-[768px] divide-y divide-[var(--tk-card-edge)] overflow-hidden rounded-xl border border-[var(--tk-card-edge)] bg-fd-card">
           {items.map((item, i) => {
             const isOpen = openIndex === i
             const panelId = `${idPrefix}-faq-panel-${i}`
@@ -43,7 +42,7 @@ export function CapabilityFaq({ idPrefix, heading, subtext, items }: CapabilityF
                   aria-expanded={isOpen}
                   aria-controls={panelId}
                   onClick={() => setOpenIndex(isOpen ? null : i)}
-                  className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-4 text-left text-[15px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--tk-primary)]"
+                  className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-4 text-left text-[15px] font-semibold text-fd-foreground transition-colors hover:bg-fd-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
                 >
                   {item.question}
                   <svg

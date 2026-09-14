@@ -26,7 +26,7 @@ const DEMO_SURVEY: SurveyConfig = {
   id: 'capability-demo-nps',
   type: 'nps',
   title: 'Quick question',
-  description: 'Two questions, in context — the live component.',
+  description: 'Two questions, in context, the live component.',
   displayMode: 'inline',
   questions: [
     {
@@ -45,7 +45,7 @@ const DEMO_SURVEY: SurveyConfig = {
       id: 'nps-reason',
       type: 'textarea',
       text: 'What is the main reason for your score?',
-      placeholder: 'Optional — tell us more…',
+      placeholder: 'Optional, tell us more…',
     },
   ],
 }
@@ -151,7 +151,7 @@ function DemoSurveyCard() {
               type="button"
               onClick={isLastQuestion ? handleComplete : nextQuestion}
               disabled={currentQuestion.required && !hasAnswer}
-              className="rounded-lg bg-[#0197f6] px-4 py-2 text-[13px] font-semibold text-white shadow-sm transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+              className="rounded-lg bg-[var(--tk-cta)] px-4 py-2 text-[13px] font-semibold text-[var(--tk-cta-ink)] shadow-sm transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
             >
               {isLastQuestion ? 'Submit' : 'Next'}
             </button>
@@ -162,11 +162,11 @@ function DemoSurveyCard() {
       {state.isCompleted ? (
         <div className="space-y-3" aria-live="polite">
           <p className="text-[14px] font-semibold text-emerald-600 dark:text-emerald-400">
-            Thanks — response captured.
+            Thanks, response captured.
           </p>
           {result ? (
             <p className="text-[13px] leading-relaxed text-fd-muted-foreground">
-              That score makes you <strong>{npsBucket(result)}</strong> — classified live by{' '}
+              That score makes you <strong>{npsBucket(result)}</strong>, classified live by{' '}
               <code className="rounded bg-fd-muted px-1.5 py-0.5 font-mono text-[11.5px]">
                 calculateNPS()
               </code>
@@ -176,7 +176,7 @@ function DemoSurveyCard() {
           <button
             type="button"
             onClick={handleReset}
-            className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-background px-2.5 py-1.5 font-mono text-[11px] font-semibold text-fd-muted-foreground transition-colors hover:bg-fd-muted hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0197f6]"
+            className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-background px-2.5 py-1.5 font-mono text-[11px] font-semibold text-fd-muted-foreground transition-colors hover:bg-fd-muted hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
           >
             <RotateCcw className="h-3 w-3" aria-hidden="true" />
             Retake demo

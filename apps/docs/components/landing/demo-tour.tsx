@@ -22,6 +22,7 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { SectionHead } from './section-head'
 import { DEFAULT_PRESET_ID, StyleSwitcher } from './style-switcher'
 
 /* ═══════════════════════════════════════════
@@ -169,7 +170,7 @@ function TourDemo() {
                   <div
                     key={s.target}
                     className={`h-1.5 rounded-full transition-all ${
-                      i === step ? 'w-4 bg-[var(--tk-primary)]' : 'w-1.5 bg-fd-muted'
+                      i === step ? 'w-4 bg-[var(--tk-primary)]' : 'w-1.5 bg-[var(--tk-card-dot)]'
                     }`}
                   />
                 ))}
@@ -363,7 +364,7 @@ function AnnouncementsDemo() {
         {variant === 'banner' && (
           <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between bg-[var(--tk-primary)] px-4 py-2.5">
             <p className="text-[12px] font-medium text-white">
-              Version 2.0 is here — check out the new features!
+              Version 2.0 is here, check out the new features!
             </p>
             <button
               type="button"
@@ -1197,7 +1198,7 @@ function SurveysDemo() {
 const aiPrompts = [
   {
     q: 'How do I trigger a tour after a user logs in?',
-    a: "Call startTour('onboarding') inside a useEffect that depends on your auth state. The tour engine waits for the target element to mount — no need to manually orchestrate timing.",
+    a: "Call startTour('onboarding') inside a useEffect that depends on your auth state. The tour engine waits for the target element to mount, no need to manually orchestrate timing.",
     sources: ['docs/core/useTour', 'guides/auth-integration'],
   },
   {
@@ -1207,7 +1208,7 @@ const aiPrompts = [
   },
   {
     q: 'Can I use this with React Server Components?',
-    a: 'Yes. The tour components are client-side ("use client"), but they hydrate safely inside Server Components. Put <Tour /> in any client boundary — no SSR work needed.',
+    a: 'Yes. The tour components are client-side ("use client"), but they hydrate safely inside Server Components. Put <Tour /> in any client boundary, no SSR work needed.',
     sources: ['guides/nextjs-app-router', 'docs/react/ssr'],
   },
 ]
@@ -1435,55 +1436,75 @@ export function DemoTour() {
   const ActiveComponent = active.component
 
   return (
-    <section className="px-6 py-24 sm:px-8 md:py-32 lg:px-12">
+    <section className="px-6 pt-32 pb-32 sm:px-8 lg:px-12 lg:pb-[229px]">
+      {/* 1152px here, not the 1120 the rest of the page uses (Figma
+          3792:1684). This used to be justified by the tab row needing the
+          extra width to hold the packages on two lines; the row carries its
+          own 896px measure now, so what is left on 1152 is the demo panel
+          below. */}
       <div className="mx-auto max-w-6xl">
-        <div className="mb-12 text-center">
-          <h2 className="mb-5 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-            Try before you install
-          </h2>
-          <p className="mx-auto max-w-lg text-[16px] text-fd-muted-foreground">
-            Interactive demos for every package. No signup, no sandbox — just click through and see
-            what ships.
-          </p>
-        </div>
+        <SectionHead
+          align="center"
+          className="mb-12"
+          measure="max-w-[512px]"
+          title="Try before you install"
+        >
+          Interactive demos for every package. No signup, no sandbox, just click through and see
+          what ships.
+        </SectionHead>
 
-        {/* Tab bar */}
-        <div className="mb-6 flex flex-wrap justify-center gap-1.5">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id
-            const isPro = tab.tier === 'pro'
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                aria-label={`${tab.label}${isPro ? ' (Pro)' : ''}`}
-                aria-pressed={isActive}
-                className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
-                  isActive
-                    ? 'bg-[#0197f6] text-white shadow-sm'
-                    : 'text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground'
-                }`}
-              >
-                <tab.icon
-                  aria-hidden="true"
-                  className={`h-3.5 w-3.5 ${isActive ? '' : tab.color}`}
-                />
-                <span className="hidden sm:inline">{tab.label}</span>
-                {isPro && (
-                  <span
-                    className={`inline-flex items-center gap-0.5 rounded-[4px] px-1 py-px text-[9px] font-bold uppercase tracking-wide ${
-                      isActive ? 'bg-white/25 text-white' : 'bg-violet-500/10 text-violet-500'
+        {/* Tab bar — two rows of five, on a narrower measure than the demo
+            panel below it.
+
+            The rows are SPLIT rather than left to `flex-wrap`, because the
+            window where wrapping lands on 5+5 by itself is 28px wide and would
+            not survive a font swap: measured at 1152, the ten tabs run 84 / 83
+            / 201 / 163 / 136 / 157 / 156 / 167 / 147 / 174 with a 6px gap, so
+            the first five need 690px, the last five 824px, and the sixth tab
+            joins row one at 853px. Free-wrapping at the old full 1152 gave
+            7 + 3. 896 clears the wider row by 72px and still lets either row
+            wrap on its own on a narrow viewport, where the labels are hidden
+            anyway. */}
+        <div className="mx-auto mb-6 flex max-w-[896px] flex-col gap-1.5">
+          {[tabs.slice(0, 5), tabs.slice(5)].map((row) => (
+            <div key={row[0].id} className="flex flex-wrap justify-center gap-1.5">
+              {row.map((tab) => {
+                const isActive = activeTab === tab.id
+                const isPro = tab.tier === 'pro'
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    aria-label={`${tab.label}${isPro ? ' (Pro)' : ''}`}
+                    aria-pressed={isActive}
+                    className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
+                      isActive
+                        ? 'bg-[var(--tk-cta)] text-[var(--tk-cta-ink)] shadow-sm'
+                        : 'text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground'
                     }`}
-                    aria-hidden="true"
                   >
-                    <Sparkles className="h-2 w-2" aria-hidden="true" />
-                    Pro
-                  </span>
-                )}
-              </button>
-            )
-          })}
+                    <tab.icon
+                      aria-hidden="true"
+                      className={`h-3.5 w-3.5 ${isActive ? '' : tab.color}`}
+                    />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    {isPro && (
+                      <span
+                        className={`inline-flex items-center gap-0.5 rounded-[4px] px-1 py-px text-[9px] font-bold uppercase tracking-wide ${
+                          isActive ? 'bg-white/25 text-white' : 'bg-violet-500/10 text-violet-500'
+                        }`}
+                        aria-hidden="true"
+                      >
+                        <Sparkles className="h-2 w-2" aria-hidden="true" />
+                        Pro
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          ))}
         </div>
 
         {/* Package name label */}
@@ -1495,12 +1516,12 @@ export function DemoTour() {
           {active.tier === 'pro' ? (
             <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-[11px] font-semibold text-violet-500">
               <Sparkles className="h-3 w-3" aria-hidden="true" />
-              Pro &middot; $99 one-time
+              Pro &middot; from $9.99 one-time
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-500">
               <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-              Free &middot; MIT
+              Free in development
             </span>
           )}
         </div>

@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, scheduling, and more in a &lt;8KB core bundle. The Pro tier is $99 once. React Joyride is the most-downloaded React tour library at ~672K weekly npm installs (as of March 2026), shipping a monolithic inline-styles-only tour component at roughly 30KB gzipped. userTourKit fits teams wanting design system integration and onboarding scope beyond sequential tours. Joyride is better when you need the simplest possible setup at zero cost.
+userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, scheduling, and more in a &lt;8KB core bundle. The Pro tier is $9.99 once. React Joyride is the most-downloaded React tour library at ~672K weekly npm installs (as of March 2026), shipping a monolithic inline-styles-only tour component at roughly 30KB gzipped. userTourKit fits teams wanting design system integration and onboarding scope beyond sequential tours. Joyride is better when you need the simplest possible setup at zero cost.
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade.
 
 ## What is React Joyride?
 
@@ -40,7 +40,7 @@ userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped) provides non-sequentia
 
 React Joyride doesn't include checklists. Teams that need "complete your profile, invite a teammate, create a project" flows typically build them from scratch or bolt on a separate library. The onboarding checklist has no shared state with the tour. No shared analytics pipeline. No shared completion tracking.
 
-userTourKit's `@tour-kit/checklists` package (Pro, $99) provides task dependencies with circular dependency detection. Three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked (dependency-blocked) tasks.
+userTourKit's `@tour-kit/checklists` package (Pro, $9.99) provides task dependencies with circular dependency detection. Three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked (dependency-blocked) tasks.
 
 Components include `Checklist`, `ChecklistTask`, `ChecklistProgress`, `ChecklistLauncher`. Everything shares core state with the tour system.
 
@@ -74,7 +74,7 @@ The `ScheduleGate` component conditionally renders children only when the schedu
 
 React Joyride handles tour rendering and beacon placement — it doesn't track feature adoption. There's no mechanism to define adoption criteria, measure usage over time, or trigger nudges for underused features. Teams typically pair Joyride with Amplitude, Mixpanel, or a custom events layer to close that gap, which means maintaining two systems.
 
-userTourKit's `@tour-kit/adoption` package ($99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` provides admins with a visual overview of adoption metrics across features.
+userTourKit's `@tour-kit/adoption` package ($9.99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` provides admins with a visual overview of adoption metrics across features.
 
 The caveat: userTourKit's adoption tracking is developer-facing. Configuration happens in code, not a drag-and-drop UI. Teams that want a non-technical stakeholder to define adoption criteria will still need developer involvement.
 
@@ -82,7 +82,7 @@ The caveat: userTourKit's adoption tracking is developer-facing. Configuration h
 
 React Joyride accepts React elements as step content, so you can embed videos manually. But there's no dedicated media component, no auto-detection from URLs, no reduced-motion fallbacks, and no built-in support for platforms beyond basic iframe embeds. You'd write the embed logic per platform yourself.
 
-userTourKit's `@tour-kit/media` package ($99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` package ($9.99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
 
 If your tours include video walkthroughs or animated demos, userTourKit handles the embedding plumbing across seven platforms. For a single YouTube embed in one step, a manual iframe is arguably simpler.
 
@@ -118,9 +118,9 @@ Router adapters ship for Next.js App Router (`useNextAppRouter`), Pages Router (
 
 Both libraries use MIT licensing for their core functionality. Joyride is 100% MIT with no paid tier, which is straightforward.
 
-userTourKit's three core packages (core, react, hints) are MIT. The seven Pro packages cost $99 as a one-time purchase. No monthly fees, no MAU limits, no per-seat pricing.
+userTourKit's three core packages (core, react, hints) are MIT. The seven Pro packages cost $9.99 as a one-time purchase. No monthly fees, no MAU limits, no per-seat pricing.
 
-If your project only needs tours and hints, userTourKit costs the same as Joyride: nothing. The $99 matters when you need the extended onboarding features that Joyride doesn't offer at any price.
+If your project only needs tours and hints, userTourKit costs the same as Joyride: nothing. The $9.99 matters when you need the extended onboarding features that Joyride doesn't offer at any price.
 
 ## Side-by-side comparison table
 
@@ -128,7 +128,7 @@ If your project only needs tours and hints, userTourKit costs the same as Joyrid
 |---|---|---|
 | Product tours | ✅ Built-in (core, MIT) | ✅ Built-in (MIT) |
 | Hints/hotspots | ✅ Built-in (&lt;5KB, MIT) | ⚙️ Beacons only (sequential) |
-| Onboarding checklists | ✅ Pro ($99 one-time) | 🚫 Not available |
+| Onboarding checklists | ✅ Pro ($9.99 one-time) | 🚫 Not available |
 | Announcements | ✅ Pro (5 variants) | 🚫 Not available |
 | Analytics | ✅ Pro (5 built-in plugins) | ⚙️ Manual callback forwarding |
 | Scheduling | ✅ Pro (timezone, recurring) | 🚫 Not available |
@@ -142,7 +142,7 @@ If your project only needs tours and hints, userTourKit costs the same as Joyrid
 | React versions | 18, 19 | 16.8–19 |
 | TypeScript | Strict mode, generics | Native (v3), no generics |
 | Router integration | ✅ Next.js, React Router built-in | ⚙️ Manual via callbacks |
-| License | MIT (free) + $99 Pro | MIT (free) |
+| License | MIT (free) + $9.99 Pro | MIT (free) |
 | Maintainer model | Team | Solo (gilbarbara) |
 
 Data verified March 2026. Sources: official documentation, npm, GitHub.
@@ -205,7 +205,7 @@ We built userTourKit, so take everything above with appropriate skepticism. We'v
 
 ### Is userTourKit free?
 
-userTourKit's three core packages (core, react, hints) are MIT-licensed and completely free. The seven Pro packages cost $99 as a one-time purchase covering analytics, checklists, announcements, adoption tracking, media, and scheduling. No subscriptions. No MAU limits.
+userTourKit's three core packages (core, react, hints) are MIT-licensed and completely free. The seven Pro packages cost $9.99 as a one-time purchase covering analytics, checklists, announcements, adoption tracking, media, and scheduling. No subscriptions. No MAU limits.
 
 ### What is the difference between userTourKit and React Joyride?
 
@@ -229,7 +229,7 @@ No. Joyride is exclusively a tour component. Checklists, announcements, analytic
 
 ### Is React Joyride open source?
 
-Fully MIT-licensed, no paid tier. userTourKit's core is also MIT. The extended packages are proprietary at $99 one-time.
+Fully MIT-licensed, no paid tier. userTourKit's core is also MIT. The extended packages are proprietary at $9.99 one-time.
 
 ### Which is better for enterprise: userTourKit or React Joyride?
 

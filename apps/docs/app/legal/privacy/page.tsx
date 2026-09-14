@@ -1,14 +1,19 @@
+import { POSTHOG_ENABLED } from '@/lib/analytics'
 import { baseOptions } from '@/lib/layout.shared'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
 const TITLE = 'Privacy Policy'
+
+// Bumped by hand when the policy actually changes. Deriving this from
+// `new Date()` made every build claim the policy had just been reviewed.
+const LAST_UPDATED = '2026-09-13'
 const DESCRIPTION =
-  'How usertourkit.com handles visitor data — analytics, cookies, and third-party services.'
+  'How usertourkit.com handles visitor data, analytics, cookies, and third-party services.'
 
 export const metadata: Metadata = {
-  title: `${TITLE} — userTourKit`,
+  title: `${TITLE}, userTourKit`,
   description: DESCRIPTION,
   alternates: { canonical: '/legal/privacy' },
   openGraph: {
@@ -37,26 +42,33 @@ export default function PrivacyPage() {
           <h1 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
             {TITLE}
           </h1>
-          <p className="text-[15px] text-fd-muted-foreground">
-            Last updated: {new Date().toISOString().split('T')[0]}
-          </p>
+          <p className="text-[15px] text-fd-muted-foreground">Last updated: {LAST_UPDATED}</p>
         </header>
 
         <article className="prose prose-neutral dark:prose-invert max-w-none">
           <h2>Summary</h2>
           <p>
-            This site is the documentation and marketing homepage for the userTourKit open-source
-            library. We collect the minimum data needed to operate the site, bill Pro licenses, and
-            understand which pages are useful.
+            This site is the documentation and marketing homepage for the userTourKit library. We
+            collect the minimum data needed to operate the site, bill Pro licenses, and understand
+            which pages are useful.
           </p>
 
           <h2>What we collect</h2>
           <ul>
             <li>
-              <strong>Aggregate analytics</strong> (Vercel Analytics): page views, referrers,
-              country-level geography, device type. No cross-site tracking, no personal identifiers,
-              no advertising cookies.
+              <strong>Aggregate analytics</strong> (Google Analytics 4): page views, referrers,
+              country-level geography, device type, and which pricing and call-to-action links get
+              clicked. No advertising or remarketing features are enabled, and we do not upload
+              customer data to Google.
             </li>
+            {POSTHOG_ENABLED ? (
+              <li>
+                <strong>Product analytics</strong> (PostHog, EU region): the same page views and
+                link clicks, plus the campaign tags on inbound links so we can tell which referrals
+                lead somewhere. Anonymous visitors get no stored profile, and the data never leaves
+                the EU.
+              </li>
+            ) : null}
             <li>
               <strong>Error telemetry</strong> (server logs): request paths, response codes, and
               error stack traces. Retained for 30 days.
@@ -67,38 +79,57 @@ export default function PrivacyPage() {
                 Polar.sh
               </a>
               ): for Pro license buyers, we receive your email and order ID to issue license keys.
-              Payment card data is handled entirely by Polar and Stripe — we never see it.
+              Payment card data is handled entirely by Polar and Stripe, we never see it.
             </li>
           </ul>
 
           <h2>Cookies</h2>
           <p>
-            We do not set tracking cookies. Vercel may set a functional cookie to preserve your
-            theme preference and a first-party analytics identifier that resets every 24 hours.
+            Google Analytics sets first-party <code>_ga</code> cookies so a returning visitor is not
+            counted twice. They are analytics cookies, not advertising cookies, and they are not
+            shared with ad networks. Your light or dark theme preference is stored in your browser
+            and never leaves your device.
           </p>
+          {POSTHOG_ENABLED ? (
+            <p>
+              PostHog sets no cookies at all. It keeps an anonymous identifier in your browser's
+              local storage so repeat visits are not double-counted, which you can clear at any time
+              from your browser settings.
+            </p>
+          ) : null}
+          <p>We do not run session recording, heatmaps, or any cross-site tracking.</p>
 
           <h2>Third parties</h2>
           <ul>
             <li>
-              <strong>Vercel</strong> — hosting and analytics.{' '}
+              <strong>Google</strong>, analytics only (Google Analytics 4).{' '}
               <a
-                href="https://vercel.com/legal/privacy-policy"
+                href="https://policies.google.com/privacy"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Vercel's privacy policy
+                Google's privacy policy
               </a>
               .
             </li>
+            {POSTHOG_ENABLED ? (
+              <li>
+                <strong>PostHog</strong>, product analytics, hosted in the EU.{' '}
+                <a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer">
+                  PostHog's privacy policy
+                </a>
+                .
+              </li>
+            ) : null}
             <li>
-              <strong>Polar.sh</strong> — payments and license management for Pro purchases.{' '}
+              <strong>Polar.sh</strong>, payments and license management for Pro purchases.{' '}
               <a href="https://polar.sh/legal/privacy" target="_blank" rel="noopener noreferrer">
                 Polar's privacy policy
               </a>
               .
             </li>
             <li>
-              <strong>Cloudflare</strong> — CDN and bot-management in front of the site.{' '}
+              <strong>Cloudflare</strong>, CDN and bot-management in front of the site.{' '}
               <a
                 href="https://www.cloudflare.com/privacypolicy/"
                 target="_blank"
@@ -120,7 +151,7 @@ export default function PrivacyPage() {
             >
               GitHub Issues
             </a>{' '}
-            (or in private if you prefer — include your order ID). We will delete personal data
+            (or in private if you prefer, include your order ID). We will delete personal data
             within 30 days, except where we are required by Polar/Stripe to retain it for tax
             records.
           </p>

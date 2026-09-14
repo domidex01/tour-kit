@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-04-20T04:51:53.753Z",
+  "measuredAt": "2026-09-13T03:26:44.743Z",
   "methodology": "Gzipped production-build sizes pulled from bundlephobia.com API. Methodology documented at /how-we-test. Re-run `scripts/fetch-bundle-sizes.ts` to refresh.",
   "rows": [
     {
@@ -8,10 +8,10 @@
       "homepage": "https://usertourkit.com/docs/core",
       "isOurs": true,
       "status": "measured",
-      "version": "0.3.0",
-      "minifiedBytes": 17116,
-      "gzipBytes": 5753,
-      "dependencyCount": 1,
+      "version": "2.1.0",
+      "minifiedBytes": 92723,
+      "gzipBytes": 29584,
+      "dependencyCount": 2,
       "sourceUrl": "https://bundlephobia.com/package/%40tour-kit%2Fcore"
     },
     {
@@ -20,10 +20,10 @@
       "homepage": "https://usertourkit.com/docs/react",
       "isOurs": true,
       "status": "measured",
-      "version": "0.4.1",
-      "minifiedBytes": 64225,
-      "gzipBytes": 22533,
-      "dependencyCount": 4,
+      "version": "2.1.0",
+      "minifiedBytes": 133356,
+      "gzipBytes": 44080,
+      "dependencyCount": 5,
       "sourceUrl": "https://bundlephobia.com/package/%40tour-kit%2Freact"
     },
     {
@@ -32,10 +32,10 @@
       "homepage": "https://usertourkit.com/docs/hints",
       "isOurs": true,
       "status": "measured",
-      "version": "0.4.1",
-      "minifiedBytes": 42444,
-      "gzipBytes": 15486,
-      "dependencyCount": 4,
+      "version": "2.1.0",
+      "minifiedBytes": 209506,
+      "gzipBytes": 64642,
+      "dependencyCount": 5,
       "sourceUrl": "https://bundlephobia.com/package/%40tour-kit%2Fhints"
     },
     {
@@ -43,9 +43,9 @@
       "label": "React Joyride",
       "homepage": "https://react-joyride.com/",
       "status": "measured",
-      "version": "3.0.2",
-      "minifiedBytes": 74905,
-      "gzipBytes": 25592,
+      "version": "3.2.0",
+      "minifiedBytes": 75288,
+      "gzipBytes": 25596,
       "dependencyCount": 10,
       "sourceUrl": "https://bundlephobia.com/package/react-joyride"
     },
@@ -54,9 +54,9 @@
       "label": "Shepherd.js",
       "homepage": "https://shepherdjs.dev/",
       "status": "measured",
-      "version": "15.2.2",
-      "minifiedBytes": 40647,
-      "gzipBytes": 14077,
+      "version": "15.3.0",
+      "minifiedBytes": 44738,
+      "gzipBytes": 15293,
       "dependencyCount": 2,
       "sourceUrl": "https://bundlephobia.com/package/shepherd.js"
     },
@@ -65,9 +65,9 @@
       "label": "Driver.js",
       "homepage": "https://driverjs.com/",
       "status": "measured",
-      "version": "1.4.0",
-      "minifiedBytes": 20429,
-      "gzipBytes": 6070,
+      "version": "1.8.0",
+      "minifiedBytes": 24940,
+      "gzipBytes": 7336,
       "dependencyCount": 0,
       "sourceUrl": "https://bundlephobia.com/package/driver.js"
     },
@@ -76,9 +76,9 @@
       "label": "Intro.js",
       "homepage": "https://introjs.com/",
       "status": "measured",
-      "version": "8.3.2",
-      "minifiedBytes": 61836,
-      "gzipBytes": 16920,
+      "version": "8.5.0",
+      "minifiedBytes": 63219,
+      "gzipBytes": 17591,
       "dependencyCount": 0,
       "sourceUrl": "https://bundlephobia.com/package/intro.js"
     },

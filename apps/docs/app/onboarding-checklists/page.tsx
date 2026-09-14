@@ -20,7 +20,7 @@ import dynamic from 'next/dynamic'
 const PAGE_PATH = '/onboarding-checklists'
 const PAGE_TITLE = 'Onboarding Checklists for React | userTourKit'
 const PAGE_DESC =
-  'React onboarding checklist component with task dependencies, progress persistence, and your design system. Runs free in dev — $99 once when you ship.'
+  'React onboarding checklist component with task dependencies, progress persistence, and your design system. Runs free in dev, from $9.99 once when you ship.'
 // File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
 // which blocks Twitter/Facebook crawlers from fetching share images.
 const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
@@ -88,12 +88,12 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'Does progress persist across sessions?',
     answer:
-      'Yes. Enable persistence and state is serialized through a storage adapter — localStorage by default, or swap in cookies or your own API in one line for cross-device, authenticated persistence. A returning user lands exactly where they left off.',
+      'Yes. Enable persistence and state is serialized through a storage adapter, localStorage by default, or swap in cookies or your own API in one line for cross-device, authenticated persistence. A returning user lands exactly where they left off.',
   },
   {
     question: 'Can a task launch a product tour or navigate somewhere?',
     answer:
-      'Each task takes an action — navigate to a URL, start a @tour-kit/react tour, or run a custom callback. Tasks can also auto-complete from events or custom checks (completedWhen), so "Take the tour" ticks itself when the tour finishes.',
+      'Each task takes an action, navigate to a URL, start a @tour-kit/react tour, or run a custom callback. Tasks can also auto-complete from events or custom checks (completedWhen), so "Take the tour" ticks itself when the tour finishes.',
   },
   {
     question: 'Does it match my design system, or do I get an iframe widget?',
@@ -103,7 +103,7 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
   {
     question: 'What happens before I buy a license?',
     answer:
-      'Everything works. @tour-kit/checklists runs unlicensed in development and on localhost with full functionality; production shows a small watermark until you activate a $99 lifetime license. Activation precedes purchase by design — ship the checklist first, pay when it earns its keep.',
+      'Everything works. @tour-kit/checklists runs unlicensed in development and on localhost with full functionality, no feature gates. Production shows a small badge until you activate a one-time licence key, from $9.99 for a single project, which covers every Tour Kit package.',
   },
 ]
 
@@ -132,25 +132,25 @@ export default function OnboardingChecklistsPage() {
           eyebrow="@tour-kit/checklists · Pro"
           heading="Checklists that walk users"
           headingAccent="to activation."
-          subhead="An embeddable onboarding checklist for React — task dependencies, progress persistence, and adoption nudges, rendered with your own design system."
+          subhead="An embeddable onboarding checklist for React, task dependencies, progress persistence, and adoption nudges, rendered with your own design system."
           primaryLabel="Try it free in dev"
           primaryHref="/docs/checklists"
           secondaryLabel="See pricing"
           secondaryHref="/pricing"
-          reassurance="Runs free in dev — pay once ($99) when you ship."
+          reassurance="Runs free in dev, one-time from $9.99 when you ship."
           factsLine="< 10KB gzipped · TypeScript strict · WCAG 2.1 AA · your repo, your code"
         />
 
         <DemoSection
           heading="Tick the boxes. This one's real."
-          subtext="The checklist below is the live @tour-kit/checklists component — complete a task, watch the dependency unlock, and see progress recalculate. No video, no signup wall."
+          subtext="The checklist below is the live @tour-kit/checklists component, complete a task, watch the dependency unlock, and see progress recalculate. No video, no signup wall."
         >
           <ChecklistDemo />
         </DemoSection>
 
         <PainOutcomeStrip
           heading="Activation shouldn't be a maze"
-          subtext="Most onboarding stalls between signup and the aha moment. A checklist gives users a visible path — if it doesn't fight your stack."
+          subtext="Most onboarding stalls between signup and the aha moment. A checklist gives users a visible path, if it doesn't fight your stack."
           items={[
             {
               pain: 'DIY checklist sprawl',
@@ -166,7 +166,7 @@ export default function OnboardingChecklistsPage() {
                 'Pendo-style platforms render their checklist in their styles, behind their script tag, for $300+ a month.',
               outcome: 'Your components, your tokens',
               outcomeDetail:
-                'Styled (shadcn-native) or fully headless — the checklist looks like your product because it is your product.',
+                'Styled (shadcn-native) or fully headless, the checklist looks like your product because it is your product.',
             },
             {
               pain: 'No idea where users stall',
@@ -174,7 +174,7 @@ export default function OnboardingChecklistsPage() {
                 'Without per-task signals you learn about drop-off from churn, weeks too late.',
               outcome: 'Per-task events, your analytics',
               outcomeDetail:
-                'Task completions stream into PostHog, Mixpanel, Amplitude, or GA4 via @tour-kit/analytics — you see the exact task where users stop.',
+                'Task completions stream into PostHog, Mixpanel, Amplitude, or GA4 via @tour-kit/analytics, you see the exact task where users stop.',
             },
           ]}
         />
@@ -236,10 +236,10 @@ export default function OnboardingChecklistsPage() {
         <CtaBand
           placement="checklists_after_features"
           eyebrow="Pro package"
-          heading="Try it free in dev — watermark until you license."
-          subtext="Full functionality in development and on localhost, no key required. One $99 license unlocks production for all Pro packages."
+          heading="Try it free in dev, watermark until you license."
+          subtext="Full functionality in development and on localhost, no key required. One licence from $9.99 unlocks production for every package."
           ctaLabel="Build my checklist"
-          reassurance="No signup, no credit card — install and go."
+          reassurance="No signup, no credit card, install and go."
           primaryHref="/builder"
         />
 
@@ -248,7 +248,7 @@ export default function OnboardingChecklistsPage() {
         <ComparisonTeaser
           heading="Checklists without the platform tax"
           rows={[
-            { label: 'Cost', tourKit: '$99 once', saas: '$200–900/mo', oss: 'DIY time' },
+            { label: 'Cost', tourKit: 'From $9.99 once', saas: '$200–900/mo', oss: 'DIY time' },
             { label: 'Task dependencies', tourKit: 'yes', saas: 'partial', oss: 'no' },
             {
               label: 'Design system fit',
@@ -285,7 +285,7 @@ export default function OnboardingChecklistsPage() {
             {
               label: 'In-app surveys',
               href: '/in-app-surveys',
-              description: 'Ask users how onboarding felt — right when they finish.',
+              description: 'Ask users how onboarding felt, right when they finish.',
             },
           ]}
         />
