@@ -92,7 +92,7 @@ import { Tour, TourStep, TourKitProvider } from '@tour-kit/react'
 | `prefers-reduced-motion` | ✅ | ❌ | ❌ | ❌ | ❌ |
 | RTL support | ✅ | ❌ | ❌ | ❌ | ❌ |
 | Tailwind preset | ✅ | ❌ | ❌ | ❌ | ❌ |
-| License | MIT | MIT | MIT | MIT | MIT |
+| License | BUSL-1.1 (MIT after 4y) | MIT | MIT | MIT | MIT |
 
 ## Tailwind CSS setup
 
@@ -274,6 +274,15 @@ Full documentation: [https://usertourkit.com/docs/react](https://usertourkit.com
 
 See [Troubleshooting](https://usertourkit.com/docs/troubleshooting) for React 19 / Next 16 caveats.
 
-## License
+## Licence
 
-MIT © Tour Kit Team
+[Business Source License 1.1](./LICENSE.md). Development, evaluation, testing,
+CI and any non-production environment are free and need no key. **Production
+use needs a licence key** — a one-time purchase from $9.99 at
+[usertourkit.com/pricing](https://usertourkit.com/pricing). Each version
+converts to MIT on its Change Date, four years after release.
+
+Versions up to and including 2.1.0 were published under MIT and stay MIT — an
+MIT grant cannot be withdrawn. This applies from 3.0.0 onward.
+
+© 2026 domidex01
