@@ -216,7 +216,7 @@ function TourOverlay() {
 
 The approach is straightforward: keep tour state in React state, render tour UI with React components, and let React handle the DOM. No `document.createElement`, no `appendChild`, no manual event listeners. Positioning uses Floating UI with proper cleanup via `autoUpdate`'s return value. Keyboard navigation hooks return cleanup functions. Scroll management restores original values on unmount.
 
-This isn't a technical achievement. It's just the way React components are supposed to work. But when we surveyed the existing tour library ecosystem, none of them followed this pattern consistently. Tour Kit's core ships at under 8KB gzipped precisely because we don't carry the imperative DOM manipulation layer that other libraries need.
+This isn't a technical achievement. It's just the way React components are supposed to work. But when we surveyed the existing tour library ecosystem, none of them followed this pattern consistently. Tour Kit's core ships at under 23KB gzipped precisely because we don't carry the imperative DOM manipulation layer that other libraries need.
 
 One honest caveat: Tour Kit is React 18+ only. We made this tradeoff deliberately. Supporting React 16/17 would require the exact class-based and imperative patterns that break under Strict Mode. If you need React 16 support, that's a legitimate reason to choose a different library.
 

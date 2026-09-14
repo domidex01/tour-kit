@@ -78,7 +78,7 @@ Here's what we couldn't find: the actual script payload size for any major SaaS 
 <tr><th>Tool</th><th>Payload (gzipped)</th><th>Auditable?</th><th>CDN dependency</th></tr>
 </thead>
 <tbody>
-<tr><td>Tour Kit core</td><td>&lt;8 KB</td><td>Yes (npm, bundlephobia)</td><td>No</td></tr>
+<tr><td>Tour Kit core</td><td>&lt;23 KB</td><td>Yes (npm, bundlephobia)</td><td>No</td></tr>
 <tr><td>Driver.js</td><td>~5 KB</td><td>Yes (npm)</td><td>No</td></tr>
 <tr><td>React Joyride</td><td>~25 KB</td><td>Yes (npm)</td><td>No</td></tr>
 <tr><td>Shepherd.js</td><td>~35 KB</td><td>Yes (npm)</td><td>No</td></tr>
@@ -154,7 +154,7 @@ function App() {
 const TourOverlay = React.lazy(() => import('./TourOverlay'));
 ```
 
-Tour Kit's core ships at under 8KB gzipped with zero runtime dependencies. It runs in your bundle, on your schedule. No CDN request, no remote config fetch, no DOM polling loop. The performance cost is the same as any other React component in your app, which means it's covered by the same code-splitting and lazy-loading strategies you already use.
+Tour Kit's core ships at under 23KB gzipped with zero runtime dependencies. It runs in your bundle, on your schedule. No CDN request, no remote config fetch, no DOM polling loop. The performance cost is the same as any other React component in your app, which means it's covered by the same code-splitting and lazy-loading strategies you already use.
 
 ### What you trade for performance
 
@@ -199,7 +199,7 @@ Here's a realistic budget for onboarding:
 <tr><th>Approach</th><th>JS cost</th><th>Network requests</th><th>Main thread impact</th></tr>
 </thead>
 <tbody>
-<tr><td>Tour Kit (lazy-loaded)</td><td>&lt;8 KB (in bundle)</td><td>0 additional</td><td>Negligible (renders with React)</td></tr>
+<tr><td>Tour Kit (lazy-loaded)</td><td>&lt;23 KB (in bundle)</td><td>0 additional</td><td>Negligible (renders with React)</td></tr>
 <tr><td>SaaS tool (async)</td><td>Unknown + config fetch</td><td>2-5 additional</td><td>50-300ms TBT contribution</td></tr>
 <tr><td>SaaS tool (sync)</td><td>Unknown + config fetch</td><td>2-5 additional</td><td>200-500ms+ TBT contribution</td></tr>
 </tbody>
@@ -215,7 +215,7 @@ Async loading improves First Contentful Paint and LCP because the script no long
 
 ### How much does a SaaS onboarding tool add to my page weight?
 
-No major SaaS onboarding vendor publishes their client-side script payload size as of April 2026. Measure it yourself using Chrome DevTools Network tab filtered by the vendor's CDN domain. Client-side alternatives like Tour Kit publish exact sizes on bundlephobia: Tour Kit core is under 8KB gzipped.
+No major SaaS onboarding vendor publishes their client-side script payload size as of April 2026. Measure it yourself using Chrome DevTools Network tab filtered by the vendor's CDN domain. Client-side alternatives like Tour Kit publish exact sizes on bundlephobia: Tour Kit core is under 23KB gzipped.
 
 ### Why did Lighthouse 13 remove the third-party code audit?
 
@@ -227,7 +227,7 @@ Conditional loading helps. Only load the onboarding script on pages where tours 
 
 ### What is the best lightweight alternative to SaaS onboarding tools?
 
-Tour Kit ships at under 8KB gzipped with zero runtime dependencies and full TypeScript support. It renders through your existing React components, so there's no injected DOM, no CDN dependency, and no accessibility gaps. Install with `npm install @tourkit/core @tourkit/react`. We built Tour Kit, so take this recommendation with appropriate skepticism and verify the bundle size on [bundlephobia](https://bundlephobia.com/) yourself.
+Tour Kit ships at under 23KB gzipped with zero runtime dependencies and full TypeScript support. It renders through your existing React components, so there's no injected DOM, no CDN dependency, and no accessibility gaps. Install with `npm install @tourkit/core @tourkit/react`. We built Tour Kit, so take this recommendation with appropriate skepticism and verify the bundle size on [bundlephobia](https://bundlephobia.com/) yourself.
 
 ---
 
@@ -235,7 +235,7 @@ Tour Kit ships at under 8KB gzipped with zero runtime dependencies and full Type
 - Link from [React tour library benchmark 2026](/blog/react-tour-library-benchmark-2026) — add a section referencing this Lighthouse deep-dive
 - Link from [Lightweight product tour libraries under 10KB](/blog/lightweight-product-tour-libraries-under-10kb) — reference the performance budget section
 - Link from [Tree-shaking product tour libraries](/blog/tree-shaking-product-tour-libraries) — connect bundle size to Lighthouse impact
-- Link to [Tour Kit ships at 8KB with zero dependencies](/blog/tour-kit-8kb-zero-dependencies) from the client-side library section
+- Link to [Tour Kit ships at 23KB with zero dependencies](/blog/tour-kit-8kb-zero-dependencies) from the client-side library section
 - Link to [Animation performance in product tours](/blog/animation-performance-product-tours-raf-vs-css) from the TBT section
 
 **JSON-LD schema:**

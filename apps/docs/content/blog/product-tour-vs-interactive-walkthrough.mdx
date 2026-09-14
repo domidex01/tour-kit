@@ -113,7 +113,7 @@ Product tours and interactive walkthroughs differ across eight dimensions that m
     </tr>
     <tr>
       <td><strong>Bundle cost</strong></td>
-      <td>Tour Kit core: &lt;8KB gzipped</td>
+      <td>Tour Kit core: &lt;23KB gzipped</td>
       <td>Same library + custom event handlers</td>
     </tr>
   </tbody>
@@ -212,7 +212,7 @@ As [Navattic suggests](https://www.navattic.com/blog/product-walkthroughs-vs-int
 
 ## The developer concerns nobody talks about
 
-Every existing product tour vs. walkthrough article targets product managers and growth teams. Developers choosing between these patterns face a different set of tradeoffs: UI drift when selectors break after redesigns, WCAG 2.1 AA compliance for tooltip focus management, and the 40-100KB bundle cost of third-party SaaS tools versus sub-8KB headless alternatives.
+Every existing product tour vs. walkthrough article targets product managers and growth teams. Developers choosing between these patterns face a different set of tradeoffs: UI drift when selectors break after redesigns, WCAG 2.1 AA compliance for tooltip focus management, and the 40-100KB bundle cost of third-party SaaS tools versus sub-23KB headless alternatives.
 
 **UI drift.** Both patterns anchor tooltips to DOM elements via CSS selectors or data attributes. When engineering ships a redesign, tours break silently. Interactive walkthroughs are worse here because they also depend on event handlers staying consistent. Code-owned tour definitions (checked into your repo, not configured in a SaaS dashboard) reduce this risk because your CI pipeline can catch selector mismatches.
 
@@ -220,7 +220,7 @@ Every existing product tour vs. walkthrough article targets product managers and
 
 Tour Kit handles focus management and keyboard navigation out of the box, though you still need to test with screen readers. No product tour library we've seen fully automates `prefers-reduced-motion` for animated overlays. Tour Kit respects it, but verify with your own testing ([web.dev on prefers-reduced-motion](https://web.dev/prefers-reduced-motion/)).
 
-**Performance.** Third-party SaaS tour tools inject external scripts that add 40-100KB to your bundle and create additional network requests. A headless library like Tour Kit ships at under 8KB gzipped for the core package with zero runtime dependencies. Whether you're building tours or walkthroughs, the performance cost is the library itself, not the interaction pattern.
+**Performance.** Third-party SaaS tour tools inject external scripts that add 40-100KB to your bundle and create additional network requests. A headless library like Tour Kit ships at under 23KB gzipped for the core package with zero runtime dependencies. Whether you're building tours or walkthroughs, the performance cost is the library itself, not the interaction pattern.
 
 Tour Kit doesn't have a visual builder, and it's React 18+ only. If your team isn't writing React code, a no-code tool like Appcues or Userpilot will get you to a working walkthrough faster despite the performance tradeoff.
 
@@ -244,7 +244,7 @@ Chameleon's benchmark data from 15 million interactions shows 61% average comple
 
 ### Do I need a separate library for interactive walkthroughs?
 
-No. Most product tour libraries support both patterns from the same API. Tour Kit uses the `advanceOn` property to listen for DOM events (click, input, submit) on step targets. You can mix passive and action-required steps in a single flow. The core library stays under 8KB gzipped either way.
+No. Most product tour libraries support both patterns from the same API. Tour Kit uses the `advanceOn` property to listen for DOM events (click, input, submit) on step targets. You can mix passive and action-required steps in a single flow. The core library stays under 23KB gzipped either way.
 
 ### Are interactive walkthroughs better for onboarding?
 
@@ -316,7 +316,7 @@ export const faqSchema = {
       "name": "Do I need a separate library for interactive walkthroughs?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. Most product tour libraries support both passive and action-driven advancement. Tour Kit uses the advanceOn property to listen for specific DOM events on step targets. The core library stays under 8KB gzipped either way."
+        "text": "No. Most product tour libraries support both passive and action-driven advancement. Tour Kit uses the advanceOn property to listen for specific DOM events on step targets. The core library stays under 23KB gzipped either way."
       }
     },
     {

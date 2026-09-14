@@ -281,7 +281,7 @@ We've seen these patterns fail in enterprise HR contexts:
 
 **Forcing a 15-step linear tour on day one.** Cognitive load research says people retain 5-7 items per session ([Smashing Magazine, 2023](https://www.smashingmagazine.com/2023/04/design-effective-user-onboarding-flow/)). Split tours by task: one for payroll setup, one for benefits, one for time-off requests. Let employees complete them over their first week.
 
-**Ignoring mobile and low-bandwidth users.** Frontline employees in healthcare, retail, and logistics access HR portals on shared devices or personal phones. Mobile learning completion rates are 45% higher than desktop e-learning ([SC Training, 2025](https://training.safetyculture.com/blog/employee-training-statistics/)). Your tours need to work on a 4G connection. Tour Kit's core is under 8KB gzipped. Compare that to Pendo's or Appcues' script bundles, which add 100KB+ to every page load.
+**Ignoring mobile and low-bandwidth users.** Frontline employees in healthcare, retail, and logistics access HR portals on shared devices or personal phones. Mobile learning completion rates are 45% higher than desktop e-learning ([SC Training, 2025](https://training.safetyculture.com/blog/employee-training-statistics/)). Your tours need to work on a 4G connection. Tour Kit's core is under 23KB gzipped. Compare that to Pendo's or Appcues' script bundles, which add 100KB+ to every page load.
 
 **Sending tour analytics to third-party servers.** Employee interaction data falls under GDPR when you serve EU employees. Every third-party SaaS that touches that data needs a Data Processing Agreement. Self-hosted tour analytics avoid the problem entirely.
 
@@ -305,7 +305,7 @@ We've seen these patterns fail in enterprise HR contexts:
   <tbody>
     <tr>
       <td>Tour Kit</td>
-      <td>&lt;8KB core (gzipped)</td>
+      <td>&lt;23KB core (gzipped)</td>
       <td>MIT + Pro</td>
       <td>WCAG 2.1 AA</td>
       <td>Yes (pluggable)</td>
@@ -372,7 +372,7 @@ Pass your existing i18n translation function into Tour Kit's step definitions. T
 
 ### What bundle size overhead do product tours add to HR portals?
 
-Tour Kit's core package is under 8KB gzipped with zero runtime dependencies. Adding `@tour-kit/react` and `@tour-kit/analytics` brings the total to roughly 15KB. Compare this to SaaS alternatives: Appcues adds 100KB+ and Pendo adds 200KB+ via external scripts. For enterprise HR portals that already ship heavy JavaScript bundles, the difference matters for page load times on employee devices.
+Tour Kit's core package is under 23KB gzipped with zero runtime dependencies. Adding `@tour-kit/react` and `@tour-kit/analytics` brings the total to roughly 15KB. Compare this to SaaS alternatives: Appcues adds 100KB+ and Pendo adds 200KB+ via external scripts. For enterprise HR portals that already ship heavy JavaScript bundles, the difference matters for page load times on employee devices.
 
 ---
 

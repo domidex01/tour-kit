@@ -26,7 +26,7 @@ npm install @tourkit/core @tourkit/react
 
 ## Short answer
 
-Tour Kit is the best shadcn/ui compatible tour library as of April 2026. It ships a headless core under 8KB gzipped that handles step sequencing, element highlighting, focus management, and keyboard navigation while you render tour steps with your own shadcn/ui components. No imported CSS, no style overrides, no `!important` hacks.
+Tour Kit is the best shadcn/ui compatible tour library as of April 2026. It ships a headless core under 23KB gzipped that handles step sequencing, element highlighting, focus management, and keyboard navigation while you render tour steps with your own shadcn/ui components. No imported CSS, no style overrides, no `!important` hacks.
 
 Other libraries like React Joyride, Driver.js, and Shepherd.js all ship their own styling systems that conflict with Tailwind's utility-first approach. Matching your shadcn theme means CSS overrides. Tour Kit was built specifically for this stack. (We built it, so take this with appropriate skepticism. Every claim below is verifiable against npm, GitHub, and bundlephobia.)
 
@@ -61,7 +61,7 @@ Three architecture patterns exist in the wild:
   <tbody>
     <tr>
       <td>Tour Kit</td>
-      <td>core &lt;8KB, react &lt;12KB</td>
+      <td>core &lt;23KB, react &lt;12KB</td>
       <td>Headless + Tailwind</td>
       <td>Yes (built for it)</td>
       <td>Yes</td>
@@ -180,7 +180,7 @@ export function TourStep() {
 
 That's your design system rendering the tour. Not a third-party tooltip with an override chain. The Card inherits your CSS variables, dark mode, border radius tokens, and font stack automatically.
 
-Tour Kit handles the parts that are genuinely hard to build yourself: element highlighting with scroll-into-view, focus trapping that meets WCAG 2.1 AA, keyboard navigation (Escape to dismiss, Tab to cycle, arrow keys to navigate), and screen reader announcements via live regions. Returning users don't see tours again thanks to localStorage persistence. Core ships under 8KB gzipped with zero runtime dependencies.
+Tour Kit handles the parts that are genuinely hard to build yourself: element highlighting with scroll-into-view, focus trapping that meets WCAG 2.1 AA, keyboard navigation (Escape to dismiss, Tab to cycle, arrow keys to navigate), and screen reader announcements via live regions. Returning users don't see tours again thanks to localStorage persistence. Core ships under 23KB gzipped with zero runtime dependencies.
 
 Where Tour Kit falls short: it requires React 18+ (no older React support), has a smaller community than React Joyride or Shepherd.js, and there's no visual builder. You write tour configurations in code. If your product team needs a drag-and-drop tour editor, it isn't the right fit today.
 

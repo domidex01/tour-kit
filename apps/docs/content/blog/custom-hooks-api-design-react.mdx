@@ -29,7 +29,7 @@ Here's what I learned.
 
 Poor hook APIs cost teams real time and real bugs. A 2023 study found function components with hooks produce minified bundles 59.55% smaller than equivalent class components ([Medium](https://medium.com/@maafaishal/react-class-component-vs-function-component-with-hooks-bundle-size-part-1-ce8a257d53bb)). That performance advantage disappears when the hook API forces consumers to work around it. Zustand v5 is roughly 30x smaller than Redux Toolkit, and React Hook Form ships at 9.1KB gzipped. Both won adoption by designing hooks that compose without friction.
 
-For Tour Kit specifically, hook design determines whether the library achieves its bundle budgets: core under 8KB, react under 12KB, hints under 5KB gzipped. Every hook that ships zero JSX and zero CSS contributes to those numbers. The headless architecture only works if hooks expose enough information for consumers to build any UI they want.
+For Tour Kit specifically, hook design determines whether the library achieves its bundle budgets: core under 23KB, react under 12KB, hints under 6.5KB gzipped. Every hook that ships zero JSX and zero CSS contributes to those numbers. The headless architecture only works if hooks expose enough information for consumers to build any UI they want.
 
 Users who complete onboarding tours are 2.5x more likely to convert to paid (Appcues 2024 Benchmark Report). Product tours reduce support tickets for feature discovery by 40% on average. But those outcomes depend on developers actually implementing the tours correctly. A confusing hook API means abandoned integrations.
 
@@ -234,7 +234,7 @@ Prop-getter hooks return functions like `getButtonProps()` that generate merged 
 
 ### How does headless hook architecture reduce bundle size?
 
-Headless hook architecture ships logic without UI, so bundles are smaller. Hooks-based components produce 59.55% smaller minified output than class equivalents ([Medium, 2023](https://medium.com/@maafaishal/react-class-component-vs-function-component-with-hooks-bundle-size-part-1-ce8a257d53bb)). Tour Kit's core ships under 8KB gzipped with zero JSX and zero CSS. Bundlers tree-shake unused hooks.
+Headless hook architecture ships logic without UI, so bundles are smaller. Hooks-based components produce 59.55% smaller minified output than class equivalents ([Medium, 2023](https://medium.com/@maafaishal/react-class-component-vs-function-component-with-hooks-bundle-size-part-1-ce8a257d53bb)). Tour Kit's core ships under 23KB gzipped with zero JSX and zero CSS. Bundlers tree-shake unused hooks.
 
 
 {/* JSON-LD Schema */}
@@ -345,7 +345,7 @@ Headless hook architecture ships logic without UI, so bundles are smaller. Hooks
       "name": "How does headless hook architecture reduce bundle size?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Headless hook architecture reduces bundle size by shipping logic without UI. Function components with hooks produce minified bundles 59.55% smaller than equivalent class components. Tour Kit's core ships under 8KB gzipped because hooks contain zero JSX, zero CSS, and zero DOM opinions."
+        "text": "Headless hook architecture reduces bundle size by shipping logic without UI. Function components with hooks produce minified bundles 59.55% smaller than equivalent class components. Tour Kit's core ships under 23KB gzipped because hooks contain zero JSX, zero CSS, and zero DOM opinions."
       }
     }
   ]

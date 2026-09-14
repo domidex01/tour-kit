@@ -8,7 +8,7 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped. Onborda is a Next.js-only product tour library powered by Framer Motion with roughly 1,400 GitHub stars and no release since December 2024. userTourKit fits React teams that want accessibility and framework flexibility beyond Next.js. Onborda is the better pick when you're already running Framer Motion in a Next.js app and only need basic step-by-step tours.
+userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 23KB gzipped. Onborda is a Next.js-only product tour library powered by Framer Motion with roughly 1,400 GitHub stars and no release since December 2024. userTourKit fits React teams that want accessibility and framework flexibility beyond Next.js. Onborda is the better pick when you're already running Framer Motion in a Next.js app and only need basic step-by-step tours.
 
 ## What is userTourKit?
 
@@ -32,7 +32,7 @@ Where Onborda falls short: cross-route tour transitions rely on a hardcoded 500m
 
 Onborda doesn't include hints. If you need persistent feature-discovery beacons outside a sequential tour, you're building them yourself.
 
-userTourKit ships `@tour-kit/hints` (under 5KB gzipped, MIT licensed) with `HintHotspot` for pulsing indicators and `HintTooltip` for on-hover/click content. Each hint dismisses independently and persists across page loads. Non-sequential by design, not a hack on top of the tour system.
+userTourKit ships `@tour-kit/hints` (under 6.5KB gzipped, MIT licensed) with `HintHotspot` for pulsing indicators and `HintTooltip` for on-hover/click content. Each hint dismisses independently and persists across page loads. Non-sequential by design, not a hack on top of the tour system.
 
 ### Checklists and onboarding flows
 
@@ -88,7 +88,7 @@ Onborda's own code weighs roughly 5-15KB, but it mandates Framer Motion as a pee
 
 One detail: Onborda still imports from the legacy `framer-motion` package name rather than the rebranded `motion` package. That suggests the dependency hasn't been updated to current conventions.
 
-userTourKit's core bundles at under 8KB gzipped. React package: under 12KB. Hints: under 5KB. Animations use CSS by default, with bring-your-own-library as an option.
+userTourKit's core bundles at under 23KB gzipped. React package: under 12KB. Hints: under 6.5KB. Animations use CSS by default, with bring-your-own-library as an option.
 
 No forced dependencies beyond React 18+.
 
@@ -129,7 +129,7 @@ userTourKit's Pro tier funds ongoing development. Your mileage may vary on which
 | Cross-route tours | ✅ Event-driven, framework-agnostic | ⚙️ MutationObserver + 500ms delay |
 | Multiple tours | ✅ MultiTourKitProvider | ✅ Since v1.2.3 |
 | Progress persistence | ✅ localStorage, sessionStorage, cookie | 🚫 Not available |
-| Core bundle (gzipped) | &lt;8KB | ~5-15KB + 32KB Framer Motion |
+| Core bundle (gzipped) | &lt;23KB | ~5-15KB + 32KB Framer Motion |
 | Framework support | Next.js, Vite, Remix, Astro, CRA | Next.js only |
 | shadcn/ui integration | ✅ Native UnifiedSlot | ⚙️ Compatible (manual) |
 | TypeScript | Strict mode, full inference | TypeScript, no strict evidence |
@@ -244,7 +244,7 @@ Yes. Replace the provider wrapper, convert the step array, adapt your custom car
 userTourKit supports React 18 and React 19 across Next.js, Vite, Remix, Astro. Onborda has an open compatibility issue (#28) with React 19 and Next.js 15 that's been unresolved since October 2024.
 
 **What is the bundle size of userTourKit vs Onborda?**
-userTourKit's core is under 8KB gzipped. The react package is under 12KB. Onborda's own code is roughly 5-15KB, but it requires Framer Motion (approximately 32KB gzipped) as a mandatory dependency.
+userTourKit's core is under 23KB gzipped. The react package is under 12KB. Onborda's own code is roughly 5-15KB, but it requires Framer Motion (approximately 32KB gzipped) as a mandatory dependency.
 
 **Does Onborda support checklists, analytics, or hints?**
 No. Onborda provides product tours only. userTourKit offers dedicated packages for hints, checklists, analytics, announcements, media embedding, and scheduling.

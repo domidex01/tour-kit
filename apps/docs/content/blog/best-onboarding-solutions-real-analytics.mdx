@@ -56,7 +56,7 @@ Full disclosure: Tour Kit is our project. We built it, so take our inclusion wit
 <td>Via callbacks + your BI tool</td>
 <td>Yes</td>
 <td>Full (your warehouse)</td>
-<td>&lt;8KB gzipped</td>
+<td>&lt;23KB gzipped</td>
 <td>Free / Pro via Polar.sh</td>
 </tr>
 <tr>
@@ -102,13 +102,13 @@ Full disclosure: Tour Kit is our project. We built it, so take our inclusion wit
 
 Tour Kit is a headless, composable React library that gives you typed analytics events without a vendor dashboard. The `@tour-kit/analytics` package uses a plugin architecture: you write a 10-line adapter for PostHog, Amplitude, Mixpanel, or any provider, and every tour event flows directly to your existing data pipeline. No black-box dashboard, no session replay privacy concerns, no $48K invoice.
 
-As of April 2026, Tour Kit's analytics package ships at under 8KB gzipped with zero runtime dependencies. The core library supports React 18 and 19 natively with full TypeScript type exports.
+As of April 2026, Tour Kit's analytics package ships at under 23KB gzipped with zero runtime dependencies. The core library supports React 18 and 19 natively with full TypeScript type exports.
 
 ### Strengths
 
 - Every event is typed and goes to your data warehouse: activation rate, feature adoption, step completion, survey responses. One callback interface handles all of them
 - Plugin-based analytics works with PostHog, Amplitude, Mixpanel, Segment, or a custom `fetch` call
-- Sub-8KB gzipped footprint for the entire analytics layer, 12-25x smaller than SaaS alternatives
+- Sub-23KB gzipped footprint for the entire analytics layer, 12-25x smaller than SaaS alternatives
 - WCAG 2.1 AA accessibility built into every component, including tour steps, hints, and surveys
 
 ### Limitations
@@ -291,7 +291,7 @@ Vanity metrics are numbers that look impressive but don't predict retention or r
 
 ### Which onboarding tool has the best analytics?
 
-Pendo has the deepest analytics with native session replay plus full product usage tracking, but costs around $48,000/year. Userpilot offers comparable depth starting at $249/month. Tour Kit pipes typed events directly to your data warehouse through a plugin architecture at under 8KB gzipped.
+Pendo has the deepest analytics with native session replay plus full product usage tracking, but costs around $48,000/year. Userpilot offers comparable depth starting at $249/month. Tour Kit pipes typed events directly to your data warehouse through a plugin architecture at under 23KB gzipped.
 
 ### Can I use an open-source onboarding tool with analytics?
 

@@ -17,7 +17,7 @@ ogImage: /og-images/tour-kit-clerk-role-based-tours.png
 
 Your admin needs a tour of billing settings, team management, and API keys. Your member needs a tour of the dashboard, task creation, and notifications. Showing both the same 12-step walkthrough wastes everyone's time and teaches nobody anything.
 
-Clerk gives you the auth context. Tour Kit gives you the tour engine. The glue between them is about 30 lines of TypeScript. As of April 2026, Clerk's free tier covers 50,000 monthly active users ([Clerk pricing, Feb 2026](https://clerk.com/changelog/2026-02-05-new-plans-more-value)), and Tour Kit's core ships at under 8KB gzipped. That's a role-based onboarding system for $0 at most startup scales.
+Clerk gives you the auth context. Tour Kit gives you the tour engine. The glue between them is about 30 lines of TypeScript. As of April 2026, Clerk's free tier covers 50,000 monthly active users ([Clerk pricing, Feb 2026](https://clerk.com/changelog/2026-02-05-new-plans-more-value)), and Tour Kit's core ships at under 23KB gzipped. That's a role-based onboarding system for $0 at most startup scales.
 
 This tutorial walks through wiring Clerk's `useAuth()`, `useUser()`, and `useOrganization()` hooks into Tour Kit's `when` prop so each role sees only the steps relevant to their permissions.
 
@@ -40,7 +40,7 @@ No backend changes required.
 
 ## Why Clerk + Tour Kit?
 
-Clerk serves over 300,000 applications as of early 2026, with a free tier covering 50,000 MAU and Pro starting at $0.02/MAU after that. Auth0 charges $0.07/MAU after just 7,500 free users. For a 40,000-user SaaS app, Clerk costs $0 while Auth0 runs roughly $2,275/month. Pair that with Tour Kit's under 8KB gzipped core (also free), and you have a role-based onboarding system at zero cost for most startups.
+Clerk serves over 300,000 applications as of early 2026, with a free tier covering 50,000 MAU and Pro starting at $0.02/MAU after that. Auth0 charges $0.07/MAU after just 7,500 free users. For a 40,000-user SaaS app, Clerk costs $0 while Auth0 runs roughly $2,275/month. Pair that with Tour Kit's under 23KB gzipped core (also free), and you have a role-based onboarding system at zero cost for most startups.
 
 Both APIs are hook-based and TypeScript-first. Clerk's `useAuth`, `useUser`, and `useOrganization` expose role data in client components. Tour Kit's `when` prop accepts a filtering function. Connecting them takes minimal glue code.
 
@@ -51,7 +51,7 @@ Clerk handles authentication and authorization. Tour Kit handles presentation. K
 <table>
 <thead><tr><th>Approach</th><th>Auth cost (40K MAU)</th><th>Tour library</th><th>Combined bundle</th><th>Role filtering</th></tr></thead>
 <tbody>
-<tr><td>Clerk + Tour Kit</td><td>$0/mo</td><td>Free (MIT)</td><td>8KB gzipped (tour only)</td><td>Built-in via hooks</td></tr>
+<tr><td>Clerk + Tour Kit</td><td>$0/mo</td><td>Free (MIT)</td><td>23KB gzipped (tour only)</td><td>Built-in via hooks</td></tr>
 <tr><td>Auth0 + React Joyride</td><td>$2,275/mo</td><td>Free (MIT)</td><td>37KB gzipped</td><td>DIY with React Context</td></tr>
 <tr><td>Clerk + Appcues</td><td>$0/mo</td><td>$300/mo</td><td>External script (180KB)</td><td>Segment-based UI</td></tr>
 <tr><td>WalkMe enterprise</td><td>Included</td><td>$15,000+/yr</td><td>External script (250KB)</td><td>Built-in RBAC targeting</td></tr>
@@ -268,7 +268,7 @@ Your `getDashboardSteps` function already handles arbitrary role strings. When a
 
 ### Lazy-load tours to manage combined bundle size
 
-Clerk's `@clerk/clerk-react` package weighs roughly 1.02 MB uncompressed ([GitHub issue #1578](https://github.com/clerk/javascript/issues/1578)), though tree-shaking and the newer `@clerk/react` package reduce the runtime cost. Tour Kit adds under 8KB gzipped on top of that. Lazy-loading the tour after auth resolves keeps your First Contentful Paint under control:
+Clerk's `@clerk/clerk-react` package weighs roughly 1.02 MB uncompressed ([GitHub issue #1578](https://github.com/clerk/javascript/issues/1578)), though tree-shaking and the newer `@clerk/react` package reduce the runtime cost. Tour Kit adds under 23KB gzipped on top of that. Lazy-loading the tour after auth resolves keeps your First Contentful Paint under control:
 
 ```tsx
 import { lazy, Suspense } from "react";

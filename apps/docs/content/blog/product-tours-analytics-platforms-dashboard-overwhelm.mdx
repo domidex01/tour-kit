@@ -263,7 +263,7 @@ Human working memory holds 5 to 9 items at once. Analytics dashboards routinely 
 
 Tour Kit's headless architecture fits analytics dashboards because these UIs vary wildly in structure. A Mixpanel-style event explorer has different layout constraints than a Tableau-style visualization builder.
 
-Three architectural advantages matter here. Bundle size: Tour Kit's core ships at under 8KB gzipped (verified via bundlephobia). Analytics platforms already load heavy charting libraries like D3.js (73KB) or Recharts (45KB), so a 37KB onboarding library on top degrades performance noticeably. No external scripts: Tour Kit runs within your bundle with zero network calls, which matters for SOC 2 and HIPAA compliance. Composition: the provider/step model lets you define tours at the layout level and reference targets across deeply nested component trees.
+Three architectural advantages matter here. Bundle size: Tour Kit's core ships at under 23KB gzipped (verified via bundlephobia). Analytics platforms already load heavy charting libraries like D3.js (73KB) or Recharts (45KB), so a 37KB onboarding library on top degrades performance noticeably. No external scripts: Tour Kit runs within your bundle with zero network calls, which matters for SOC 2 and HIPAA compliance. Composition: the provider/step model lets you define tours at the layout level and reference targets across deeply nested component trees.
 
 One limitation to acknowledge: Tour Kit doesn't include a visual tour builder. Teams without React developers can't modify tours through a drag-and-drop interface. If product managers need to iterate on tour content without deploying code, Appcues or Userpilot are better fits for that workflow.
 

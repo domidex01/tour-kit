@@ -25,7 +25,7 @@ npm install @tourkit/core @tourkit/react
 
 ## Short answer
 
-Every major product tour library in 2026 works without jQuery. Driver.js, Intro.js, Shepherd.js, React Joyride, and Tour Kit all ship zero jQuery dependencies. The only libraries that still require jQuery are effectively dead: Bootstrap Tour (last meaningful update 2019) and Trip.js (archived). If you're on React, Tour Kit's core ships at under 8 KB gzipped with full TypeScript support and WCAG 2.1 AA accessibility built in. For vanilla JavaScript projects, Driver.js is the lightest option at roughly 25 KB gzipped.
+Every major product tour library in 2026 works without jQuery. Driver.js, Intro.js, Shepherd.js, React Joyride, and Tour Kit all ship zero jQuery dependencies. The only libraries that still require jQuery are effectively dead: Bootstrap Tour (last meaningful update 2019) and Trip.js (archived). If you're on React, Tour Kit's core ships at under 23 KB gzipped with full TypeScript support and WCAG 2.1 AA accessibility built in. For vanilla JavaScript projects, Driver.js is the lightest option at roughly 25 KB gzipped.
 
 ## Why jQuery left the product tour conversation
 
@@ -50,7 +50,7 @@ Here's how the current options stack up. All data verified against npm and Bundl
 <tr><th>Library</th><th>jQuery?</th><th>Gzip size</th><th>License</th><th>React support</th><th>Accessibility</th></tr>
 </thead>
 <tbody>
-<tr><td>Tour Kit</td><td>No</td><td>&lt;8 KB (core)</td><td>MIT</td><td>Native hooks + components</td><td>WCAG 2.1 AA, focus trap, aria-live</td></tr>
+<tr><td>Tour Kit</td><td>No</td><td>&lt;23 KB (core)</td><td>MIT</td><td>Native hooks + components</td><td>WCAG 2.1 AA, focus trap, aria-live</td></tr>
 <tr><td>Driver.js</td><td>No</td><td>~25 KB</td><td>MIT</td><td>Manual refs + useEffect</td><td>Basic ARIA attributes</td></tr>
 <tr><td>React Joyride v3</td><td>No</td><td>~37 KB</td><td>MIT</td><td>Native React component</td><td>Partial (no focus trap)</td></tr>
 <tr><td>Intro.js</td><td>No</td><td>~10 KB</td><td>AGPL v3</td><td>Community wrapper</td><td>Basic ARIA attributes</td></tr>
@@ -75,7 +75,7 @@ This isn't a technicality. It's a real business risk that most "best product tou
 
 **If you're already on React and want the fastest setup:** React Joyride v3. It has the largest community (340K+ weekly npm downloads) and the v3 rewrite replaced Popper.js with `@floating-ui/react-dom` for better positioning. The tradeoff is the 37 KB gzip footprint.
 
-**If you want headless architecture with full design control:** Tour Kit. No shipped CSS, no opinionated components. You render steps with your own UI: Tailwind, shadcn/ui, Radix, whatever your design system uses. Core is under 8 KB gzipped.
+**If you want headless architecture with full design control:** Tour Kit. No shipped CSS, no opinionated components. You render steps with your own UI: Tailwind, shadcn/ui, Radix, whatever your design system uses. Core is under 23 KB gzipped.
 
 **If bundle size is your only concern and you're not building SaaS:** Intro.js at roughly 10 KB gzipped. Just check whether the AGPL license works for your situation first.
 
@@ -147,7 +147,7 @@ Yes. React Joyride has never required jQuery. Version 3 is a complete rewrite th
 
 ### What is the lightest product tour library without jQuery?
 
-Tour Kit's core package ships at under 8 KB gzipped with zero runtime dependencies. Among non-React options, Intro.js comes in at roughly 10 KB gzipped (but carries AGPL licensing). Driver.js lands at approximately 25 KB gzipped. These are gzipped transfer sizes, not unpacked npm sizes. That's an important distinction that most comparison articles skip.
+Tour Kit's core package ships at under 23 KB gzipped with zero runtime dependencies. Among non-React options, Intro.js comes in at roughly 10 KB gzipped (but carries AGPL licensing). Driver.js lands at approximately 25 KB gzipped. These are gzipped transfer sizes, not unpacked npm sizes. That's an important distinction that most comparison articles skip.
 
 ### Does jQuery 4 change anything for product tour libraries?
 

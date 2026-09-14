@@ -31,7 +31,7 @@ Every SaaS onboarding platform starts the same pitch: "No-code! Ship tours witho
 
 SaaS tools inject third-party JavaScript that ranges from 50KB to 200KB gzipped. That script parses your DOM at runtime, figures out where your elements are, and overlays its own UI on top of yours. Your design system? Ignored. Your Tailwind tokens? Overridden by inline styles you can't control.
 
-A React library takes the opposite approach. Tour Kit's core package ships at under 8KB gzipped with zero runtime dependencies. It doesn't fight your component tree. It *is* part of your component tree.
+A React library takes the opposite approach. Tour Kit's core package ships at under 23KB gzipped with zero runtime dependencies. It doesn't fight your component tree. It *is* part of your component tree.
 
 ```tsx
 // src/components/OnboardingTour.tsx
@@ -244,7 +244,7 @@ The W3C's [ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/) doe
 
 ### Is a React library really better than Appcues or Userpilot for onboarding?
 
-For teams with React developers, a library like Tour Kit provides equivalent core functionality (step tours, highlights, tooltips, checklists) at a fraction of the cost. Appcues starts at $299/month while Tour Kit's core is free and ships at under 8KB gzipped. The tradeoff is losing the visual builder and built-in analytics dashboard.
+For teams with React developers, a library like Tour Kit provides equivalent core functionality (step tours, highlights, tooltips, checklists) at a fraction of the cost. Appcues starts at $299/month while Tour Kit's core is free and ships at under 23KB gzipped. The tradeoff is losing the visual builder and built-in analytics dashboard.
 
 ### What does "onboarding as code" mean?
 
@@ -256,7 +256,7 @@ A single library handles product tours, tooltips, and highlights. Tour Kit's ext
 
 ### How does bundle size affect onboarding tool choice?
 
-SaaS onboarding scripts inject 50-200KB of JavaScript on every page load, affecting Core Web Vitals scores. Tour Kit's core ships at under 8KB gzipped and tree-shakes so only imported code reaches the browser. For performance-sensitive applications, the bundle size difference directly impacts Interaction to Next Paint and Total Blocking Time.
+SaaS onboarding scripts inject 50-200KB of JavaScript on every page load, affecting Core Web Vitals scores. Tour Kit's core ships at under 23KB gzipped and tree-shakes so only imported code reaches the browser. For performance-sensitive applications, the bundle size difference directly impacts Interaction to Next Paint and Total Blocking Time.
 
 ### Is Tour Kit free or paid?
 
@@ -338,7 +338,7 @@ Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) a
       "name": "Is a React library really better than Appcues or Userpilot for onboarding?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "For teams with React developers, a library like Tour Kit provides equivalent core functionality (step tours, highlights, tooltips, checklists) at a fraction of the cost. Appcues starts at $299/month while Tour Kit's core is free and ships at under 8KB gzipped. The tradeoff is losing the visual builder and built-in analytics dashboard."
+        "text": "For teams with React developers, a library like Tour Kit provides equivalent core functionality (step tours, highlights, tooltips, checklists) at a fraction of the cost. Appcues starts at $299/month while Tour Kit's core is free and ships at under 23KB gzipped. The tradeoff is losing the visual builder and built-in analytics dashboard."
       }
     },
     {
@@ -362,7 +362,7 @@ Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) a
       "name": "How does bundle size affect onboarding tool choice?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "SaaS onboarding scripts inject 50-200KB of JavaScript on every page load, affecting Core Web Vitals scores. Tour Kit's core ships at under 8KB gzipped and tree-shakes so only imported code reaches the browser. For performance-sensitive applications, the bundle size difference directly impacts Interaction to Next Paint and Total Blocking Time."
+        "text": "SaaS onboarding scripts inject 50-200KB of JavaScript on every page load, affecting Core Web Vitals scores. Tour Kit's core ships at under 23KB gzipped and tree-shakes so only imported code reaches the browser. For performance-sensitive applications, the bundle size difference directly impacts Interaction to Next Paint and Total Blocking Time."
       }
     },
     {

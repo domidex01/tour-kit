@@ -377,7 +377,7 @@ Push the event into a job queue instead of calling `resend.emails.send` directly
 
 ### Does React Email affect my app's bundle size?
 
-No. React Email templates render server-side to static HTML strings via the `render()` function. None of the email component code ships to the browser. The 6.5 MB `@react-email/tailwind` dependency lives in your server bundle only. Your client-side bundle stays exactly the same size, which matters for Tour Kit's under-8KB core footprint.
+No. React Email templates render server-side to static HTML strings via the `render()` function. None of the email component code ships to the browser. The 6.5 MB `@react-email/tailwind` dependency lives in your server bundle only. Your client-side bundle stays exactly the same size, which matters for Tour Kit's under-23KB core footprint.
 
 ### What happens if the user closes the tab before the tour ends?
 

@@ -42,7 +42,7 @@ Before starting, confirm your project meets these requirements. The Redux Toolki
 
 ## Step 1: install and configure Tour Kit alongside Redux
 
-If your project already has Redux Toolkit and React-Redux, you only need the Tour Kit packages. Tour Kit's core ships at under 8KB gzipped, so the bundle impact is minimal on top of RTK's existing footprint.
+If your project already has Redux Toolkit and React-Redux, you only need the Tour Kit packages. Tour Kit's core ships at under 23KB gzipped, so the bundle impact is minimal on top of RTK's existing footprint.
 
 ```tsx
 // src/store/store.ts
@@ -431,7 +431,7 @@ Without centralized state, debugging means sprinkling `console.log` across callb
     </tr>
     <tr>
       <td>Bundle overhead</td>
-      <td>&#126;8KB core + &#126;12KB react (gzipped)</td>
+      <td>&#126;23KB core + &#126;12KB react (gzipped)</td>
       <td>Adds &#126;11KB for RTK + react-redux</td>
     </tr>
   </tbody>
@@ -514,7 +514,7 @@ Tour Kit does not require Redux. It ships with built-in state via `TourProvider`
 
 ### How much bundle size does adding Redux Toolkit add on top of Tour Kit?
 
-Tour Kit's core is under 8KB gzipped; the React package adds ~12KB. Redux Toolkit with react-redux adds roughly 11KB gzipped on top. If your app already uses RTK, the marginal cost is zero. RTK Query adds another ~9KB if you use it for fetching tour configs from an API ([RTK docs](https://redux-toolkit.js.org/rtk-query/comparison)).
+Tour Kit's core is under 23KB gzipped; the React package adds ~12KB. Redux Toolkit with react-redux adds roughly 11KB gzipped on top. If your app already uses RTK, the marginal cost is zero. RTK Query adds another ~9KB if you use it for fetching tour configs from an API ([RTK docs](https://redux-toolkit.js.org/rtk-query/comparison)).
 
 ### Can I use Zustand instead of Redux Toolkit with Tour Kit?
 
@@ -588,7 +588,7 @@ Tour Kit handles accessibility out of the box: ARIA live region announcements, f
       "name": "How much bundle size does adding Redux Toolkit add on top of Tour Kit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit's core is under 8KB gzipped, and the React package adds about 12KB gzipped. Redux Toolkit with react-redux adds roughly 11KB gzipped on top of that. If your app already uses Redux Toolkit, the marginal cost is zero since Tour Kit only needs the packages you've already installed."
+        "text": "Tour Kit's core is under 23KB gzipped, and the React package adds about 12KB gzipped. Redux Toolkit with react-redux adds roughly 11KB gzipped on top of that. If your app already uses Redux Toolkit, the marginal cost is zero since Tour Kit only needs the packages you've already installed."
       }
     },
     {

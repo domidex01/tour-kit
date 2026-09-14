@@ -46,7 +46,7 @@ OpenTelemetry gives you something product analytics tools don't: causality acros
 </tbody>
 </table>
 
-The catch: OTel's browser SDK adds roughly 30-40KB gzipped depending on which instrumentations you load ([Bundlephobia](https://bundlephobia.com/package/@opentelemetry/sdk-trace-web)). On top of Tour Kit's core at under 8KB gzipped, that's meaningful. For enterprise apps already running OTel for backend tracing, the frontend SDK is a natural extension. For a marketing site with a 3-step tour? Overkill. Use PostHog or GA4 instead.
+The catch: OTel's browser SDK adds roughly 30-40KB gzipped depending on which instrumentations you load ([Bundlephobia](https://bundlephobia.com/package/@opentelemetry/sdk-trace-web)). On top of Tour Kit's core at under 23KB gzipped, that's meaningful. For enterprise apps already running OTel for backend tracing, the frontend SDK is a natural extension. For a marketing site with a 3-step tour? Overkill. Use PostHog or GA4 instead.
 
 ## Prerequisites
 
@@ -347,7 +347,7 @@ OTel traces show *why* something happened by connecting frontend events to backe
 
 ### How much does OpenTelemetry add to my bundle size?
 
-The `@opentelemetry/sdk-trace-web` package with OTLP HTTP exporter adds roughly 30-40KB gzipped. Combined with Tour Kit's core at under 8KB gzipped, total is about 40-50KB. If your app already loads OTel for fetch tracing, the incremental cost of this plugin is zero since it reuses the existing provider.
+The `@opentelemetry/sdk-trace-web` package with OTLP HTTP exporter adds roughly 30-40KB gzipped. Combined with Tour Kit's core at under 23KB gzipped, total is about 40-50KB. If your app already loads OTel for fetch tracing, the incremental cost of this plugin is zero since it reuses the existing provider.
 
 ### Can I use this with Grafana Tempo instead of Jaeger?
 
@@ -427,7 +427,7 @@ The `destroy` method ends in-progress tour spans with an error status. If the us
       "name": "How much does OpenTelemetry add to my bundle size?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The @opentelemetry/sdk-trace-web package with the OTLP HTTP exporter adds roughly 30-40KB gzipped. Combined with Tour Kit's core at under 8KB gzipped, total overhead is about 40-50KB. For apps already loading OTel, the incremental cost of the Tour Kit plugin is zero."
+        "text": "The @opentelemetry/sdk-trace-web package with the OTLP HTTP exporter adds roughly 30-40KB gzipped. Combined with Tour Kit's core at under 23KB gzipped, total overhead is about 40-50KB. For apps already loading OTel, the incremental cost of the Tour Kit plugin is zero."
       }
     },
     {

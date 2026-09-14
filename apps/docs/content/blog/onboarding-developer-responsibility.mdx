@@ -43,7 +43,7 @@ Google's own data shows that increasing page load from 1 second to 3 seconds dri
 
 No-code onboarding tools inject scripts at runtime. They bypass tree-shaking. They bypass your bundle analysis pipeline. They bypass your performance budgets. The PM who added the tour never sees the cost. The developer who reviews the Lighthouse report does.
 
-Compare that to a code-first library. Tour Kit's core package ships at under 8KB gzipped. It tree-shakes. It's part of your build graph, your CI checks, your performance budgets. When the bundle grows, you know exactly why and can act on it.
+Compare that to a code-first library. Tour Kit's core package ships at under 23KB gzipped. It tree-shakes. It's part of your build graph, your CI checks, your performance budgets. When the bundle grows, you know exactly why and can act on it.
 
 <table>
   <thead>
@@ -57,7 +57,7 @@ Compare that to a code-first library. Tour Kit's core package ships at under 8KB
     <tr>
       <td>Bundle impact</td>
       <td>50–500KB injected at runtime</td>
-      <td>&lt;8KB gzipped, tree-shakeable</td>
+      <td>&lt;23KB gzipped, tree-shakeable</td>
     </tr>
     <tr>
       <td>Build visibility</td>
@@ -210,7 +210,7 @@ Product managers should absolutely own onboarding strategy: defining what users 
 
 ### What's wrong with no-code onboarding tools?
 
-No-code onboarding tools inject 50 to 500KB of third-party JavaScript at runtime, bypassing tree-shaking and bundle analysis. They typically lack ARIA controls, keyboard trap prevention, and focus management required by WCAG 2.1 SC 4.1.2. Tour Kit's core ships at under 8KB gzipped with full accessibility controls, giving developers complete oversight of production code.
+No-code onboarding tools inject 50 to 500KB of third-party JavaScript at runtime, bypassing tree-shaking and bundle analysis. They typically lack ARIA controls, keyboard trap prevention, and focus management required by WCAG 2.1 SC 4.1.2. Tour Kit's core ships at under 23KB gzipped with full accessibility controls, giving developers complete oversight of production code.
 
 ### How does code-first onboarding handle PM iteration speed?
 
@@ -218,7 +218,7 @@ Code-first doesn't mean slow iteration. With feature flags (LaunchDarkly, PostHo
 
 ### Is Tour Kit a replacement for Appcues or Userpilot?
 
-Tour Kit replaces the UI layer that tools like Appcues and Userpilot provide, but with developer-owned code instead of vendor-injected scripts. Tour Kit is a headless React library: tour logic, step management, positioning, and accessibility primitives without prescribed UI. The tradeoff is no visual builder. The gain is under 8KB gzipped, full WCAG 2.1 compliance, zero vendor lock-in, and onboarding code that lives in your repo.
+Tour Kit replaces the UI layer that tools like Appcues and Userpilot provide, but with developer-owned code instead of vendor-injected scripts. Tour Kit is a headless React library: tour logic, step management, positioning, and accessibility primitives without prescribed UI. The tradeoff is no visual builder. The gain is under 23KB gzipped, full WCAG 2.1 compliance, zero vendor lock-in, and onboarding code that lives in your repo.
 
 {/* JSON-LD Schema */}
 export const jsonLd = {

@@ -8,7 +8,7 @@ published: true
 
 # How to add a product tour to a React 19 app in 5 minutes
 
-Your React 19 app is live, users sign up, and then they stare at the dashboard wondering what to do next. Most React tour libraries were built for React 16. They rely on `forwardRef` wrappers, fight with Server Components, and ship opinionated CSS that clashes with whatever design system you're running. userTourKit is a headless React product tour library (under 8KB gzipped for the core) that gives you step sequencing, element highlighting, scroll management, and keyboard navigation while you keep full control of rendering. By the end of this tutorial, you'll have a working 4-step product tour that uses React 19's native ref-as-prop and `useTransition` for async step navigation.
+Your React 19 app is live, users sign up, and then they stare at the dashboard wondering what to do next. Most React tour libraries were built for React 16. They rely on `forwardRef` wrappers, fight with Server Components, and ship opinionated CSS that clashes with whatever design system you're running. userTourKit is a headless React product tour library (under 23KB gzipped for the core) that gives you step sequencing, element highlighting, scroll management, and keyboard navigation while you keep full control of rendering. By the end of this tutorial, you'll have a working 4-step product tour that uses React 19's native ref-as-prop and `useTransition` for async step navigation.
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -285,7 +285,7 @@ You've got a working product tour in a React 19 app with step sequencing, spotli
 - **Build multi-page tours** using `route` on each step and a router adapter like `useNextAppRouter()` for Next.js App Router
 - **Style the tooltip** by passing your own components. userTourKit's `TourCard`, `TourCardHeader`, `TourCardContent`, and `TourCardFooter` are all replaceable via composition
 
-**Honest limitation:** userTourKit has no visual builder. It requires React developers to implement tours in code, which means non-technical teammates can't create or edit tours on their own. If that's a dealbreaker, a SaaS tool like Appcues or Userpilot gives you drag-and-drop editing. userTourKit also has a smaller community than React Joyride (~7,600 GitHub stars) or Shepherd.js (~12K stars). The tradeoff: you get a sub-8KB bundle, full design system control, and native React 19 support.
+**Honest limitation:** userTourKit has no visual builder. It requires React developers to implement tours in code, which means non-technical teammates can't create or edit tours on their own. If that's a dealbreaker, a SaaS tool like Appcues or Userpilot gives you drag-and-drop editing. userTourKit also has a smaller community than React Joyride (~7,600 GitHub stars) or Shepherd.js (~12K stars). The tradeoff: you get a sub-23KB bundle, full design system control, and native React 19 support.
 Check the [userTourKit docs](https://usertourkit.com/docs) for the full API reference, or clone the [GitHub repo](https://github.com/user-tour-kit/tour-kit) to run the examples locally.
 
 ## FAQ
@@ -302,11 +302,11 @@ A product tour in React is a guided walkthrough that highlights UI elements in s
 
 ### How is userTourKit different from React Joyride?
 
-React Joyride ships opinionated tooltip UI at roughly 30KB gzipped. userTourKit is headless at under 8KB for the core. You get the tour logic (step sequencing, positioning, keyboard nav) and render tooltips with your own components. If you use shadcn/ui or Tailwind, that means zero style conflicts.
+React Joyride ships opinionated tooltip UI at roughly 30KB gzipped. userTourKit is headless at under 23KB for the core. You get the tour logic (step sequencing, positioning, keyboard nav) and render tooltips with your own components. If you use shadcn/ui or Tailwind, that means zero style conflicts.
 
 ### Does adding a product tour affect performance?
 
-userTourKit's core ships under 8KB gzipped with zero runtime dependencies. React Joyride weighs roughly 30KB and Shepherd.js roughly 25KB ([bundlephobia](https://bundlephobia.com), April 2026). userTourKit uses a single SVG spotlight instead of multiple DOM nodes, so layout shift isn't a concern.
+userTourKit's core ships under 23KB gzipped with zero runtime dependencies. React Joyride weighs roughly 30KB and Shepherd.js roughly 25KB ([bundlephobia](https://bundlephobia.com), April 2026). userTourKit uses a single SVG spotlight instead of multiple DOM nodes, so layout shift isn't a concern.
 
 ### Can I use userTourKit with Next.js App Router?
 

@@ -25,7 +25,7 @@ npm install @tourkit/core @tourkit/react
 
 ## Short answer
 
-User Tour Kit, Onborda, NextStepjs, and Driver.js all work with Next.js App Router when placed inside a `"use client"` boundary. Tour Kit is the only headless option with built-in App Router navigation adapters, typed step definitions, and WCAG 2.1 AA accessibility — at under 8 KB gzipped for the core package. React Joyride and Shepherd.js work too, but both need extra configuration to avoid SSR errors and neither supports multi-route tours natively.
+User Tour Kit, Onborda, NextStepjs, and Driver.js all work with Next.js App Router when placed inside a `"use client"` boundary. Tour Kit is the only headless option with built-in App Router navigation adapters, typed step definitions, and WCAG 2.1 AA accessibility — at under 23 KB gzipped for the core package. React Joyride and Shepherd.js work too, but both need extra configuration to avoid SSR errors and neither supports multi-route tours natively.
 
 ## How App Router changes the game for product tours
 
@@ -57,7 +57,7 @@ Libraries that don't account for these patterns will lose track of tour targets 
       <td>User Tour Kit</td>
       <td>Native: router adapters for next/navigation</td>
       <td>Headless (you bring UI)</td>
-      <td>core &lt;8 KB gzipped</td>
+      <td>core &lt;23 KB gzipped</td>
       <td>Yes, built-in</td>
       <td>MIT (free) + Pro</td>
     </tr>
@@ -205,7 +205,7 @@ App Router's intelligent prefetching already reduced average page load times by 
 
 We measured first-load JS impact by running `next build` with bundle analysis enabled:
 
-- **Tour Kit core + react:** Added ~15 KB to the client bundle (gzipped). Tree-shakes unused features.
+- **Tour Kit core + react:** Added ~23 KB to the client bundle (gzipped). Tree-shakes unused features.
 - **React Joyride:** Added ~85 KB (gzipped) to the client bundle. No tree-shaking — the entire library loads even if you use one component.
 - **Onborda:** Added ~45 KB (gzipped) including Framer Motion. Animation library is not optional.
 
@@ -219,7 +219,7 @@ No. As of April 2026, every product tour library requires browser APIs (DOM meas
 
 ### Which product tour library is smallest for Next.js?
 
-Driver.js ships at roughly 5 KB gzipped but has no React bindings or multi-route support. Tour Kit's core is under 8 KB gzipped with TypeScript types, accessibility, and App Router navigation adapters. React Joyride is the largest at approximately 85 KB gzipped.
+Driver.js ships at roughly 5 KB gzipped but has no React bindings or multi-route support. Tour Kit's core is under 23 KB gzipped with TypeScript types, accessibility, and App Router navigation adapters. React Joyride is the largest at approximately 85 KB gzipped.
 
 ### Can I use React Joyride with Next.js App Router?
 

@@ -8,7 +8,7 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $9.99 one-time fee. UserGuiding is a no-code product adoption platform starting at $174/month with a visual Chrome Extension builder. userTourKit suits React teams wanting code ownership and tiny bundles with WCAG 2.1 AA baked in. UserGuiding is better when product managers need to ship onboarding flows without developer involvement.
+userTourKit is a headless React library offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;23KB core bundle for a $9.99 one-time fee. UserGuiding is a no-code product adoption platform starting at $174/month with a visual Chrome Extension builder. userTourKit suits React teams wanting code ownership and tiny bundles with WCAG 2.1 AA baked in. UserGuiding is better when product managers need to ship onboarding flows without developer involvement.
 
 ## What is userTourKit?
 
@@ -32,7 +32,7 @@ userTourKit takes a different approach. Tours are React components with typed st
 
 UserGuiding offers hotspots as pulsing beacons positioned through the visual builder. The Starter plan caps you at 20 active hotspots. Need 21? Upgrade to Growth at $349/month. Positioning hotspots precisely over specific elements can be frustrating, according to multiple Capterra reviewers.
 
-userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped) treats hints as non-sequential, independently dismissible components. Each hint persists across page loads via storage adapters. The `HintHotspot` component renders pulsing beacons; `HintTooltip` appears on hover or click. No artificial caps on how many you can run.
+userTourKit's `@tour-kit/hints` package (&lt;6.5KB gzipped) treats hints as non-sequential, independently dismissible components. Each hint persists across page loads via storage adapters. The `HintHotspot` component renders pulsing beacons; `HintTooltip` appears on hover or click. No artificial caps on how many you can run.
 
 ### Checklists and onboarding flows
 
@@ -92,7 +92,7 @@ UserGuiding loads an external JavaScript snippet on every page. The exact bundle
 
 What we do know: in February 2026, Bromcom (a UK schools platform) published a root cause analysis after UserGuiding's client-side JavaScript caused CPU spikes and degraded browser performance over five consecutive days. Their post-mortem stated that UserGuiding "confirmed to us that software updates made to their client side javascript source code have resulted in CPU spikes and degraded browser responses for their customers." Bromcom built a "kill switch" to disable UserGuiding without requiring a code deploy.
 
-userTourKit's core bundle is under 8KB gzipped. The React package is under 12KB. Hints are under 5KB. Everything tree-shakes, so you ship only the code your application actually uses. There's no external runtime, no network requests to a vendor CDN. And no third-party script can push a bad update to your production environment at 2 AM on a Tuesday.
+userTourKit's core bundle is under 23KB gzipped. The React package is under 12KB. Hints are under 6.5KB. Everything tree-shakes, so you ship only the code your application actually uses. There's no external runtime, no network requests to a vendor CDN. And no third-party script can push a bad update to your production environment at 2 AM on a Tuesday.
 
 ### Framework support and TypeScript
 
@@ -134,7 +134,7 @@ Over three years at 5,000 MAU on UserGuiding's Growth plan, a team would spend r
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 No published compliance |
 | Headless/BYO UI | ✅ Full headless + styled | 🚫 Template-based only |
 | Custom CSS | ✅ Full control (any method) | ⚠️ Growth plan only ($349/mo) |
-| Core bundle (gzipped) | &lt;8KB | Undisclosed (external script) |
+| Core bundle (gzipped) | &lt;23KB | Undisclosed (external script) |
 | No-code visual editor | 🚫 Code-only (by design) | ✅ Chrome Extension |
 | TypeScript support | ✅ Strict mode, exported types | 🚫 No npm package |
 | Framework support | React 18+ only | ✅ Any web application |
@@ -231,7 +231,7 @@ Yes, but it's a rebuild rather than a migration. You'll recreate each guide as t
 userTourKit supports React 18 and 19. Built-in router adapters handle Next.js App Router, Next.js Pages Router, and React Router v6+. The `useNextAppRouter` hook connects userTourKit's navigation to Next.js routing.
 
 **What is the bundle size of userTourKit vs UserGuiding?**
-userTourKit's core is under 8KB gzipped, the React package under 12KB, and hints under 5KB. UserGuiding's external script size isn't publicly disclosed. userTourKit tree-shakes so you ship only the code you use; UserGuiding loads its full runtime on every page.
+userTourKit's core is under 23KB gzipped, the React package under 12KB, and hints under 6.5KB. UserGuiding's external script size isn't publicly disclosed. userTourKit tree-shakes so you ship only the code you use; UserGuiding loads its full runtime on every page.
 
 **Does UserGuiding have an npm package?**
 No. UserGuiding installs via a script tag in your HTML. A help center FAQ confirms developers have asked for an npm package and it doesn't exist. A third-party wrapper from commercetools exists, but UserGuiding itself doesn't publish one.
@@ -244,4 +244,4 @@ Depends on your enterprise. UserGuiding offers SOC2/HIPAA/GDPR compliance, SAML 
 
 ## Final verdict
 
-For React teams with frontend developers, userTourKit gives you better performance (&lt;8KB vs. an undisclosed external script), real accessibility (WCAG 2.1 AA, Lighthouse 100), full design control, and a 99%+ cost reduction over three years. For product managers without developer support who need onboarding live today, UserGuiding's visual builder is genuinely faster to ship. The choice comes down to whether onboarding is an engineering concern or a marketing one. We built userTourKit, so factor that bias in.
+For React teams with frontend developers, userTourKit gives you better performance (&lt;23KB vs. an undisclosed external script), real accessibility (WCAG 2.1 AA, Lighthouse 100), full design control, and a 99%+ cost reduction over three years. For product managers without developer support who need onboarding live today, UserGuiding's visual builder is genuinely faster to ship. The choice comes down to whether onboarding is an engineering concern or a marketing one. We built userTourKit, so factor that bias in.

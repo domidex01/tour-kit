@@ -27,7 +27,7 @@ npm install @tourkit/core @tourkit/react
 
 ## Short answer
 
-Pendo fits product-led enterprise teams with $25K+ budgets who need combined analytics and in-app guidance under one vendor. Appcues fits product managers who want a visual builder and can absorb $3,000-$18,000 per year in MAU-based pricing that grows with their user base. Open-source libraries like Tour Kit fit engineering-led teams who want sub-10KB bundles, full design system control, and predictable costs that don't scale with user count. As of April 2026, Pendo's median contract sits at $48,463/year ([Vendr marketplace data](https://www.vendr.com/marketplace/pendo)), Appcues Growth starts at $879/month for 2,500 MAU ([Userorbit, 2026](https://userorbit.com/blog/appcues-pricing-guide)), and Tour Kit ships at under 8KB gzipped with an MIT license.
+Pendo fits product-led enterprise teams with $25K+ budgets who need combined analytics and in-app guidance under one vendor. Appcues fits product managers who want a visual builder and can absorb $3,000-$18,000 per year in MAU-based pricing that grows with their user base. Open-source libraries like Tour Kit fit engineering-led teams who want sub-10KB bundles, full design system control, and predictable costs that don't scale with user count. As of April 2026, Pendo's median contract sits at $48,463/year ([Vendr marketplace data](https://www.vendr.com/marketplace/pendo)), Appcues Growth starts at $879/month for 2,500 MAU ([Userorbit, 2026](https://userorbit.com/blog/appcues-pricing-guide)), and Tour Kit ships at under 23KB gzipped with an MIT license.
 
 ## How the three approaches actually compare
 
@@ -55,7 +55,7 @@ That distinction drives everything else: performance impact, design flexibility,
       <td>Script size</td>
       <td>~300KB+ agent script</td>
       <td>~200KB+ injected bundle</td>
-      <td>Under 8KB gzipped (core)</td>
+      <td>Under 23KB gzipped (core)</td>
     </tr>
     <tr>
       <td>Visual builder</td>
@@ -240,11 +240,11 @@ Appcues provides CSS customization, but components render inside Appcues' own DO
 
 ### What are the best open-source alternatives to Pendo and Appcues?
 
-Tour Kit (under 8KB, MIT, headless) and React Joyride (37KB, MIT, 603K weekly downloads) lead the React space. Shepherd.js is capable but uses an AGPL license. Driver.js (5KB, MIT) covers basics. Tour Kit is the only one that bundles analytics, surveys, and checklists as composable packages. See our [React tour library benchmark](/blog/react-tour-library-benchmark-2026) for detailed numbers.
+Tour Kit (under 23KB, MIT, headless) and React Joyride (37KB, MIT, 603K weekly downloads) lead the React space. Shepherd.js is capable but uses an AGPL license. Driver.js (5KB, MIT) covers basics. Tour Kit is the only one that bundles analytics, surveys, and checklists as composable packages. See our [React tour library benchmark](/blog/react-tour-library-benchmark-2026) for detailed numbers.
 
 ### Do Pendo and Appcues affect page performance?
 
-Both inject third-party JavaScript at runtime: Pendo adds roughly 300KB, Appcues around 200KB. These scripts consume main-thread time during initialization, impacting Time to Interactive and Interaction to Next Paint ([web.dev, 2025](https://web.dev/vitals/)). Open-source libraries compile into your bundle and tree-shake to as little as 8KB gzipped.
+Both inject third-party JavaScript at runtime: Pendo adds roughly 300KB, Appcues around 200KB. These scripts consume main-thread time during initialization, impacting Time to Interactive and Interaction to Next Paint ([web.dev, 2025](https://web.dev/vitals/)). Open-source libraries compile into your bundle and tree-shake to as little as 23KB gzipped.
 
 ### Can I migrate from Pendo or Appcues to open source later?
 
@@ -275,8 +275,8 @@ Yes, but the migration cost depends on how many flows you've built. Pendo and Ap
   "mainEntity": [
     { "@type": "Question", "name": "Is Pendo worth it for a small team?", "acceptedAnswer": { "@type": "Answer", "text": "Pendo's value proposition is analytics-plus-guides in one platform. For teams under 50 employees, the $25K-$48K annual cost often exceeds what the onboarding component alone justifies. Pendo for Startups at $7,000/year is more reasonable, but you graduate to standard pricing after Series B." } },
     { "@type": "Question", "name": "Can Appcues match a custom design system?", "acceptedAnswer": { "@type": "Answer", "text": "Appcues provides CSS customization, but components render inside Appcues' own DOM layer, not your React tree. Matching a Tailwind or shadcn/ui design system requires significant CSS overrides. Open-source headless libraries like Tour Kit render inside your component tree." } },
-    { "@type": "Question", "name": "What are the best open-source alternatives to Pendo and Appcues?", "acceptedAnswer": { "@type": "Answer", "text": "The top open-source product tour libraries for React in 2026 are Tour Kit (under 8KB, MIT, headless), React Joyride (37KB, MIT, 603K weekly downloads), Shepherd.js (50KB, AGPL), and Driver.js (5KB, MIT). Tour Kit includes analytics, surveys, and checklists as composable packages." } },
-    { "@type": "Question", "name": "Do Pendo and Appcues affect page performance?", "acceptedAnswer": { "@type": "Answer", "text": "Both inject third-party JavaScript at runtime. Pendo adds approximately 300KB and Appcues around 200KB. These impact Time to Interactive and Interaction to Next Paint. Open-source libraries compile into your bundle and tree-shake to as little as 8KB gzipped." } },
+    { "@type": "Question", "name": "What are the best open-source alternatives to Pendo and Appcues?", "acceptedAnswer": { "@type": "Answer", "text": "The top open-source product tour libraries for React in 2026 are Tour Kit (under 23KB, MIT, headless), React Joyride (37KB, MIT, 603K weekly downloads), Shepherd.js (50KB, AGPL), and Driver.js (5KB, MIT). Tour Kit includes analytics, surveys, and checklists as composable packages." } },
+    { "@type": "Question", "name": "Do Pendo and Appcues affect page performance?", "acceptedAnswer": { "@type": "Answer", "text": "Both inject third-party JavaScript at runtime. Pendo adds approximately 300KB and Appcues around 200KB. These impact Time to Interactive and Interaction to Next Paint. Open-source libraries compile into your bundle and tree-shake to as little as 23KB gzipped." } },
     { "@type": "Question", "name": "Can I migrate from Pendo or Appcues to open source later?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, but migration means rebuilding each flow in code since Pendo and Appcues store configurations in their cloud. Budget 2-4 hours per flow for a typical migration." } }
   ]
 })}</script>

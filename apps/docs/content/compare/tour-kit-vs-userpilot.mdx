@@ -8,7 +8,7 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $9.99 one-time Pro fee. Userpilot is a no-code product adoption platform starting at $299/month. userTourKit suits React teams wanting code ownership and tiny bundles. Userpilot is better when non-technical PMs need to build onboarding flows without developers.
+userTourKit is a headless React library offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;23KB core bundle for a $9.99 one-time Pro fee. Userpilot is a no-code product adoption platform starting at $299/month. userTourKit suits React teams wanting code ownership and tiny bundles. Userpilot is better when non-technical PMs need to build onboarding flows without developers.
 
 ## What is userTourKit?
 
@@ -32,7 +32,7 @@ The trade-off is control versus speed-to-publish. Userpilot wins on time-to-firs
 
 ### Hints and hotspots
 
-Both tools support hotspots. Userpilot renders them as part of its proprietary DOM overlay. userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped) provides `HintHotspot` and `HintTooltip` components with independent dismiss state per hint. The key difference is persistence: userTourKit hints dismiss independently and persist across page loads via storage adapters. Userpilot's hotspots are tied to its flow system and don't offer per-hint programmatic control through a hook like `useHint('feature-name')`.
+Both tools support hotspots. Userpilot renders them as part of its proprietary DOM overlay. userTourKit's `@tour-kit/hints` package (&lt;6.5KB gzipped) provides `HintHotspot` and `HintTooltip` components with independent dismiss state per hint. The key difference is persistence: userTourKit hints dismiss independently and persist across page loads via storage adapters. Userpilot's hotspots are tied to its flow system and don't offer per-hint programmatic control through a hook like `useHint('feature-name')`.
 
 For developer teams that want to scatter contextual hints across an app and manage each one through code, userTourKit gives more granular control. For PM teams that want to drop a pulsing dot on a button through a Chrome extension, Userpilot is faster.
 
@@ -96,7 +96,7 @@ userTourKit's accessibility is its strongest technical differentiator against ev
 
 ### Bundle size and performance
 
-userTourKit's core ships at &lt;8KB gzipped. The React package adds &lt;12KB. Hints adds &lt;5KB. All packages tree-shake.
+userTourKit's core ships at &lt;23KB gzipped. The React package adds &lt;12KB. Hints adds &lt;6.5KB. All packages tree-shake.
 
 Userpilot's npm package (`userpilot@1.4.2`) is 8.38KB, but it's a shim. The actual SDK loads from Userpilot's CDN (`js.userpilot.io`) at runtime, and the full size is undisclosed. Installation docs recommend placing the script at the beginning of `<head>` with no mention of `async` or `defer`.
 
@@ -143,7 +143,7 @@ Over three years, the math works out to: userTourKit Pro costs $9.99 total. User
 | Headless / BYO UI | ✅ Full headless mode | 🚫 Proprietary overlay |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | ⚙️ "Aligns with" (not certified) |
 | TypeScript | ✅ Strict mode, full inference | 🚫 No type definitions |
-| Core bundle (gzipped) | &lt;8KB | 8KB shim + CDN-loaded SDK (unknown) |
+| Core bundle (gzipped) | &lt;23KB | 23KB shim + CDN-loaded SDK (unknown) |
 | Self-hosted | ✅ Default (npm install) | ⚠️ Growth+ only, multi-step setup |
 | Framework | React 18+ | Any (script tag) |
 | Mobile SDK | 🚫 Web only | ⚠️ Growth+ (iOS/Android) |
@@ -239,7 +239,7 @@ Yes. The migration is manual since there's no automated import. You audit existi
 userTourKit supports React 18 and React 19 as peer dependencies. It ships router adapters for Next.js App Router, Next.js Pages Router, and React Router v6+. Userpilot works with any framework but requires manual `userpilot.reload()` calls on SPA route changes.
 
 **What is the bundle size of userTourKit vs Userpilot?**
-userTourKit's core is &lt;8KB gzipped, React package &lt;12KB, hints &lt;5KB. Userpilot's npm shim is 8KB, but the actual SDK loads from their CDN at runtime with an undisclosed total size. userTourKit tree-shakes; Userpilot's CDN-loaded SDK doesn't.
+userTourKit's core is &lt;23KB gzipped, React package &lt;12KB, hints &lt;6.5KB. Userpilot's npm shim is 8KB, but the actual SDK loads from their CDN at runtime with an undisclosed total size. userTourKit tree-shakes; Userpilot's CDN-loaded SDK doesn't.
 
 **Does Userpilot support TypeScript?**
 As of March 2026, the Userpilot npm package ships no `.d.ts` type definitions and no `@types/userpilot` package exists. userTourKit uses TypeScript strict mode with full type inference across all packages.

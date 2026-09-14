@@ -128,7 +128,7 @@ The React ecosystem has moved faster than its tour libraries. Here's how the maj
 <td>Yes</td>
 <td>Yes</td>
 <td>Inherits your theme</td>
-<td>~8KB gzipped (core)</td>
+<td>~23KB gzipped (core)</td>
 </tr>
 </tbody>
 </table>
@@ -145,7 +145,7 @@ Three structural advantages compound over time.
 
 **Accessibility comes from the right layer.** Traditional tour libraries bolt on ARIA attributes as an afterthought. A headless approach pushes accessibility into the hook layer: focus trapping, keyboard navigation, `aria-live` announcements, and `prefers-reduced-motion` support all happen before your JSX enters the picture. Intro.js implements tour step buttons as `<a>` tags. That's not a bug to fix; it's an architecture that can't be fixed.
 
-**Bundle size stays under control.** React Joyride ships at ~37KB gzipped. Tour Kit's core is ~8KB. When the tour library doesn't include a rendering layer, styles, or animation system, there's less code to ship. For a feature that most users encounter once, during their first session, that 29KB difference matters.
+**Bundle size stays under control.** React Joyride ships at ~37KB gzipped. Tour Kit's core is ~23KB. When the tour library doesn't include a rendering layer, styles, or animation system, there's less code to ship. For a feature that most users encounter once, during their first session, that 29KB difference matters.
 
 ## The counterargument: why someone might disagree
 
@@ -185,7 +185,7 @@ Choosing between a no-code platform, a headless library, and building from scrat
 
 **Build from scratch if:** you only need a single 3-step tooltip flow and don't want any dependency. But budget 40-80 hours of engineering time for scroll handling, focus management, positioning, resize observers, and keyboard navigation. We built Tour Kit because we went down this road once and decided never to do it again.
 
-We built Tour Kit as an open-source, headless-first tour library. The core is MIT licensed, under 8KB gzipped, with zero runtime dependencies. React 18 and 19 both work. Ten composable packages (install only what you need). Full disclosure: this is our project, so take the recommendation with appropriate skepticism. Every claim is verifiable against [npm](https://www.npmjs.com/), [GitHub](https://github.com/), and [bundlephobia](https://bundlephobia.com/).
+We built Tour Kit as an open-source, headless-first tour library. The core is MIT licensed, under 23KB gzipped, with zero runtime dependencies. React 18 and 19 both work. Ten composable packages (install only what you need). Full disclosure: this is our project, so take the recommendation with appropriate skepticism. Every claim is verifiable against [npm](https://www.npmjs.com/), [GitHub](https://github.com/), and [bundlephobia](https://bundlephobia.com/).
 
 That said, Tour Kit doesn't have a visual builder. It requires React developers. The community is smaller than React Joyride's. If those are dealbreakers for your team, they're legitimate dealbreakers.
 
@@ -203,7 +203,7 @@ Yes. Because a headless tour library renders no UI of its own, it works with Tai
 
 ### What's the performance difference between headless and styled tour libraries?
 
-Tour Kit's core ships at approximately 8KB gzipped with zero runtime dependencies. React Joyride ships at approximately 37KB gzipped. For a feature most users encounter once during their first session, that 29KB difference directly affects Time to Interactive on the critical first load. Tour Kit's headless architecture also avoids style injection, eliminating the layout recalculation that styled libraries trigger on mount.
+Tour Kit's core ships at approximately 23KB gzipped with zero runtime dependencies. React Joyride ships at approximately 37KB gzipped. For a feature most users encounter once during their first session, that 29KB difference directly affects Time to Interactive on the critical first load. Tour Kit's headless architecture also avoids style injection, eliminating the layout recalculation that styled libraries trigger on mount.
 
 ### Do headless tours pass accessibility audits?
 

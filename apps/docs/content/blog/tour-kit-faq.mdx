@@ -27,7 +27,7 @@ Here are the questions developers ask most, organized by when they come up in th
 
 ## Short answer: what is Tour Kit?
 
-Tour Kit is an open-source, headless product tour library for React. It ships as 10 composable packages, so you install only what you need. The core package is under 8KB gzipped with zero runtime dependencies. It handles tour logic (step sequencing, element targeting, scroll handling, focus management) without rendering any UI. You bring your own components. Tour Kit works with shadcn/ui, Radix, Tailwind, or any design system because it doesn't ship styles to fight against.
+Tour Kit is an open-source, headless product tour library for React. It ships as 10 composable packages, so you install only what you need. The core package is under 23KB gzipped with zero runtime dependencies. It handles tour logic (step sequencing, element targeting, scroll handling, focus management) without rendering any UI. You bring your own components. Tour Kit works with shadcn/ui, Radix, Tailwind, or any design system because it doesn't ship styles to fight against.
 
 ## What questions do developers ask before installing?
 
@@ -55,7 +55,7 @@ The questions below come from GitHub issues across tour libraries, Reddit thread
     <tr>
       <td>Architecture</td>
       <td>Bundle size?</td>
-      <td>Core: &lt;8KB gzipped, zero dependencies</td>
+      <td>Core: &lt;23KB gzipped, zero dependencies</td>
     </tr>
     <tr>
       <td>Architecture</td>
@@ -65,7 +65,7 @@ The questions below come from GitHub issues across tour libraries, Reddit thread
     <tr>
       <td>Comparison</td>
       <td>vs React Joyride?</td>
-      <td>Headless vs opinionated, 8KB vs 498KB unpacked</td>
+      <td>Headless vs opinionated, 23KB vs 498KB unpacked</td>
     </tr>
     <tr>
       <td>Features</td>
@@ -127,7 +127,7 @@ LogRocket recommends this pattern explicitly: "Tour libraries should be loaded d
 
 ## How big is the Tour Kit bundle?
 
-Tour Kit's core package is under 8KB gzipped with zero runtime dependencies. The React package adds roughly 4KB. You install only the packages you need. Analytics, checklists, surveys, and other features are separate packages that tree-shake independently.
+Tour Kit's core package is under 23KB gzipped with zero runtime dependencies. The React package adds roughly 4KB. You install only the packages you need. Analytics, checklists, surveys, and other features are separate packages that tree-shake independently.
 
 For context, the bundle size spread across tour libraries is enormous:
 
@@ -147,7 +147,7 @@ For context, the bundle size spread across tour libraries is enormous:
     </tr>
     <tr>
       <td>Tour Kit (core)</td>
-      <td>&lt;8KB</td>
+      <td>&lt;23KB</td>
       <td>Zero</td>
     </tr>
     <tr>
@@ -264,7 +264,7 @@ React Joyride has 400,000+ weekly npm downloads and 5,100+ GitHub stars. It's th
     </tr>
     <tr>
       <td>Bundle size</td>
-      <td>&lt;8KB core, ~12KB with React</td>
+      <td>&lt;23KB core, ~23KB with React</td>
       <td>498KB unpacked</td>
     </tr>
     <tr>
@@ -456,7 +456,7 @@ If you're evaluating Tour Kit, here's the decision framework:
 **Choose Tour Kit if:**
 - You have a React 18+ app with a design system or Tailwind setup
 - You want tours that look exactly like the rest of your app
-- Bundle size matters (core is under 8KB gzipped)
+- Bundle size matters (core is under 23KB gzipped)
 - You want tour state in your own database
 - Your team is comfortable writing React components
 
