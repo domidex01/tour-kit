@@ -325,7 +325,7 @@ Developers adopting React Compiler with existing tour implementations tend to ma
 
 The compiler adds runtime overhead. Each memoization guard costs about 0.02 kB, and the compiler runtime itself adds roughly 1 kB. For a typical app with hundreds of components, this means a slightly larger bundle.
 
-For product tour libraries, the math works out in your favor. Tour Kit's core ships at under 8 kB gzipped. The compiler's ~1 kB overhead is a 12.5% increase in absolute terms, but the INP improvement from memoized tour transitions more than compensates. Wakelet saw their INP drop from 275ms to 240ms, a 15% improvement that directly affects Core Web Vitals scores ([InfoQ](https://www.infoq.com/news/2025/12/react-compiler-meta/)).
+For product tour libraries, the math works out in your favor. Tour Kit's core ships at under 23 kB gzipped. The compiler's ~1 kB overhead is a 12.5% increase in absolute terms, but the INP improvement from memoized tour transitions more than compensates. Wakelet saw their INP drop from 275ms to 240ms, a 15% improvement that directly affects Core Web Vitals scores ([InfoQ](https://www.infoq.com/news/2025/12/react-compiler-meta/)).
 
 One caveat: Tour Kit is React 18+ only, and the compiler works with React 17+ via the `react-compiler-runtime` package. If you're still on React 17, you can still benefit from the compiler without upgrading React versions.
 

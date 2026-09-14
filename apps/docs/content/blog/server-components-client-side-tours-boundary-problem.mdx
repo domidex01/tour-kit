@@ -291,7 +291,7 @@ export default function OnboardingPage() {
 }
 ```
 
-The `OnboardingDashboard` can be a Server Component. The `steps` array serializes through Flight. The tour overlay only renders after hydration. Total client JavaScript added: Tour Kit's ~8KB core plus whatever tooltip UI you build.
+The `OnboardingDashboard` can be a Server Component. The `steps` array serializes through Flight. The tour overlay only renders after hydration. Total client JavaScript added: Tour Kit's ~23KB core plus whatever tooltip UI you build.
 
 ## Bundle impact: RSC vs traditional SPA
 
@@ -302,14 +302,14 @@ We measured the impact of adding a product tour to both an RSC-enabled Next.js 1
 <tr><th>Metric</th><th>Traditional SPA (Vite)</th><th>Next.js App Router (RSC)</th><th>Difference</th></tr>
 </thead>
 <tbody>
-<tr><td>Tour Kit client JS</td><td>~8KB gzipped</td><td>~8KB gzipped</td><td>Same (the library is client-only either way)</td></tr>
+<tr><td>Tour Kit client JS</td><td>~23KB gzipped</td><td>~23KB gzipped</td><td>Same (the library is client-only either way)</td></tr>
 <tr><td>Total page JS (with tour)</td><td>100% baseline</td><td>60-80% of baseline</td><td>20-40% reduction from RSC, not the tour</td></tr>
 <tr><td>TTFB</td><td>Baseline</td><td>3-5x faster</td><td>Server rendering eliminates round trips</td></tr>
 <tr><td>Tour step config JS cost</td><td>Included in bundle</td><td>0 KB (serialized via Flight)</td><td>Config data stays off the client bundle</td></tr>
 </tbody>
 </table>
 
-The honest takeaway: adding Tour Kit costs the same ~8KB regardless of your rendering strategy. But RSC lets you keep everything *around* the tour leaner. The step configuration data doesn't inflate the client bundle because it serializes through the Flight protocol instead of being imported as a JavaScript module.
+The honest takeaway: adding Tour Kit costs the same ~23KB regardless of your rendering strategy. But RSC lets you keep everything *around* the tour leaner. The step configuration data doesn't inflate the client bundle because it serializes through the Flight protocol instead of being imported as a JavaScript module.
 
 Contrast that with a library like React Joyride at ~37KB gzipped. In a traditional SPA, 37KB is a fixed cost. In an RSC app, it's still a fixed cost, but now it's a much larger share of your remaining client JavaScript because everything else got smaller. The relative impact grows as your baseline shrinks.
 
@@ -368,7 +368,7 @@ export function AccessibleTooltip({ title, content, onNext, onPrev }: TooltipPro
 
 ## Tools and libraries for RSC-compatible tours
 
-**[Tour Kit](https://tourkit.dev)**: Headless architecture means the provider is thin (~8KB core). The children slot pattern is the default. RSC documentation and patterns are published. (We built this — bias disclosed.)
+**[Tour Kit](https://tourkit.dev)**: Headless architecture means the provider is thin (~23KB core). The children slot pattern is the default. RSC documentation and patterns are published. (We built this — bias disclosed.)
 
 **[Onborda](https://www.onborda.dev/)**: Built specifically for Next.js App Router. Handles route transitions natively. Requires Framer Motion as a dependency, which adds significant client JavaScript.
 
@@ -396,7 +396,7 @@ Tour Kit and other React tour libraries work with Server Components by isolating
 
 ### Why does 'use client' affect my tour library's bundle size?
 
-The `'use client'` directive marks a module boundary, not just a single component. Every file imported by a `'use client'` module becomes client code too. If your tour provider imports animation libraries or icon sets, all of those ship to the browser. Tour Kit keeps its provider under 8KB gzipped to limit the boundary's blast radius.
+The `'use client'` directive marks a module boundary, not just a single component. Every file imported by a `'use client'` module becomes client code too. If your tour provider imports animation libraries or icon sets, all of those ship to the browser. Tour Kit keeps its provider under 23KB gzipped to limit the boundary's blast radius.
 
 ### How do I avoid hydration mismatches with product tours?
 
@@ -483,7 +483,7 @@ The server-client boundary is a fundamental architectural decision in React, not
       "name": "Why does 'use client' affect my tour library's bundle size?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The 'use client' directive marks a module boundary, not just a single component. Every file imported by a 'use client' module becomes client code. If your tour provider imports heavy dependencies, all of those ship to the browser. Tour Kit keeps its provider imports minimal at under 8KB gzipped."
+        "text": "The 'use client' directive marks a module boundary, not just a single component. Every file imported by a 'use client' module becomes client code. If your tour provider imports heavy dependencies, all of those ship to the browser. Tour Kit keeps its provider imports minimal at under 23KB gzipped."
       }
     },
     {

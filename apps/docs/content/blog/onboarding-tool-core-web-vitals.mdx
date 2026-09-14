@@ -188,7 +188,7 @@ The CWV impact of this approach:
 
 **CLS: zero layout shifts from late injection.** Tour Kit renders tooltips and overlays through React portals that are part of your component lifecycle. They mount when your component mounts, not on a CDN-dependent timer. No late-arriving banners, no surprise modals.
 
-Tour Kit's core ships at under 8KB gzipped. You can verify this yourself on [bundlephobia](https://bundlephobia.com/) or by running `npx size-limit` in the repo. That transparency is the architectural difference — you can audit the cost before you ship it.
+Tour Kit's core ships at under 23KB gzipped. You can verify this yourself on [bundlephobia](https://bundlephobia.com/) or by running `npx size-limit` in the repo. That transparency is the architectural difference — you can audit the cost before you ship it.
 
 ### What you trade
 

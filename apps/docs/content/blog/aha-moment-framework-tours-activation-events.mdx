@@ -288,7 +288,7 @@ Mapping tours to activation events requires three categories of tools working to
 
 **Analytics platforms** identify the activation event. Mixpanel, Amplitude, and PostHog all support cohort analysis where you compare retained vs. churned users to find the action that predicts stickiness. [Mixpanel's PLG guide](https://mixpanel.com/blog/product-led-growth/) covers this methodology in detail.
 
-**Tour libraries** guide users to that event. We built Tour Kit with headless tour components and `onStepComplete` / `onTourEnd` callbacks that pipe into whatever analytics platform you use, at under 8KB gzipped. Full disclosure: it's our project, so take that with appropriate skepticism. The library has a smaller community than React Joyride (603K weekly downloads) and no visual builder.
+**Tour libraries** guide users to that event. We built Tour Kit with headless tour components and `onStepComplete` / `onTourEnd` callbacks that pipe into whatever analytics platform you use, at under 23KB gzipped. Full disclosure: it's our project, so take that with appropriate skepticism. The library has a smaller community than React Joyride (603K weekly downloads) and no visual builder.
 
 **A/B testing tools** validate the mapping. Dropbox improved their activation rate by over 10% through A/B testing different onboarding flows ([Userpilot](https://userpilot.com/blog/slack-onboarding/)). Once you've mapped a tour to an activation event, test whether a different tour structure (fewer steps, different trigger, alternative emotional hook) drives higher activation.
 

@@ -59,10 +59,10 @@ Full disclosure: Tour Kit is our project. We've tried to be fair, but you should
 
 ## 1. Tour Kit: best for React teams wanting code ownership
 
-Tour Kit is a headless React library that ships tour logic without prescribing UI. The core package weighs under 8KB gzipped with zero runtime dependencies, and it works natively with React 18 and 19. Ten composable packages cover tours, hints, checklists, announcements, surveys, and analytics. Install only what you need.
+Tour Kit is a headless React library that ships tour logic without prescribing UI. The core package weighs under 23KB gzipped with zero runtime dependencies, and it works natively with React 18 and 19. Ten composable packages cover tours, hints, checklists, announcements, surveys, and analytics. Install only what you need.
 
 **Strengths:**
-- Core bundle under 8KB gzipped, tree-shakeable across 10 packages
+- Core bundle under 23KB gzipped, tree-shakeable across 10 packages
 - WCAG 2.1 AA compliant with built-in focus management and keyboard navigation
 - Works with shadcn/ui, Radix, Tailwind, or any design system (no style overrides needed)
 - TypeScript-first with full type exports
@@ -268,7 +268,7 @@ The decision tree is shorter than the ten entries above suggest.
 
 **Choose a budget option (UserGuiding)** if you're pre-Series A and need basic walkthroughs today.
 
-Is bundle size a concern? Tour Kit's core ships at under 8KB gzipped. Shepherd.js ships at 37KB. SaaS platform scripts typically add 80-200KB. According to [web.dev](https://web.dev/vitals/), every 100KB of JavaScript adds measurable latency on mobile connections, directly impacting Core Web Vitals scores.
+Is bundle size a concern? Tour Kit's core ships at under 23KB gzipped. Shepherd.js ships at 37KB. SaaS platform scripts typically add 80-200KB. According to [web.dev](https://web.dev/vitals/), every 100KB of JavaScript adds measurable latency on mobile connections, directly impacting Core Web Vitals scores.
 
 [Get started with Tour Kit →](https://tourkit.dev/docs/getting-started) | [View on GitHub](https://github.com/anthropics/tour-kit)
 
@@ -276,7 +276,7 @@ Is bundle size a concern? Tour Kit's core ships at under 8KB gzipped. Shepherd.j
 
 ### What are in-app guidance tools?
 
-In-app guidance tools help SaaS companies onboard users and drive adoption through contextual messages inside the product. They range from lightweight JavaScript libraries like Tour Kit (under 8KB gzipped) to full platforms like Pendo. As of April 2026, pricing spans $69/month to $405,000/year.
+In-app guidance tools help SaaS companies onboard users and drive adoption through contextual messages inside the product. They range from lightweight JavaScript libraries like Tour Kit (under 23KB gzipped) to full platforms like Pendo. As of April 2026, pricing spans $69/month to $405,000/year.
 
 ### Do I need a SaaS platform or can I use an open-source library?
 
@@ -292,7 +292,7 @@ Pricing ranges from free to $405,000/year. Open-source libraries (Tour Kit core,
 
 ### Can in-app guidance tools hurt website performance?
 
-Yes. SaaS platform scripts typically add 80-200KB to your JavaScript bundle, which impacts Core Web Vitals on mobile. Headless libraries minimize this: Tour Kit's core is under 8KB gzipped, Shepherd.js ships at 37KB. Measure impact on Largest Contentful Paint before deploying to production.
+Yes. SaaS platform scripts typically add 80-200KB to your JavaScript bundle, which impacts Core Web Vitals on mobile. Headless libraries minimize this: Tour Kit's core is under 23KB gzipped, Shepherd.js ships at 37KB. Measure impact on Largest Contentful Paint before deploying to production.
 
 ---
 
@@ -356,7 +356,7 @@ Yes. SaaS platform scripts typically add 80-200KB to your JavaScript bundle, whi
       "name": "What are in-app guidance tools?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "In-app guidance tools are software that helps SaaS companies onboard users, announce features, and drive adoption through contextual messages displayed inside the product. These tools range from lightweight JavaScript libraries like Tour Kit (under 8KB gzipped) to full platforms like Pendo that combine guidance with product analytics."
+        "text": "In-app guidance tools are software that helps SaaS companies onboard users, announce features, and drive adoption through contextual messages displayed inside the product. These tools range from lightweight JavaScript libraries like Tour Kit (under 23KB gzipped) to full platforms like Pendo that combine guidance with product analytics."
       }
     },
     {
@@ -388,7 +388,7 @@ Yes. SaaS platform scripts typically add 80-200KB to your JavaScript bundle, whi
       "name": "Can in-app guidance tools hurt website performance?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. SaaS platform scripts typically add 80-200KB to your JavaScript bundle. Headless libraries minimize this: Tour Kit core is under 8KB gzipped, Shepherd.js ships at 37KB. Measure impact on Largest Contentful Paint and Interaction to Next Paint before deploying."
+        "text": "Yes. SaaS platform scripts typically add 80-200KB to your JavaScript bundle. Headless libraries minimize this: Tour Kit core is under 23KB gzipped, Shepherd.js ships at 37KB. Measure impact on Largest Contentful Paint and Interaction to Next Paint before deploying."
       }
     }
   ]

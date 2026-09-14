@@ -42,7 +42,7 @@ The pattern works with any auth provider (Clerk, Auth.js, Supabase Auth, or your
 
 ## Step 1: install Tour Kit
 
-Tour Kit ships as two packages for this tutorial: `@tourkit/core` (under 8KB gzipped) for the tour engine and step evaluation logic, and `@tourkit/react` for the React component bindings that render steps in your component tree.
+Tour Kit ships as two packages for this tutorial: `@tourkit/core` (under 23KB gzipped) for the tour engine and step evaluation logic, and `@tourkit/react` for the React component bindings that render steps in your component tree.
 
 ```bash
 # npm
@@ -419,7 +419,7 @@ Yes. Tour Kit supports React Server Components by keeping all tour logic in clie
 
 ### Does adding a conditional product tour affect performance?
 
-Tour Kit's core is under 8KB gzipped. The `when` callbacks are plain synchronous functions with no DOM queries or network calls. We measured initialization at under 2ms with 20 conditional steps on Vite + React 19. Spotlight overlays use GPU-accelerated CSS transforms, not DOM re-parenting.
+Tour Kit's core is under 23KB gzipped. The `when` callbacks are plain synchronous functions with no DOM queries or network calls. We measured initialization at under 2ms with 20 conditional steps on Vite + React 19. Spotlight overlays use GPU-accelerated CSS transforms, not DOM re-parenting.
 
 ### What happens if a user has multiple roles?
 
@@ -501,7 +501,7 @@ No. Client-side role checks improve UX but don't enforce authorization. A user c
       "name": "Does adding a conditional product tour affect performance?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit's core bundle is under 8KB gzipped. The when callbacks are plain synchronous functions with no DOM queries or network calls. Initialization takes under 2ms in a Vite + React 19 project with 20 conditional steps."
+        "text": "Tour Kit's core bundle is under 23KB gzipped. The when callbacks are plain synchronous functions with no DOM queries or network calls. Initialization takes under 2ms in a Vite + React 19 project with 20 conditional steps."
       }
     },
     {

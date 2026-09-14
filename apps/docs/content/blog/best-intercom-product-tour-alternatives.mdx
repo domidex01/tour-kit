@@ -103,13 +103,13 @@ Intercom's own best practice docs acknowledge their tours should explain process
 
 ## 1. Tour Kit: best for React teams with custom design systems
 
-Tour Kit is a headless, composable product tour library for React that ships at under 8KB gzipped for the core package. Instead of giving you pre-built tooltip UI, it gives you hooks and primitives. You render steps with your own components, which means tours match your design system by default rather than fighting a theme editor.
+Tour Kit is a headless, composable product tour library for React that ships at under 23KB gzipped for the core package. Instead of giving you pre-built tooltip UI, it gives you hooks and primitives. You render steps with your own components, which means tours match your design system by default rather than fighting a theme editor.
 
 We built Tour Kit. So yes, we're biased. Every number here links to a public source so you can verify independently.
 
 ### Strengths
 
-- Core bundle under 8KB gzipped with zero runtime dependencies
+- Core bundle under 23KB gzipped with zero runtime dependencies
 - Full WCAG 2.1 AA compliance: ARIA roles, focus trapping, keyboard navigation. Intercom's accessibility work focused on the Messenger widget, not product tours ([Intercom Engineering Blog](https://www.intercom.com/blog/messenger-accessibility/)).
 - 10 composable packages: install only what you need (tours, hints, checklists, surveys, analytics)
 - Works with shadcn/ui, Radix, Tailwind, or any component library. Smashing Magazine's guide to product tours in React highlights the importance of design system integration ([Smashing Magazine, 2020](https://www.smashingmagazine.com/2020/08/guide-product-tours-react-apps/)).
@@ -273,7 +273,7 @@ The six tools above fall into three categories. Your team composition determines
 
 Two questions that narrow it quickly: Do you need mobile tour support? (Intercom doesn't have it. Tour Kit, Appcues, UserGuiding, Product Fruits, and Intro.js do.) And does your team write code or use visual builders? That split determines everything else.
 
-One angle no competitor article mentions: bundle size. Intercom loads its entire Messenger SDK even if you only use tours. Tour Kit's core ships at under 8KB gzipped. For teams where Core Web Vitals matter, the JavaScript weight of your tour tool is worth measuring. Google's research on web.dev shows that every 100KB of JavaScript costs roughly 350ms on a median mobile device ([web.dev, 2025](https://web.dev/vitals/)).
+One angle no competitor article mentions: bundle size. Intercom loads its entire Messenger SDK even if you only use tours. Tour Kit's core ships at under 23KB gzipped. For teams where Core Web Vitals matter, the JavaScript weight of your tour tool is worth measuring. Google's research on web.dev shows that every 100KB of JavaScript costs roughly 350ms on a median mobile device ([web.dev, 2025](https://web.dev/vitals/)).
 
 [Try Tour Kit in a CodeSandbox demo](https://tourkit.dev/docs/examples) or browse the [API reference](https://tourkit.dev/docs/api).
 
@@ -281,7 +281,7 @@ One angle no competitor article mentions: bundle size. Intercom loads its entire
 
 ### What is the best Intercom product tour alternative in 2026?
 
-Tour Kit is the best Intercom product tour alternative for React teams in 2026. Ships under 8KB gzipped with WCAG 2.1 AA accessibility. Costs $0 for the open-source core or $9.99 one-time for Pro. No recurring fees versus Intercom's $273/month minimum.
+Tour Kit is the best Intercom product tour alternative for React teams in 2026. Ships under 23KB gzipped with WCAG 2.1 AA accessibility. Costs $0 for the open-source core or $9.99 one-time for Pro. No recurring fees versus Intercom's $273/month minimum.
 
 ### Why are developers switching away from Intercom product tours?
 
@@ -355,7 +355,7 @@ As of April 2026, Intercom product tours require a base plan ($74-$132 per seat 
       "name": "What is the best Intercom product tour alternative in 2026?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit is the best Intercom product tour alternative for React teams in 2026. Ships under 8KB gzipped with WCAG 2.1 AA accessibility. Costs $0 for the open-source core or $9.99 one-time for Pro. No recurring fees versus Intercom's $273/month minimum."
+        "text": "Tour Kit is the best Intercom product tour alternative for React teams in 2026. Ships under 23KB gzipped with WCAG 2.1 AA accessibility. Costs $0 for the open-source core or $9.99 one-time for Pro. No recurring fees versus Intercom's $273/month minimum."
       }
     },
     {

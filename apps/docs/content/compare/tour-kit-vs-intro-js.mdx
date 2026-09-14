@@ -8,7 +8,7 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle under an MIT license. Intro.js is a framework-agnostic tour library with ~23,900 GitHub stars, AGPL-3.0 licensing, and an 8-month release gap since v8.3.2. userTourKit fits React teams needing design system integration and WCAG compliance. Intro.js is better for vanilla JavaScript sites where the data-attribute setup pattern makes sense.
+userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling in a &lt;23KB core bundle under an MIT license. Intro.js is a framework-agnostic tour library with ~23,900 GitHub stars, AGPL-3.0 licensing, and an 8-month release gap since v8.3.2. userTourKit fits React teams needing design system integration and WCAG compliance. Intro.js is better for vanilla JavaScript sites where the data-attribute setup pattern makes sense.
 
 ## What is userTourKit?
 
@@ -30,7 +30,7 @@ userTourKit's tour engine (`@tour-kit/core`) takes a different approach entirely
 
 Intro.js has hints. Persistent, pulsating hotspots that draw attention to features without a linear flow. They work. But a developer on Medium documented a significant viewport bug: when elements with hints scroll out of view inside a container, the hint pulsars stay visible, floating over other UI components. That's the kind of issue that erodes user trust in your onboarding.
 
-userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped) provides non-sequential hotspots with independent lifecycles: show, hide, dismiss. Dismissed hints persist across page loads via the storage adapter. `HintHotspot` renders a pulsing beacon; `HintTooltip` appears on hover or click. No viewport ghost bugs because positioning runs through `@floating-ui` rather than manual `getBoundingClientRect` calculations.
+userTourKit's `@tour-kit/hints` package (&lt;6.5KB gzipped) provides non-sequential hotspots with independent lifecycles: show, hide, dismiss. Dismissed hints persist across page loads via the storage adapter. `HintHotspot` renders a pulsing beacon; `HintTooltip` appears on hover or click. No viewport ghost bugs because positioning runs through `@floating-ui` rather than manual `getBoundingClientRect` calculations.
 
 ### Checklists and onboarding flows
 
@@ -82,7 +82,7 @@ userTourKit ships WCAG 2.1 AA compliance by default. `useFocusTrap()` manages fo
 
 Intro.js claims ~10KB minified for JavaScript, but the required `introjs.css` stylesheet adds more weight. The library isn't tree-shakeable. Everything ships as one bundle whether you use hints or not.
 
-userTourKit's core is under 8KB gzipped. The React UI package is under 12KB. Hints: under 5KB. Each package is a separate entry point, so tree-shaking works. The headless architecture means you only ship the logic you use.
+userTourKit's core is under 23KB gzipped. The React UI package is under 12KB. Hints: under 6.5KB. Each package is a separate entry point, so tree-shaking works. The headless architecture means you only ship the logic you use.
 
 On raw numbers, Intro.js is lighter than many competitors. But its CSS requirement and non-tree-shakeable bundle mean the practical weight is higher than the headline number suggests.
 
@@ -122,7 +122,7 @@ If you're building anything commercial, the licensing difference alone drives ma
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 Key issue closed as "wontfix" |
 | Headless mode | ✅ Full headless architecture | 🚫 Library-owned DOM/CSS |
 | shadcn/ui + Tailwind | ✅ Native (CVA-based) | ⚙️ Requires !important overrides |
-| Core bundle (gzipped) | &lt;8KB | ~10KB JS + CSS (not tree-shakeable) |
+| Core bundle (gzipped) | &lt;23KB | ~10KB JS + CSS (not tree-shakeable) |
 | React support | 18, 19 (first-party) | ⚙️ Wrapper unmaintained 3+ years |
 | TypeScript | Strict mode, generics | ⚙️ Community @types (DefinitelyTyped) |
 | SSR / Server Components | ✅ Supported | 🚫 Requires document/window |
@@ -210,7 +210,7 @@ Yes. React 18 and 19, with built-in router adapters for Next.js App Router and P
 
 ### What is the bundle size of userTourKit vs Intro.js?
 
-userTourKit's core is &lt;8KB gzipped. Intro.js is ~10KB minified JS plus a required CSS file, and the bundle isn't tree-shakeable. userTourKit's headless architecture ships only the logic you import.
+userTourKit's core is &lt;23KB gzipped. Intro.js is ~10KB minified JS plus a required CSS file, and the bundle isn't tree-shakeable. userTourKit's headless architecture ships only the logic you import.
 
 ### Is Intro.js open source?
 

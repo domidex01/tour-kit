@@ -17,7 +17,7 @@ ogImage: /og-images/ab-test-onboarding-statsig.png
 
 You shipped an onboarding tour. Completion rates look decent. But you have no idea whether the 5-step tooltip flow actually works better than a 3-step checklist, or whether that intro video helps or just delays time-to-value.
 
-Statsig gives you experiment infrastructure (variant assignment, metric tracking, statistical significance) for free up to 2M events per month. Tour Kit gives you headless tour logic at under 8KB gzipped. Combined, they're under 22KB total and cost nothing in production. That beats the per-MAU pricing of tools like Appcues or Pendo, which charge for onboarding _and_ force you to bolt on a separate experimentation platform.
+Statsig gives you experiment infrastructure (variant assignment, metric tracking, statistical significance) for free up to 2M events per month. Tour Kit gives you headless tour logic at under 23KB gzipped. Combined, they're under 40KB total and cost nothing in production. That beats the per-MAU pricing of tools like Appcues or Pendo, which charge for onboarding _and_ force you to bolt on a separate experimentation platform.
 
 One caveat: Tour Kit requires React 18+ and doesn't have a visual builder, so you need developers comfortable writing JSX to define tour steps. If that's your team, keep reading.
 
@@ -311,7 +311,7 @@ Run the experiment for at least two weeks with a minimum of 1,000 visitors per v
 
 ### Does adding Statsig and Tour Kit affect page performance?
 
-Statsig's core JavaScript SDK targets under 10KB compressed with sub-millisecond evaluation latency after initialization ([Statsig docs](https://www.statsig.com/blog/announcing-new-statsig-javascript-sdks)). Tour Kit's core is under 8KB gzipped. Together they add under 22KB, less than a single hero image. Both support tree-shaking, so you only ship the code you use.
+Statsig's core JavaScript SDK targets under 23KB compressed with sub-millisecond evaluation latency after initialization ([Statsig docs](https://www.statsig.com/blog/announcing-new-statsig-javascript-sdks)). Tour Kit's core is under 23KB gzipped. Together they add under 22KB, less than a single hero image. Both support tree-shaking, so you only ship the code you use.
 
 ### How is this different from using Statsig feature flags without Tour Kit?
 

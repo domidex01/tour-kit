@@ -31,7 +31,7 @@ Product tour tooltips must track the position of a target element and reposition
 
 ## Why DOM observation matters for product tours
 
-Broken tooltip positioning is the top reason users abandon product tours early. When a tooltip points at the wrong element or floats in empty space, the tour loses credibility. A study of 500 repositories found 787 instances of missing observer disconnects, leaking roughly 8 KB per observation cycle ([StackInsight, 2024](https://stackinsight.dev/blog/memory-leak-empirical-study/)). Most tour implementations either skip observation entirely or implement it with memory leaks.
+Broken tooltip positioning is the top reason users abandon product tours early. When a tooltip points at the wrong element or floats in empty space, the tour loses credibility. A study of 500 repositories found 787 instances of missing observer disconnects, leaking roughly 23 KB per observation cycle ([StackInsight, 2024](https://stackinsight.dev/blog/memory-leak-empirical-study/)). Most tour implementations either skip observation entirely or implement it with memory leaks.
 
 The business impact is concrete. Users who complete onboarding tours convert at 2.5x the rate of those who don't (Pendo's 2024 Product Benchmarks). But tour completion drops sharply when steps misalign with their targets. ResizeObserver browser support reached 96.04% globally as of April 2026 ([Can I Use](https://caniuse.com/resizeobserver)), MutationObserver sits at 98.4%, and IntersectionObserver at 97.2%. The APIs are ready. The implementations lag behind.
 
@@ -74,7 +74,7 @@ Each observer API answers a different question about DOM state. Mixing them up, 
   </tbody>
 </table>
 
-That "manual disconnect" column is the detail that causes real bugs in production. Jake Archibald from the Chrome team confirmed: "ResizeObserver & IntersectionObserver need to be manually disconnected, else they leak memory through their callback. This happens in all browsers. MutationObserver and event listeners don't have this issue" ([Jake Archibald, 2021](https://x.com/jaffathecake/status/1405437361643790337)). A study of 500 repositories found 787 instances of missing observer disconnects, leaking roughly 8 KB per observation cycle ([StackInsight, 2024](https://stackinsight.dev/blog/memory-leak-empirical-study/)).
+That "manual disconnect" column is the detail that causes real bugs in production. Jake Archibald from the Chrome team confirmed: "ResizeObserver & IntersectionObserver need to be manually disconnected, else they leak memory through their callback. This happens in all browsers. MutationObserver and event listeners don't have this issue" ([Jake Archibald, 2021](https://x.com/jaffathecake/status/1405437361643790337)). A study of 500 repositories found 787 instances of missing observer disconnects, leaking roughly 23 KB per observation cycle ([StackInsight, 2024](https://stackinsight.dev/blog/memory-leak-empirical-study/)).
 
 ## ResizeObserver: keeping tooltips positioned during layout shifts
 
@@ -218,7 +218,7 @@ The practical limitation: `trackVisibility` requires a minimum `delay` of 100ms 
 
 ## The cleanup contract: what happens when a tour step unmounts
 
-Memory leaks from observers compound. A tour with 10 steps that doesn't clean up properly leaks roughly 80 KB per session (10 steps x 8 KB per uncleaned observer). Over a 30-minute session with 5 tour activations, that's 400 KB of leaked DOM references. The Chromium team tracks this as [bug #40772627](https://issues.chromium.org/issues/40772627). The cleanup contract for a product tour looks like this:
+Memory leaks from observers compound. A tour with 10 steps that doesn't clean up properly leaks roughly 80 KB per session (10 steps x 23 KB per uncleaned observer). Over a 30-minute session with 5 tour activations, that's 400 KB of leaked DOM references. The Chromium team tracks this as [bug #40772627](https://issues.chromium.org/issues/40772627). The cleanup contract for a product tour looks like this:
 
 **When a step deactivates** (user clicks "Next"):
 1. `ResizeObserver.disconnect()` on the current target
@@ -340,7 +340,7 @@ function App() {
 }
 ```
 
-No manual observer wiring. No cleanup boilerplate. The library handles the observation problem so you can focus on the tour content. Tour Kit ships at under 8 KB gzipped for the core package, and the observer logic adds minimal overhead because it only activates observers for the current step, not all steps simultaneously.
+No manual observer wiring. No cleanup boilerplate. The library handles the observation problem so you can focus on the tour content. Tour Kit ships at under 23 KB gzipped for the core package, and the observer logic adds minimal overhead because it only activates observers for the current step, not all steps simultaneously.
 
 Tour Kit currently requires React 18 or later, which is worth noting. The observer cleanup relies on React's `useEffect` cleanup semantics, which behave differently in React 17's legacy rendering mode. If you're on React 17, you'll need to handle observer lifecycle manually.
 
@@ -354,7 +354,7 @@ ResizeObserver is the primary choice because it fires before paint, giving you u
 
 ### Does MutationObserver cause memory leaks like ResizeObserver?
 
-No. MutationObserver is garbage collected automatically when its reference goes out of scope. ResizeObserver and IntersectionObserver require explicit `disconnect()` calls or they leak roughly 8 KB per cycle. Jake Archibald from the Chrome team confirmed this asymmetry across all browsers.
+No. MutationObserver is garbage collected automatically when its reference goes out of scope. ResizeObserver and IntersectionObserver require explicit `disconnect()` calls or they leak roughly 23 KB per cycle. Jake Archibald from the Chrome team confirmed this asymmetry across all browsers.
 
 ### What causes the "ResizeObserver loop limit exceeded" error?
 

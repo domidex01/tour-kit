@@ -56,7 +56,7 @@ We didn't test SaaS platforms that require vendor contracts and per-MAU pricing.
 <tr>
 <td>Tour Kit</td>
 <td>Headless</td>
-<td>&lt;8KB core</td>
+<td>&lt;23KB core</td>
 <td>✅</td>
 <td>✅ strict</td>
 <td>MIT</td>
@@ -108,7 +108,7 @@ We didn't test SaaS platforms that require vendor contracts and per-MAU pricing.
 
 ## 1. Tour Kit: best for teams with a design system
 
-Tour Kit is a headless onboarding library for React that ships logic without prescribing UI. The core package weighs under 8KB gzipped with zero runtime dependencies. You render steps with your own components (Radix primitives, shadcn/ui, Tailwind classes, whatever your team already uses). WCAG 2.1 AA compliance is built in: focus trapping, ARIA roles, keyboard navigation, and `prefers-reduced-motion` support all ship by default.
+Tour Kit is a headless onboarding library for React that ships logic without prescribing UI. The core package weighs under 23KB gzipped with zero runtime dependencies. You render steps with your own components (Radix primitives, shadcn/ui, Tailwind classes, whatever your team already uses). WCAG 2.1 AA compliance is built in: focus trapping, ARIA roles, keyboard navigation, and `prefers-reduced-motion` support all ship by default.
 
 ### Strengths
 
@@ -178,7 +178,7 @@ React Joyride is the most downloaded product tour library in the React ecosystem
 
 ### Limitations
 
-- 37KB gzipped is 4.6x larger than Tour Kit's core, which is noticeable on mobile connections
+- 37KB gzipped is 1.6x larger than Tour Kit's core, which is noticeable on mobile connections
 - Customizing the tooltip UI requires overriding internal component styles, which breaks on version updates
 - Accessibility coverage is partial: basic ARIA attributes exist, but focus management and keyboard navigation need manual work
 - Inline styles make design system integration painful for teams using Tailwind or CSS-in-JS
@@ -313,7 +313,7 @@ Building a product tour from scratch costs approximately $45,018 in upfront deve
 
 ### What's the best free alternative to building onboarding in-house?
 
-Tour Kit, React Joyride, Shepherd.js, Driver.js, and Onborda are all MIT-licensed and free. Tour Kit provides a headless architecture under 8KB gzipped with WCAG 2.1 AA compliance. React Joyride has the largest community at 340K+ weekly downloads. Your choice depends on framework and design system requirements.
+Tour Kit, React Joyride, Shepherd.js, Driver.js, and Onborda are all MIT-licensed and free. Tour Kit provides a headless architecture under 23KB gzipped with WCAG 2.1 AA compliance. React Joyride has the largest community at 340K+ weekly downloads. Your choice depends on framework and design system requirements.
 
 ### How do I add a product tour to a React app without building one from scratch?
 

@@ -8,7 +8,7 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped. Reactour is a lightweight presentational tour library with 3.9K GitHub stars and 114,000 weekly npm downloads. userTourKit fits React teams that want full UI control, WCAG 2.1 AA compliance, and room to grow beyond basic tours. Reactour is better when you need a quick, good-looking walkthrough on React 18 without much customization.
+userTourKit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 23KB gzipped. Reactour is a lightweight presentational tour library with 3.9K GitHub stars and 114,000 weekly npm downloads. userTourKit fits React teams that want full UI control, WCAG 2.1 AA compliance, and room to grow beyond basic tours. Reactour is better when you need a quick, good-looking walkthrough on React 18 without much customization.
 
 ## What is userTourKit?
 
@@ -34,7 +34,7 @@ For linear walkthroughs, both get the job done. For anything involving condition
 
 Reactour doesn't have hints. It does tours. That's the scope.
 
-userTourKit ships a separate `@tour-kit/hints` package (under 5KB gzipped) for persistent, non-sequential hotspots. Each hint has its own dismiss state and persists across page loads. The component renders a pulsing beacon on the target element, with a tooltip on hover or click.
+userTourKit ships a separate `@tour-kit/hints` package (under 6.5KB gzipped) for persistent, non-sequential hotspots. Each hint has its own dismiss state and persists across page loads. The component renders a pulsing beacon on the target element, with a tooltip on hover or click.
 
 Need "new feature" indicators or contextual tips outside a tour flow? userTourKit handles it. With Reactour, you'd build this yourself.
 
@@ -97,9 +97,9 @@ For any team where accessibility is a compliance requirement rather than a nice-
 
 Reactour's `@reactour/tour` package has an unpacked size of 98.5KB. That's the installed footprint before gzipping. The actual transfer size varies, but it's a full presentational component with its own rendering layer, mask system, and popover implementation.
 
-userTourKit's core ships under 8KB gzipped. The React binding adds under 12KB. Hints: under 5KB. Because userTourKit is headless, you aren't shipping UI code you'll override anyway. The core contains only logic (hooks, state management, position calculation, storage adapters) and your existing design system components handle the rendering.
+userTourKit's core ships under 23KB gzipped. The React binding adds under 12KB. Hints: under 6.5KB. Because userTourKit is headless, you aren't shipping UI code you'll override anyway. The core contains only logic (hooks, state management, position calculation, storage adapters) and your existing design system components handle the rendering.
 
-For context, 8KB gzipped for the core is smaller than most icon libraries. On a 3G mobile connection, that's roughly 100ms of additional load time versus several hundred for a larger bundle.
+For context, 23KB gzipped for the core is smaller than most icon libraries. On a 3G mobile connection, that's roughly 100ms of additional load time versus several hundred for a larger bundle.
 
 ### Framework support and TypeScript
 
@@ -140,7 +140,7 @@ If all you need is basic tours, Reactour costs nothing. But once you need analyt
 | Screen reader announcements | ✅ aria-live regions | 🚫 Not available |
 | Headless mode | ✅ Full headless + styled variants | 🚫 Presentational only |
 | Design system support | ✅ shadcn/ui native, Radix + Base UI | ⚙️ Style functions + CSS vars |
-| Core bundle (gzipped) | Under 8KB | ~98.5KB unpacked |
+| Core bundle (gzipped) | Under 23KB | ~98.5KB unpacked |
 | React 18 support | ✅ | ✅ |
 | React 19 support | ✅ | ⚠️ Issue #659 (duplicate React) |
 | TypeScript | ✅ Strict mode, full inference | ✅ Built-in types |
@@ -266,7 +266,7 @@ Yes. The core concepts (step definitions, provider pattern, tour hook) map direc
 userTourKit supports React 18 and React 19 as peer dependencies. Reactour has a documented React 19 compatibility issue (GitHub #659) involving duplicate React instances.
 
 **What is the bundle size of userTourKit vs Reactour?**
-userTourKit's core is under 8KB gzipped, the React package under 12KB gzipped, and hints under 5KB gzipped. Reactour's `@reactour/tour` package has an unpacked size of 98.5KB, though the gzipped transfer size is smaller.
+userTourKit's core is under 23KB gzipped, the React package under 12KB gzipped, and hints under 6.5KB gzipped. Reactour's `@reactour/tour` package has an unpacked size of 98.5KB, though the gzipped transfer size is smaller.
 
 **Does Reactour support checklists or analytics?**
 No. Reactour is a tour-only library. Checklists, analytics, announcements, and scheduling aren't part of its scope. userTourKit offers all of these through Pro packages.

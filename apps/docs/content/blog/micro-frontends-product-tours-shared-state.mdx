@@ -339,7 +339,7 @@ Choosing the right micro-frontend product tour pattern depends on two factors: h
 <tr><td>Type safety</td><td>Weak (runtime only)</td><td>Strong (shared types)</td><td>Strong (Tour Kit types)</td></tr>
 <tr><td>Accessibility</td><td>DIY (you build it all)</td><td>DIY (store has no a11y)</td><td>Built-in (Tour Kit handles it)</td></tr>
 <tr><td>Version coupling</td><td>None</td><td>High (singleton versions must match)</td><td>Low if bundled per-module</td></tr>
-<tr><td>Bundle cost</td><td>~0.5KB</td><td>~3KB (Zustand)</td><td>~8KB per module (Tour Kit core)</td></tr>
+<tr><td>Bundle cost</td><td>~0.5KB</td><td>~3KB (Zustand)</td><td>~23KB per module (Tour Kit core)</td></tr>
 <tr><td>Best for</td><td>Polyglot stacks, quick POC</td><td>All-React teams, tight versioning</td><td>Teams needing a11y + analytics</td></tr>
 </tbody>
 </table>
@@ -421,7 +421,7 @@ Screen reader announcements are simpler since they're global. An `aria-live="pol
 
 Most product tour libraries weren't designed for micro-frontends. Here's what actually works as of April 2026:
 
-**Tour Kit** provides headless hooks that can run independently in each micro-frontend, with the coordination patterns described in this article. Core ships at under 8KB gzipped. No visual builder, React 18+ only. We built Tour Kit, so take this with appropriate skepticism.
+**Tour Kit** provides headless hooks that can run independently in each micro-frontend, with the coordination patterns described in this article. Core ships at under 23KB gzipped. No visual builder, React 18+ only. We built Tour Kit, so take this with appropriate skepticism.
 
 **Driver.js** works for simple cases because it uses global DOM queries. No React dependency, 5KB gzipped. But it has no state management, no persistence, and no accessibility features. You build all of that yourself.
 

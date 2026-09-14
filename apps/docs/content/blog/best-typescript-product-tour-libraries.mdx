@@ -55,7 +55,7 @@ We weighted React 19 at 20% because as of April 2026, React 19 is the current st
 <td>userTourKit</td>
 <td>Native (strict)</td>
 <td>✅</td>
-<td>Under 8KB core</td>
+<td>Under 23KB core</td>
 <td>Full</td>
 <td>MIT</td>
 <td>9.2</td>
@@ -73,7 +73,7 @@ We weighted React 19 at 20% because as of April 2026, React 19 is the current st
 <td>Onborda</td>
 <td>Native</td>
 <td>✅</td>
-<td>&#126;8KB + Framer</td>
+<td>&#126;23KB + Framer</td>
 <td>Good</td>
 <td>MIT</td>
 <td>7.4</td>
@@ -132,7 +132,7 @@ Data verified April 2026. Sources: npm, GitHub, bundlephobia, package source ins
 
 <img src="/screenshots/user-tour-kit.avif" alt="Screenshot of userTourKit - Product Tours for React" width="800" style={{borderRadius: '8px'}} />
 
-userTourKit is a headless product tour library written in TypeScript strict mode from line one. The core ships at under 8KB gzipped with zero runtime dependencies. Every hook, provider, and component has full type coverage, so you get autocomplete on step config, tour options, and callback payloads without importing a single type manually. React 18 and 19 are both supported natively.
+userTourKit is a headless product tour library written in TypeScript strict mode from line one. The core ships at under 23KB gzipped with zero runtime dependencies. Every hook, provider, and component has full type coverage, so you get autocomplete on step config, tour options, and callback payloads without importing a single type manually. React 18 and 19 are both supported natively.
 
 **What makes it different for TypeScript developers:** The entire API is generic. Step definitions accept a type parameter for custom metadata, so `useStep<MyStepData>()` gives you typed access to fields like `videoUrl` or `requiredRole` without a cast. Headless architecture means your tooltips are your own components, not a library's opaque render tree.
 
@@ -389,7 +389,7 @@ Your decision comes down to three axes, all tied to TypeScript quality.
 
 **React 19 TS compatibility: compiles clean vs needs workarounds.** React 19 changed several type definitions (`ReactNode`, `forwardRef`, callback refs). userTourKit, Onborda, and OnboardJS compile clean against `@types/react@19`. Driver.js has no React types to break. Shepherd.js's React wrapper fails to compile. React Joyride v2.x fails with multiple type errors. If you are starting a new React 19 project, eliminate libraries that require `@ts-expect-error` to build.
 
-**Bundle size** matters for Core Web Vitals but is secondary to type quality. Driver.js at ~5KB and userTourKit core at under 8KB are the lightweights. React Joyride at ~30KB and Shepherd.js at ~25KB carry meaningful weight. Google's research on [Core Web Vitals](https://web.dev/articles/vitals) shows JavaScript bundle size directly impacts Interaction to Next Paint.
+**Bundle size** matters for Core Web Vitals but is secondary to type quality. Driver.js at ~5KB and userTourKit core at under 23KB are the lightweights. React Joyride at ~30KB and Shepherd.js at ~25KB carry meaningful weight. Google's research on [Core Web Vitals](https://web.dev/articles/vitals) shows JavaScript bundle size directly impacts Interaction to Next Paint.
 
 If you were about to build your own tour system with XState and Floating UI (and [you wouldn't be the first](https://sandroroth.com/blog/evaluating-tour-libraries/)), userTourKit is the library designed for developers like you. It gives you typed primitives without the opinions.
 

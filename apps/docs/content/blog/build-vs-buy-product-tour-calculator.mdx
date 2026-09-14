@@ -209,7 +209,7 @@ import { Tour, TourStep } from '@tourkit/react';
 
 **Vendor lock-in.** SaaS tour configurations live on someone else's server. If the vendor raises prices (Pendo increased from ~$15K to ~$48K average annual contract), changes their API, or shuts down, your onboarding breaks. With a library, your tour code lives in your repo alongside your application code.
 
-**Performance overhead.** SaaS onboarding tools inject third-party scripts that add 40-150KB to your bundle and create additional network requests. We measured this in our [Lighthouse audit of onboarding SaaS tools](/blog/onboarding-tool-lighthouse-performance). Tour Kit's core ships at under 8KB gzipped with zero runtime dependencies.
+**Performance overhead.** SaaS onboarding tools inject third-party scripts that add 40-150KB to your bundle and create additional network requests. We measured this in our [Lighthouse audit of onboarding SaaS tools](/blog/onboarding-tool-lighthouse-performance). Tour Kit's core ships at under 23KB gzipped with zero runtime dependencies.
 
 **Accessibility ownership.** WCAG 2.1 AA compliance is your responsibility regardless of approach. SaaS tools handle some of it, but you can't audit their implementation. With a library, you own the ARIA attributes, keyboard navigation, and focus management. When an audit finds an issue, you fix it in your code instead of filing a ticket.
 
@@ -350,7 +350,7 @@ Most startups should buy (SaaS) or compose (headless library) rather than build 
 - Link FROM: [Best alternatives to building onboarding in-house](/blog/best-alternatives-building-onboarding-in-house) → this article's calculator section
 - Link FROM: [Onboarding tool Lighthouse performance](/blog/onboarding-tool-lighthouse-performance) → this article's performance section
 - Link FROM: [How onboarding tools inject code](/blog/how-onboarding-tools-inject-code) → this article's vendor lock-in section
-- Link TO: [Tour Kit 8KB zero dependencies](/blog/tour-kit-8kb-zero-dependencies) from the performance overhead section
+- Link TO: [Tour Kit 23KB zero dependencies](/blog/tour-kit-8kb-zero-dependencies) from the performance overhead section
 - Link TO: [Migrate Appcues to code-owned onboarding](/blog/migrate-appcues-code-owned-onboarding) from the SaaS section
 
 **Distribution checklist:**

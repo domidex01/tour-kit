@@ -1,7 +1,7 @@
 ---
 title: "Migrating from Shepherd.js to Tour Kit: AGPL to MIT"
 slug: "migrate-shepherd-js-tour-kit"
-description: "Migrate from Shepherd.js to Tour Kit step by step. Replace AGPL licensing with MIT, get native React hooks, and cut your tour bundle to under 8KB gzipped."
+description: "Migrate from Shepherd.js to Tour Kit step by step. Replace AGPL licensing with MIT, get native React hooks, and cut your tour bundle to under 23KB gzipped."
 primary_keyword: "migrate shepherd js tour kit"
 secondary_keywords: ["shepherd js migration", "replace shepherd js react", "shepherd js alternative mit", "shepherd js agpl license"]
 category: "Tutorials"
@@ -15,7 +15,7 @@ ogImage: /og-images/migrate-shepherd-js-tour-kit.png
 
 # Migrating from Shepherd.js to Tour Kit: AGPL to MIT
 
-Shepherd.js is a solid product tour library with 13,000+ GitHub stars and 221K weekly npm downloads as of April 2026. But two things push teams to migrate: its AGPL-3.0 license creates real legal exposure for commercial SaaS products, and its vanilla-JS-with-React-wrapper architecture fights React's component model instead of working with it. If your legal team flagged the AGPL dependency or your React 19 upgrade stalled on `react-shepherd` compatibility issues, this guide walks you through replacing Shepherd.js with Tour Kit, a headless, MIT-licensed alternative that ships at under 8KB gzipped.
+Shepherd.js is a solid product tour library with 13,000+ GitHub stars and 221K weekly npm downloads as of April 2026. But two things push teams to migrate: its AGPL-3.0 license creates real legal exposure for commercial SaaS products, and its vanilla-JS-with-React-wrapper architecture fights React's component model instead of working with it. If your legal team flagged the AGPL dependency or your React 19 upgrade stalled on `react-shepherd` compatibility issues, this guide walks you through replacing Shepherd.js with Tour Kit, a headless, MIT-licensed alternative that ships at under 23KB gzipped.
 
 By the end, you'll have your existing Shepherd tours running on Tour Kit with native React hooks, zero CSS conflicts, and no license risk.
 
@@ -25,7 +25,7 @@ npm install @tourkit/core @tourkit/react
 
 ## What you'll build
 
-This tutorial converts a working Shepherd.js tour into an equivalent Tour Kit implementation. You'll cover step definitions, event callbacks, multi-page persistence, then clean up the old dependency. You'll go from an AGPL-3.0 `shepherd.js` import to a fully MIT-licensed `@tourkit/react` setup that uses React hooks and your own components for rendering. The final result is a smaller bundle (under 8KB gzipped vs 13.7KB), full TypeScript strict mode coverage, and zero license risk for commercial products.
+This tutorial converts a working Shepherd.js tour into an equivalent Tour Kit implementation. You'll cover step definitions, event callbacks, multi-page persistence, then clean up the old dependency. You'll go from an AGPL-3.0 `shepherd.js` import to a fully MIT-licensed `@tourkit/react` setup that uses React hooks and your own components for rendering. The final result is a smaller bundle (under 23KB gzipped vs 13.7KB), full TypeScript strict mode coverage, and zero license risk for commercial products.
 
 ## Prerequisites
 
@@ -110,7 +110,7 @@ Shepherd.js and Tour Kit share the same core concepts (steps, targets, callbacks
 
 ## Step 1: install Tour Kit alongside Shepherd
 
-The safest migration strategy is running both libraries simultaneously, converting one tour at a time, and removing Shepherd only after all tours pass QA. Tour Kit's core adds under 8KB gzipped with zero runtime dependencies, so the temporary overlap barely affects your bundle. Install it alongside Shepherd:
+The safest migration strategy is running both libraries simultaneously, converting one tour at a time, and removing Shepherd only after all tours pass QA. Tour Kit's core adds under 23KB gzipped with zero runtime dependencies, so the temporary overlap barely affects your bundle. Install it alongside Shepherd:
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -318,7 +318,7 @@ Then delete:
 - Custom CSS overriding Shepherd's default styles
 - The Shepherd.js type declarations if you added them
 
-Your bundle drops by 13.7KB gzipped (Shepherd) and gains under 8KB gzipped (Tour Kit core). Net saving: roughly 6KB gzipped. More importantly, you've removed the AGPL dependency entirely.
+Your bundle drops by 13.7KB gzipped (Shepherd) and gains under 23KB gzipped (Tour Kit core). Net saving: roughly 6KB gzipped. More importantly, you've removed the AGPL dependency entirely.
 
 ## Common issues and troubleshooting
 
@@ -389,7 +389,7 @@ Shepherd.js doesn't include built-in analytics. If you wired up custom event tra
   "@context": "https://schema.org",
   "@type": "TechArticle",
   "headline": "Migrating from Shepherd.js to Tour Kit: AGPL to MIT",
-  "description": "Migrate from Shepherd.js to Tour Kit step by step. Replace AGPL licensing with MIT, get native React hooks, and cut your tour bundle to under 8KB gzipped.",
+  "description": "Migrate from Shepherd.js to Tour Kit step by step. Replace AGPL licensing with MIT, get native React hooks, and cut your tour bundle to under 23KB gzipped.",
   "author": {
     "@type": "Person",
     "name": "Dominic Fournier",

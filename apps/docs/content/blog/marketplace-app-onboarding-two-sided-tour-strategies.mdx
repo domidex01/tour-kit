@@ -306,7 +306,7 @@ For seller verification flows involving document uploads, ensure your tour steps
 
 A few approaches to implementing two-sided tours:
 
-**Tour Kit** handles role-based routing natively through its provider architecture. The headless design means you style tooltips and checklists with your existing design system, not fighting CSS overrides from a third-party brand. The `@tour-kit/checklists` and `@tour-kit/analytics` packages solve the two patterns this use case needs most. Tour Kit ships at under 12KB gzipped for core + React. Limitation worth noting: Tour Kit requires React 18+ and doesn't have a visual builder, so your team needs developers comfortable with JSX. [Get started at usertourkit.com](https://usertourkit.com/).
+**Tour Kit** handles role-based routing natively through its provider architecture. The headless design means you style tooltips and checklists with your existing design system, not fighting CSS overrides from a third-party brand. The `@tour-kit/checklists` and `@tour-kit/analytics` packages solve the two patterns this use case needs most. Tour Kit ships at under 23KB gzipped for core + React. Limitation worth noting: Tour Kit requires React 18+ and doesn't have a visual builder, so your team needs developers comfortable with JSX. [Get started at usertourkit.com](https://usertourkit.com/).
 
 **React Joyride** (603K weekly downloads on npm as of April 2026) works for simpler marketplace tours but hits friction with multi-role orchestration. You'll end up managing role conditionals outside the library.
 

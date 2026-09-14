@@ -8,7 +8,7 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $9.99 one-time Pro fee. Chameleon is a SaaS product adoption platform starting at $279/month with a visual builder and CRM-based targeting. userTourKit fits React teams that want code ownership and design system parity. Chameleon is the better pick when product managers need to build and iterate on tours without developer involvement.
+userTourKit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a &lt;23KB core bundle for a $9.99 one-time Pro fee. Chameleon is a SaaS product adoption platform starting at $279/month with a visual builder and CRM-based targeting. userTourKit fits React teams that want code ownership and design system parity. Chameleon is the better pick when product managers need to build and iterate on tours without developer involvement.
 
 ## What is userTourKit?
 
@@ -32,7 +32,7 @@ The trade-off is clear: Chameleon is faster for simple tours built by non-develo
 
 ### Hints and hotspots
 
-Both tools support persistent tooltips attached to UI elements. Chameleon calls them "Tooltips" and manages them through the dashboard. userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped, MIT-licensed) provides `HintHotspot` beacons and `HintTooltip` components with per-hint dismiss state persisted via storage adapters. The key difference is that userTourKit hints are non-sequential and independently dismissible, while Chameleon tooltips follow its platform-wide targeting and frequency rules.
+Both tools support persistent tooltips attached to UI elements. Chameleon calls them "Tooltips" and manages them through the dashboard. userTourKit's `@tour-kit/hints` package (&lt;6.5KB gzipped, MIT-licensed) provides `HintHotspot` beacons and `HintTooltip` components with per-hint dismiss state persisted via storage adapters. The key difference is that userTourKit hints are non-sequential and independently dismissible, while Chameleon tooltips follow its platform-wide targeting and frequency rules.
 
 Developers get programmatic control through `useHint('feature-id')` for individual hint state and `useHints()` for batch operations like `dismissAll` and `resetAll`. Chameleon's hints require the dashboard for any changes.
 
@@ -93,7 +93,7 @@ userTourKit ships WCAG 2.1 AA compliance by default, not as an opt-in. Focus tra
 
 Chameleon installs via a script tag or npm package (`@chamaeleonidae/chmln`, last published over 4 years ago at v1.0.1). The loader weighs approximately 18.5KB, and the CDN runtime it fetches is undisclosed. You're loading Chameleon's JavaScript on every page for every user, whether they see a tour or not.
 
-userTourKit's core is &lt;8KB gzipped. The React package adds &lt;12KB. Hints add &lt;5KB. All three MIT packages together total under 25KB gzipped, with tree-shaking eliminating unused code. The `LazyTour` component (imported from `@tour-kit/react/lazy`) code-splits the tour UI so it only loads when a tour activates. On a mobile connection, the parse time difference between 18.5KB+ (Chameleon's loader alone) and &lt;8KB (userTourKit's core) is measurable.
+userTourKit's core is &lt;23KB gzipped. The React package adds &lt;12KB. Hints add &lt;6.5KB. All three MIT packages together total under 25KB gzipped, with tree-shaking eliminating unused code. The `LazyTour` component (imported from `@tour-kit/react/lazy`) code-splits the tour UI so it only loads when a tour activates. On a mobile connection, the parse time difference between 18.5KB+ (Chameleon's loader alone) and &lt;23KB (userTourKit's core) is measurable.
 
 ### Framework support and TypeScript
 
@@ -133,7 +133,7 @@ userTourKit's core packages (tours, hints, the headless architecture) are MIT-li
 | Headless / BYO UI | ✅ Full headless | 🚫 Own theme system |
 | shadcn/ui native | ✅ UnifiedSlot pattern | 🚫 CSS-only theming |
 | TypeScript | ✅ Strict mode, full inference | ⚙️ DefinitelyTyped (community) |
-| Core bundle (gzipped) | &lt;8KB | ~18.5KB loader + CDN runtime |
+| Core bundle (gzipped) | &lt;23KB | ~18.5KB loader + CDN runtime |
 | Version control | ✅ Git-native | 🚫 Dashboard only |
 | License | MIT (free tier) | Proprietary SaaS |
 | Starting price | Free + $9.99 one-time Pro | $279/mo ($3,348/yr) |
@@ -156,7 +156,7 @@ userTourKit wins when your team has React developers and wants tours that feel n
 
 The cost math is hard to argue with. A team paying $26,500/year (Vendr's median Chameleon contract) could buy userTourKit Pro for $9.99 and spend the remaining $26,401 on literally anything else. That's not a rounding error.
 
-userTourKit is also the better choice when accessibility is a contractual requirement. WCAG 2.1 AA compliance with Lighthouse 100 ships out of the box. And for performance-sensitive apps, a &lt;8KB core versus an 18.5KB+ loader (before the CDN runtime loads) translates directly to faster page interactions on mobile devices.
+userTourKit is also the better choice when accessibility is a contractual requirement. WCAG 2.1 AA compliance with Lighthouse 100 ships out of the box. And for performance-sensitive apps, a &lt;23KB core versus an 18.5KB+ loader (before the CDN runtime loads) translates directly to faster page interactions on mobile devices.
 
 ## Migration path from Chameleon to userTourKit
 
@@ -245,7 +245,7 @@ Yes. userTourKit doesn't have an automated import tool, but the migration involv
 userTourKit supports React 18 and React 19 as peer dependencies. It ships dedicated router adapters for Next.js App Router (`useNextAppRouter`), Next.js Pages Router (`useNextPagesRouter`), and React Router v6+.
 
 **What is the bundle size of userTourKit vs Chameleon?**
-userTourKit's core is &lt;8KB gzipped. The React package adds &lt;12KB, hints add &lt;5KB. Chameleon's loader script alone weighs approximately 18.5KB, plus an undisclosed CDN runtime. userTourKit's full MIT stack totals under 25KB gzipped with tree-shaking support.
+userTourKit's core is &lt;23KB gzipped. The React package adds &lt;12KB, hints add &lt;6.5KB. Chameleon's loader script alone weighs approximately 18.5KB, plus an undisclosed CDN runtime. userTourKit's full MIT stack totals under 25KB gzipped with tree-shaking support.
 
 **Does Chameleon support checklists and analytics?**
 Chameleon offers Launchers (checklists) but caps the Startup plan at 1 Launcher. Analytics track basic experience metrics; deeper product analytics require Mixpanel, Amplitude, or PostHog. Both features need the Growth plan ($12,000+/year) for meaningful use.

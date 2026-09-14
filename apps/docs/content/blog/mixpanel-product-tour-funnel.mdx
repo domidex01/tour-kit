@@ -379,7 +379,7 @@ Install `@tour-kit/analytics` and create a plugin that calls `mixpanel.track()` 
 
 ### Does adding Mixpanel tracking affect product tour performance?
 
-Mixpanel's browser SDK adds roughly 30KB gzipped. Combined with Tour Kit's core (under 8KB gzipped), total impact is under 40KB. The `mixpanel.track()` calls are asynchronous and non-blocking. We measured under 2ms overhead per event in Chrome DevTools.
+Mixpanel's browser SDK adds roughly 30KB gzipped. Combined with Tour Kit's core (under 23KB gzipped), total impact is under 55KB. The `mixpanel.track()` calls are asynchronous and non-blocking. We measured under 2ms overhead per event in Chrome DevTools.
 
 ### Can I track product tour funnels without Mixpanel?
 
@@ -454,7 +454,7 @@ Start with two events per step: `tour_step_viewed` and `tour_step_completed`. Ad
     {
       "@type": "Question",
       "name": "Does adding Mixpanel tracking affect product tour performance?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Mixpanel's browser SDK adds roughly 30KB gzipped. Combined with Tour Kit's core (under 8KB gzipped), total impact is under 40KB. The mixpanel.track() calls are asynchronous and non-blocking, measuring under 2ms overhead per event." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Mixpanel's browser SDK adds roughly 30KB gzipped. Combined with Tour Kit's core (under 23KB gzipped), total impact is under 55KB. The mixpanel.track() calls are asynchronous and non-blocking, measuring under 2ms overhead per event." }
     },
     {
       "@type": "Question",

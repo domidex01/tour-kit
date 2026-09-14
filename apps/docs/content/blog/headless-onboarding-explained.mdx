@@ -37,7 +37,7 @@ The term covers more than just product tours. Headless onboarding encompasses to
 
 Three converging trends made headless the default choice for teams that care about design consistency. As of April 2026, over 85% of new React projects use a utility-first CSS framework like Tailwind ([State of CSS 2025](https://stateofcss.com/)). The adoption of headless UI primitives from Radix, Ariakit, and React Aria grew 70% year-over-year, driven by shadcn/ui hitting 80,000+ GitHub stars ([Bitsrc](https://blog.bitsrc.io/headless-ui-libraries-for-react-top-5-e146145249fc)). And Google's Core Web Vitals updates continue to penalize heavy JavaScript bundles, with pages loading over 45KB of JS seeing 23% higher bounce rates on mobile ([web.dev](https://web.dev/vitals/)).
 
-Styled onboarding tools didn't keep up. React Joyride ships at 37KB gzipped. Shepherd.js adds 25KB. Intro.js lands at 12KB but brings its own CSS that fights your design tokens. A headless approach like Tour Kit's core package targets under 8KB gzipped with zero runtime dependencies.
+Styled onboarding tools didn't keep up. React Joyride ships at 37KB gzipped. Shepherd.js adds 25KB. Intro.js lands at 12KB but brings its own CSS that fights your design tokens. A headless approach like Tour Kit's core package targets under 23KB gzipped with zero runtime dependencies.
 
 But bundle size is just one reason. The bigger one is developer experience.
 
@@ -205,7 +205,7 @@ Not every team needs headless onboarding. The right choice depends on your stack
     </tr>
     <tr>
       <td>Bundle size (gzipped)</td>
-      <td>Tour Kit core: &lt;8KB</td>
+      <td>Tour Kit core: &lt;23KB</td>
       <td>React Joyride: 37KB, Shepherd.js: 25KB</td>
       <td>50-200KB external script</td>
     </tr>
@@ -393,7 +393,7 @@ The headless onboarding space is still young, with only two purpose-built librar
 
 ### Purpose-built headless onboarding libraries
 
-**Tour Kit.** 10 composable packages covering tours, checklists, announcements, hints, surveys, analytics, media, adoption tracking, and scheduling. Core under 8KB gzipped, zero runtime dependencies, React 18 and 19 native support. MIT free tier, $9.99 one-time Pro. We built this, so take that context into account. ([usertourkit.com](https://usertourkit.com/))
+**Tour Kit.** 10 composable packages covering tours, checklists, announcements, hints, surveys, analytics, media, adoption tracking, and scheduling. Core under 23KB gzipped, zero runtime dependencies, React 18 and 19 native support. MIT free tier, $9.99 one-time Pro. We built this, so take that context into account. ([usertourkit.com](https://usertourkit.com/))
 
 **OnboardJS.** A newer headless tour library with a similar hooks-based API. Smaller package scope (tours only, no checklists or announcements). Worth watching but less mature.
 
@@ -445,7 +445,7 @@ Headless isn't a silver bullet. Honest assessment of the tradeoffs:
 
 ### What is headless onboarding?
 
-Headless onboarding is a pattern where the tour library provides logic (step sequencing, element targeting, persistence, analytics) without rendering any UI. You supply all visual components using your own design system. Tour Kit is the most complete headless onboarding library for React, shipping core at under 8KB gzipped with 10 composable packages.
+Headless onboarding is a pattern where the tour library provides logic (step sequencing, element targeting, persistence, analytics) without rendering any UI. You supply all visual components using your own design system. Tour Kit is the most complete headless onboarding library for React, shipping core at under 23KB gzipped with 10 composable packages.
 
 ### How is headless onboarding different from a regular product tour?
 
@@ -457,7 +457,7 @@ If you use shadcn/ui, headless is the natural choice. Your tour tooltips render 
 
 ### What's the bundle size difference between headless and styled tour libraries?
 
-Tour Kit's headless core ships at under 8KB gzipped with zero runtime dependencies. React Joyride ships at 37KB gzipped (4.6x larger). Shepherd.js is 25KB. The difference matters for Core Web Vitals: Google's data shows pages loading over 45KB of JS see 23% higher bounce rates on mobile.
+Tour Kit's headless core ships at under 23KB gzipped with zero runtime dependencies. React Joyride ships at 37KB gzipped (1.6x larger). Shepherd.js is 25KB. The difference matters for Core Web Vitals: Google's data shows pages loading over 45KB of JS see 23% higher bounce rates on mobile.
 
 ### Can headless onboarding handle more than just product tours?
 
@@ -567,7 +567,7 @@ Yes. Tour Kit works with Next.js App Router, including server components. The pr
       "name": "What is headless onboarding?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Headless onboarding is a pattern where the tour library provides logic (step sequencing, element targeting, persistence, analytics) without rendering any UI. You supply all visual components using your own design system. Tour Kit is the most complete headless onboarding library for React, with core under 8KB gzipped and 10 composable packages."
+        "text": "Headless onboarding is a pattern where the tour library provides logic (step sequencing, element targeting, persistence, analytics) without rendering any UI. You supply all visual components using your own design system. Tour Kit is the most complete headless onboarding library for React, with core under 23KB gzipped and 10 composable packages."
       }
     },
     {
@@ -583,7 +583,7 @@ Yes. Tour Kit works with Next.js App Router, including server components. The pr
       "name": "What's the bundle size difference between headless and styled tour libraries?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit's headless core ships at under 8KB gzipped with zero runtime dependencies. React Joyride ships at 37KB gzipped (4.6x larger). Shepherd.js is 25KB. The difference matters for Core Web Vitals: Google's data shows pages loading over 45KB of JS see 23% higher bounce rates on mobile."
+        "text": "Tour Kit's headless core ships at under 23KB gzipped with zero runtime dependencies. React Joyride ships at 37KB gzipped (1.6x larger). Shepherd.js is 25KB. The difference matters for Core Web Vitals: Google's data shows pages loading over 45KB of JS see 23% higher bounce rates on mobile."
       }
     },
     {

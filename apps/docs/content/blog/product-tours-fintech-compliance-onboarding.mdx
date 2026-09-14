@@ -267,7 +267,7 @@ Code-owned headless tours eliminate all three. Tour Kit ships as an npm package 
     <tr>
       <td>Bundle size impact</td>
       <td>50-200KB+ injected at runtime</td>
-      <td>Tour Kit core: &lt;8KB gzipped</td>
+      <td>Tour Kit core: &lt;23KB gzipped</td>
     </tr>
   </tbody>
 </table>
@@ -387,7 +387,7 @@ Read more about [progressive disclosure in onboarding](/blog/progressive-disclos
 
 ## Tools and libraries for fintech onboarding tours
 
-**Tour Kit** handles the product tour layer with headless components, built-in accessibility, and explicit analytics callbacks that give you full control over data flow. Core bundle: under 8KB gzipped with no third-party DOM injection. Works with any design system including shadcn/ui and Tailwind.
+**Tour Kit** handles the product tour layer with headless components, built-in accessibility, and explicit analytics callbacks that give you full control over data flow. Core bundle: under 23KB gzipped with no third-party DOM injection. Works with any design system including shadcn/ui and Tailwind.
 
 Limitation: React 18+ only, no visual builder, and a smaller community than established tools.
 
@@ -419,7 +419,7 @@ Most product tour libraries fail WCAG 2.1 AA compliance. Tour Kit provides focus
 
 ### What's the bundle size cost of adding product tours to a fintech app?
 
-Tour Kit's core package ships at under 8KB gzipped with zero runtime dependencies. For comparison, SaaS tour tools inject 50-200KB+ of JavaScript at runtime. In fintech apps where page load performance directly affects onboarding completion rates, the difference matters. Google's Core Web Vitals research shows that pages loading a 45KB+ JavaScript bundle see 23% higher bounce rates on mobile ([web.dev](https://web.dev/vitals/)).
+Tour Kit's core package ships at under 23KB gzipped with zero runtime dependencies. For comparison, SaaS tour tools inject 50-200KB+ of JavaScript at runtime. In fintech apps where page load performance directly affects onboarding completion rates, the difference matters. Google's Core Web Vitals research shows that pages loading a 45KB+ JavaScript bundle see 23% higher bounce rates on mobile ([web.dev](https://web.dev/vitals/)).
 
 ---
 

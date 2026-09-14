@@ -164,7 +164,7 @@ function OnboardingTour() {
 }
 ```
 
-With a library like Tour Kit, the onboarding code lives in your repository. It uses your design system. It ships in your bundle at 8KB gzipped (not a 45KB external script). It doesn't break when you upgrade React. And it costs $9.99 once for the Pro tier, not $300-750/month scaling with your MAU count.
+With a library like Tour Kit, the onboarding code lives in your repository. It uses your design system. It ships in your bundle at 23KB gzipped (not a 45KB external script). It doesn't break when you upgrade React. And it costs $9.99 once for the Pro tier, not $300-750/month scaling with your MAU count.
 
 Tour Kit doesn't have a visual builder. That's a real limitation. If your product team needs to edit tours without developer involvement, a SaaS tool may genuinely be the better choice. We wrote about [when SaaS onboarding makes sense](/blog/when-saas-onboarding-makes-sense) for exactly this scenario.
 
@@ -228,7 +228,7 @@ Here's a rough decision framework:
 
 We spent three months building Tour Kit as a solo developer. The first version was 23KB gzipped. Way too big.
 
-So we split it into 10 composable packages. Install `@tourkit/core` at under 8KB for basic tours. Add `@tourkit/surveys` only if you need NPS. Add `@tourkit/analytics` only if you need event tracking. The approach means you pay (in bundle size) only for what you use.
+So we split it into 10 composable packages. Install `@tourkit/core` at under 23KB for basic tours. Add `@tourkit/surveys` only if you need NPS. Add `@tourkit/analytics` only if you need event tracking. The approach means you pay (in bundle size) only for what you use.
 
 That architectural decision came directly from experiencing the developer tax ourselves. Every SaaS onboarding tool ships one monolithic script that includes surveys, checklists, banners, and analytics whether you use them or not.
 
@@ -264,7 +264,7 @@ As of April 2026, the average enterprise uses 650+ SaaS applications according t
 
 ### Should developers build or buy product tour tools?
 
-For teams with React developers, product tours fall into the "own in code" category. SaaS tools like Appcues ($279-750/month) inject 30-60KB of external JavaScript and charge per MAU. Libraries like Tour Kit ship at under 8KB gzipped, use your design system, and cost $9.99 once. The exception: teams without developers who need visual builders should buy SaaS.
+For teams with React developers, product tours fall into the "own in code" category. SaaS tools like Appcues ($279-750/month) inject 30-60KB of external JavaScript and charge per MAU. Libraries like Tour Kit ship at under 23KB gzipped, use your design system, and cost $9.99 once. The exception: teams without developers who need visual builders should buy SaaS.
 
 ### How do third-party scripts affect web performance?
 

@@ -378,7 +378,7 @@ function useOnboardingSteps(completedMilestones: string[]): TourStep[] {
 }
 ```
 
-This is where Tour Kit's headless architecture pays off. You control the logic; Tour Kit handles positioning, scroll management, and keyboard navigation. The entire `@tourkit/core` package is under 8KB gzipped with zero runtime dependencies, so it won't bloat your dashboard bundle.
+This is where Tour Kit's headless architecture pays off. You control the logic; Tour Kit handles positioning, scroll management, and keyboard navigation. The entire `@tourkit/core` package is under 23KB gzipped with zero runtime dependencies, so it won't bloat your dashboard bundle.
 
 ## Common mistakes to avoid
 
@@ -394,7 +394,7 @@ This is where Tour Kit's headless architecture pays off. You control the logic; 
 
 ## Tools for developer tool onboarding
 
-**Tour Kit** handles dashboard and documentation tours with headless React components. Works with any design system, ships at under 8KB gzipped (core package), and supports conditional tours based on user context. React 18+ only, no visual builder. You write the tour in code, which means it lives in your repo and deploys with your app. [Get started at usertourkit.com](https://usertourkit.com/).
+**Tour Kit** handles dashboard and documentation tours with headless React components. Works with any design system, ships at under 23KB gzipped (core package), and supports conditional tours based on user context. React 18+ only, no visual builder. You write the tour in code, which means it lives in your repo and deploys with your app. [Get started at usertourkit.com](https://usertourkit.com/).
 
 We built Tour Kit, so take this recommendation with appropriate skepticism. Every claim below is verifiable against npm, GitHub, and bundlephobia.
 

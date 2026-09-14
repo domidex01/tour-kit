@@ -371,7 +371,7 @@ function App() {
 }
 ```
 
-Tour Kit's core package is under 8KB gzipped. That's small enough that even on a slow 3G connection (400KB/s effective throughput), the library loads in under 20ms after the initial chunk arrives. But your step content, images, and animations add up. Use `requestIdleCallback` to preload step content during browser idle time.
+Tour Kit's core package is under 23KB gzipped. That's small enough that even on a slow 3G connection (400KB/s effective throughput), the library loads in under 60ms after the initial chunk arrives. But your step content, images, and animations add up. Use `requestIdleCallback` to preload step content during browser idle time.
 
 Three-step tours are optimal on mobile. Chameleon's data shows they hit 72% completion. Fewer steps means less JavaScript to evaluate, fewer DOM mutations, and faster render cycles.
 
@@ -393,7 +393,7 @@ Three-step tours are optimal on mobile. Chameleon's data shows they hit 72% comp
 
 Most product tour libraries support mobile to some degree, but the quality varies:
 
-**Tour Kit** handles responsive positioning through Floating UI, renders in portals to avoid CLS, and gives you full control over step layout through headless components. The 8KB core means minimal mobile performance impact. One honest limitation: Tour Kit doesn't ship a built-in mobile layout mode or visual builder. You build touch-friendly patterns yourself using the headless primitives, which means more upfront work than a turnkey solution.
+**Tour Kit** handles responsive positioning through Floating UI, renders in portals to avoid CLS, and gives you full control over step layout through headless components. The 23KB core means minimal mobile performance impact. One honest limitation: Tour Kit doesn't ship a built-in mobile layout mode or visual builder. You build touch-friendly patterns yourself using the headless primitives, which means more upfront work than a turnkey solution.
 
 **React Joyride** has basic responsive support but ships pre-built tooltip components at 37KB gzipped. Its fixed tooltip structure limits how much you can adapt for mobile viewports. Customization requires overriding internal styles.
 
@@ -421,7 +421,7 @@ Bottom sheets work better for mobile product tours. Traditional tooltips frequen
 
 ### How do you prevent product tours from hurting mobile performance?
 
-Lazy-load tour components with `React.lazy` so they don't block First Contentful Paint. Use CSS transitions instead of JavaScript animation loops. Render overlays in React portals with `position: fixed` to prevent layout shift. Tour Kit's core is under 8KB gzipped, adding under 20ms load time on slow 3G.
+Lazy-load tour components with `React.lazy` so they don't block First Contentful Paint. Use CSS transitions instead of JavaScript animation loops. Render overlays in React portals with `position: fixed` to prevent layout shift. Tour Kit's core is under 23KB gzipped, adding under 60ms load time on slow 3G.
 
 ### Do mobile product tours need swipe navigation?
 

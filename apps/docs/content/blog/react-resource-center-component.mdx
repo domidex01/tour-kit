@@ -17,7 +17,7 @@ ogImage: /og-images/react-resource-center-component.png
 
 Search npm for "react resource center" and you get zero results. Not a handful of outdated options. Zero. Developers building in-app help centers are stitching together dialog primitives, hand-rolled search, and static link lists with no established pattern to follow. The result is usually a help icon that opens a janky sidebar with hard-coded links and no keyboard navigation.
 
-We built a resource center using Tour Kit's headless primitives: under 12KB gzipped for search filtering, keyboard navigation, and screen reader support. The compound component pattern lets you compose `<ResourceCenter.Trigger>`, `<ResourceCenter.Panel>`, and `<ResourceCenter.Section>` while keeping full styling control. By the end, you'll have a working resource center that launches product tours directly from the help panel.
+We built a resource center using Tour Kit's headless primitives: under 23KB gzipped for search filtering, keyboard navigation, and screen reader support. The compound component pattern lets you compose `<ResourceCenter.Trigger>`, `<ResourceCenter.Panel>`, and `<ResourceCenter.Section>` while keeping full styling control. By the end, you'll have a working resource center that launches product tours directly from the help panel.
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -714,7 +714,7 @@ A resource center component is an in-app help widget giving users self-service a
 
 ### Does adding a resource center affect page performance?
 
-Tour Kit's resource center implementation adds under 12KB gzipped to your bundle, compared to 200-400KB for third-party widgets like Intercom or Zendesk. The panel renders conditionally, so DOM cost is zero until the user opens it. Lazy-loading with `React.lazy()` reduces the initial cost further.
+Tour Kit's resource center implementation adds under 23KB gzipped to your bundle, compared to 200-400KB for third-party widgets like Intercom or Zendesk. The panel renders conditionally, so DOM cost is zero until the user opens it. Lazy-loading with `React.lazy()` reduces the initial cost further.
 
 ### Can I connect the resource center to product tours?
 

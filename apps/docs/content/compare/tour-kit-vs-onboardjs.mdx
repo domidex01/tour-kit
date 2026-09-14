@@ -8,7 +8,7 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, scheduling, and more in a &lt;8KB core bundle for a $9.99 one-time Pro upgrade. OnboardJS is a headless step-flow engine for multi-step onboarding wizards, MIT-licensed and free. userTourKit suits React teams building full-lifecycle onboarding with DOM-anchored tours. OnboardJS fits better when you only need wizard-style flows and don't care about tooltips or accessibility compliance.
+userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, scheduling, and more in a &lt;23KB core bundle for a $9.99 one-time Pro upgrade. OnboardJS is a headless step-flow engine for multi-step onboarding wizards, MIT-licensed and free. userTourKit suits React teams building full-lifecycle onboarding with DOM-anchored tours. OnboardJS fits better when you only need wizard-style flows and don't care about tooltips or accessibility compliance.
 
 ## What is userTourKit?
 
@@ -32,7 +32,7 @@ Both support conditional next-step routing. userTourKit uses `onNext` callbacks 
 
 ### Hints and hotspots
 
-userTourKit ships a dedicated `@tour-kit/hints` package (&lt;5KB gzipped) with `HintsProvider`, `HintHotspot`, and `HintTooltip` components. Hints are non-sequential, each dismisses independently, and dismissal state persists across page loads. The hotspot renders a pulsing beacon on the target element. The tooltip appears on hover or click.
+userTourKit ships a dedicated `@tour-kit/hints` package (&lt;6.5KB gzipped) with `HintsProvider`, `HintHotspot`, and `HintTooltip` components. Hints are non-sequential, each dismisses independently, and dismissal state persists across page loads. The hotspot renders a pulsing beacon on the target element. The tooltip appears on hover or click.
 
 OnboardJS has no hint or hotspot capability. It doesn't attach to DOM elements at all, so the concept of a persistent beacon on a UI element isn't possible within its architecture.
 
@@ -86,7 +86,7 @@ For teams building products under compliance requirements (government contracts,
 
 ### Bundle size and performance
 
-userTourKit publishes verified gzipped bundle sizes: core at &lt;8KB, react at &lt;12KB, hints at &lt;5KB. These are measured and enforced as quality gates.
+userTourKit publishes verified gzipped bundle sizes: core at &lt;23KB, react at &lt;12KB, hints at &lt;6.5KB. These are measured and enforced as quality gates.
 
 OnboardJS doesn't publish minified+gzipped bundle sizes. The npm unpacked tarball for `@onboardjs/core` weighs 442KB, but that includes source maps, type declarations, development artifacts. The actual browser payload is smaller, though without published benchmarks it's impossible to compare directly. userTourKit's transparency here is a practical advantage for teams with performance budgets.
 
@@ -125,7 +125,7 @@ The practical comparison: userTourKit's $9.99 one-time fee for 7 extra packages 
 | Focus management | ✅ useFocusTrap, aria-live | 🚫 Not documented |
 | Headless / BYO UI | ✅ Full headless mode | ✅ Fully headless |
 | shadcn/ui support | ✅ Native + Radix + Base UI | ⚙️ Copy-paste components |
-| Core bundle (gzipped) | &lt;8KB | Not published |
+| Core bundle (gzipped) | &lt;23KB | Not published |
 | React 19 support | ✅ Explicit | ⚠️ Not confirmed |
 | Router adapters | ✅ Next.js, React Router | ⚙️ Next.js App Router |
 | Persistence | ✅ localStorage, session, cookie | ✅ localStorage + Supabase |
@@ -202,7 +202,7 @@ We built userTourKit, so take the comparison above with appropriate skepticism. 
 ## Frequently asked questions
 
 **Is userTourKit free?**
-userTourKit's free tier includes three MIT-licensed packages: `@tour-kit/core` (&lt;8KB gzipped), `@tour-kit/react` (&lt;12KB), and `@tour-kit/hints` (&lt;5KB). Seven more packages (analytics, announcements, checklists, adoption, media, scheduling) are available for a one-time $9.99 Pro payment. No subscriptions. No MAU caps.
+userTourKit's free tier includes three MIT-licensed packages: `@tour-kit/core` (&lt;23KB gzipped), `@tour-kit/react` (&lt;12KB), and `@tour-kit/hints` (&lt;6.5KB). Seven more packages (analytics, announcements, checklists, adoption, media, scheduling) are available for a one-time $9.99 Pro payment. No subscriptions. No MAU caps.
 
 **What is the difference between userTourKit and OnboardJS?**
 userTourKit positions tooltips and spotlights on DOM elements for product tours. OnboardJS manages multi-step wizard screens without attaching to the DOM. userTourKit has 10 packages covering the full onboarding lifecycle. OnboardJS focuses on step flows with PostHog and Supabase plugins. Different scope, similar philosophy.
@@ -214,7 +214,7 @@ Yes. OnboardJS step definitions map to userTourKit's step config with added DOM 
 userTourKit provides router adapters for Next.js App Router (`useNextAppRouter`), Next.js Pages Router (`useNextPagesRouter`), and React Router v6+ (`useReactRouter`). It supports React 18 and React 19 explicitly. OnboardJS supports Next.js App Router via `"use client"` directives but hasn't confirmed React 19 compatibility.
 
 **What is the bundle size of userTourKit vs OnboardJS?**
-userTourKit publishes verified gzipped sizes: core &lt;8KB, react &lt;12KB, hints &lt;5KB. OnboardJS doesn't publish gzipped bundle sizes. The `@onboardjs/core` npm tarball is 442KB unpacked, but the browser bundle is smaller. Without published benchmarks, a direct size comparison isn't possible.
+userTourKit publishes verified gzipped sizes: core &lt;23KB, react &lt;12KB, hints &lt;6.5KB. OnboardJS doesn't publish gzipped bundle sizes. The `@onboardjs/core` npm tarball is 442KB unpacked, but the browser bundle is smaller. Without published benchmarks, a direct size comparison isn't possible.
 
 **Does OnboardJS support product tours with tooltips?**
 No. OnboardJS manages wizard-style step flows rendered as full-screen or panel components. It doesn't position elements relative to DOM targets, show spotlight overlays, or render contextual tooltips. For those features, you need a library like userTourKit, React Joyride, or Shepherd.js.

@@ -27,7 +27,7 @@ We tested the major options in a Vite 6 + React 19 and a Nuxt 3 + Vue 3 project.
 
 ## Short answer
 
-As of April 2026, three product tour libraries work across both Vue and React: Shepherd.js (13.7K GitHub stars, 656 kB unpacked), Driver.js (25.5K stars, 83 kB unpacked), and Intro.js (23.8K stars, 874 kB unpacked, AGPL-licensed). All three are vanilla JavaScript cores with framework wrappers. None provides first-class Vue 3 Composition API hooks or first-class React hooks from a shared engine. For React-only teams, Tour Kit ships at under 8 kB gzipped with native hooks and WCAG 2.1 AA accessibility. A `@tour-kit/vue` package is on the roadmap.
+As of April 2026, three product tour libraries work across both Vue and React: Shepherd.js (13.7K GitHub stars, 656 kB unpacked), Driver.js (25.5K stars, 83 kB unpacked), and Intro.js (23.8K stars, 874 kB unpacked, AGPL-licensed). All three are vanilla JavaScript cores with framework wrappers. None provides first-class Vue 3 Composition API hooks or first-class React hooks from a shared engine. For React-only teams, Tour Kit ships at under 23 kB gzipped with native hooks and WCAG 2.1 AA accessibility. A `@tour-kit/vue` package is on the roadmap.
 
 ## How cross-framework tour libraries actually work
 
@@ -48,8 +48,8 @@ Driver.js skips the wrapper question entirely. Pure vanilla JS. You call `driver
 <tbody>
 <tr><td>React support</td><td>Official wrapper</td><td>Vanilla JS (manual)</td><td>Community wrapper</td><td>Native hooks</td></tr>
 <tr><td>Vue support</td><td>Official wrapper</td><td>Vanilla JS (manual)</td><td>Community wrapper</td><td>Roadmap</td></tr>
-<tr><td>Bundle size (unpacked)</td><td>656 kB</td><td>83 kB</td><td>874 kB</td><td>Core: ~20 kB, React: ~30 kB</td></tr>
-<tr><td>Bundle size (gzipped)</td><td>~25 kB</td><td>~5 kB</td><td>~30 kB</td><td>Core: &lt;8 kB, React: &lt;12 kB</td></tr>
+<tr><td>Bundle size (unpacked)</td><td>656 kB</td><td>83 kB</td><td>874 kB</td><td>Core: ~23 kB, React: ~30 kB</td></tr>
+<tr><td>Bundle size (gzipped)</td><td>~25 kB</td><td>~5 kB</td><td>~30 kB</td><td>Core: &lt;23 kB, React: &lt;12 kB</td></tr>
 <tr><td>TypeScript</td><td>Yes</td><td>Yes (built in TS)</td><td>Types available</td><td>Yes (strict mode)</td></tr>
 <tr><td>License</td><td>MIT</td><td>MIT</td><td>AGPL-3.0 / Commercial</td><td>MIT (core) / Commercial (extended)</td></tr>
 <tr><td>WCAG 2.1 AA</td><td>Partial (built-in keyboard nav)</td><td>No explicit compliance</td><td>No explicit compliance</td><td>Yes (focus trap, ARIA, reduced motion)</td></tr>
@@ -176,7 +176,7 @@ We're not there yet. Browser support is Chromium-only, polyfills add weight, and
 
 We built Tour Kit, so take this with appropriate skepticism. Every claim below is verifiable against npm, GitHub, and bundlephobia.
 
-For React teams, Tour Kit's headless architecture means you render your own components, compose with your own hooks, and keep full control over styling. The core ships at under 8 kB gzipped with zero runtime dependencies. You get WCAG 2.1 AA accessibility without configuration. And the extended packages (analytics, checklists, surveys, announcements, scheduling) exist in the same monorepo, so they share types and context.
+For React teams, Tour Kit's headless architecture means you render your own components, compose with your own hooks, and keep full control over styling. The core ships at under 23 kB gzipped with zero runtime dependencies. You get WCAG 2.1 AA accessibility without configuration. And the extended packages (analytics, checklists, surveys, announcements, scheduling) exist in the same monorepo, so they share types and context.
 
 Tour Kit doesn't support Vue today. The core package (`@tour-kit/core`) is framework-agnostic by design — step state, position calculation, storage, keyboard navigation all live outside React. A `@tour-kit/vue` package using Vue 3 Composition API is on the roadmap. When it ships, it would share the same core logic with identical TypeScript types and accessibility guarantees. No wrapper tradeoffs.
 
@@ -192,7 +192,7 @@ Shepherd.js has official wrappers for Vue and React. The Vue wrapper supports Vu
 
 ### What is the lightest product tour library that works with Vue and React?
 
-Driver.js is the lightest cross-framework option at 83 kB unpacked (roughly 5 kB gzipped). It's pure vanilla JavaScript with no framework wrappers, which means you call it imperatively from Vue's `onMounted` or React's `useEffect`. Tour Kit's core is under 8 kB gzipped but currently supports only React. Shepherd.js is 656 kB unpacked and Intro.js is 874 kB unpacked.
+Driver.js is the lightest cross-framework option at 83 kB unpacked (roughly 5 kB gzipped). It's pure vanilla JavaScript with no framework wrappers, which means you call it imperatively from Vue's `onMounted` or React's `useEffect`. Tour Kit's core is under 23 kB gzipped but currently supports only React. Shepherd.js is 656 kB unpacked and Intro.js is 874 kB unpacked.
 
 ### Is Intro.js free for commercial use?
 
@@ -267,7 +267,7 @@ Use a framework-native library if you're committed to one framework. You get rea
       "name": "What is the lightest product tour library that works with Vue and React?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Driver.js is the lightest cross-framework option at 83 kB unpacked (roughly 5 kB gzipped). It is pure vanilla JavaScript with no framework wrappers, which means you call it imperatively from Vue's onMounted or React's useEffect. Tour Kit's core is under 8 kB gzipped but currently supports only React."
+        "text": "Driver.js is the lightest cross-framework option at 83 kB unpacked (roughly 5 kB gzipped). It is pure vanilla JavaScript with no framework wrappers, which means you call it imperatively from Vue's onMounted or React's useEffect. Tour Kit's core is under 23 kB gzipped but currently supports only React."
       }
     },
     {

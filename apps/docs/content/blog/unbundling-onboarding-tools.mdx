@@ -95,7 +95,7 @@ All-in-one onboarding platforms are losing market share because the trade-offs t
 
 As of April 2026, WalkMe's injected script adds 180-350KB to your page weight depending on which modules load. Pendo's agent script runs between 150-250KB. Google's Core Web Vitals update in late 2025 made these numbers directly visible in search rankings, and engineering teams are noticing.
 
-A composable approach changes the math entirely. Tour Kit's core package ships at under 8KB gzipped with zero runtime dependencies. You install only the packages you need (tours, hints, checklists, surveys) and tree-shaking removes the rest. Loading a 300KB platform script versus an 8KB library isn't a marginal difference. On mobile connections, it's the gap between a sub-100ms Interaction to Next Paint and a visible delay.
+A composable approach changes the math entirely. Tour Kit's core package ships at under 23KB gzipped with zero runtime dependencies. You install only the packages you need (tours, hints, checklists, surveys) and tree-shaking removes the rest. Loading a 300KB platform script versus an 23KB library isn't a marginal difference. On mobile connections, it's the gap between a sub-100ms Interaction to Next Paint and a visible delay.
 
 ### Force 2: vendor lock-in has a real exit cost
 
@@ -194,7 +194,7 @@ A practical composable onboarding stack in 2026 uses six layers, each handled by
     <tr>
       <td>Tour engine</td>
       <td>Tour Kit (or similar headless library)</td>
-      <td>Under 8KB, headless, works with your design system</td>
+      <td>Under 23KB, headless, works with your design system</td>
     </tr>
     <tr>
       <td>Analytics</td>

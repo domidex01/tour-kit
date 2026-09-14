@@ -166,7 +166,7 @@ We maintain a detailed comparison in [the best free product tour libraries](/blo
 
 ### Approach 3: headless component libraries
 
-Headless libraries provide tour logic (step sequencing, element targeting, scroll management, keyboard navigation) without prescribing UI. You render steps with your own components. User Tour Kit follows this approach: the core ships under 8KB gzipped with zero runtime dependencies, and you compose it with whatever design system you're running.
+Headless libraries provide tour logic (step sequencing, element targeting, scroll management, keyboard navigation) without prescribing UI. You render steps with your own components. User Tour Kit follows this approach: the core ships under 23KB gzipped with zero runtime dependencies, and you compose it with whatever design system you're running.
 
 ```tsx
 // src/components/OnboardingSystem.tsx
@@ -205,7 +205,7 @@ We built User Tour Kit, so take our enthusiasm for this approach with appropriat
       <td>Bundle impact</td>
       <td>50-200KB injected</td>
       <td>15-40KB gzipped</td>
-      <td>Under 8KB core (gzipped)</td>
+      <td>Under 23KB core (gzipped)</td>
     </tr>
     <tr>
       <td>Styling control</td>
@@ -324,7 +324,7 @@ For full benchmarks: [react tour library benchmarks](/blog/react-tour-library-be
 
 ### Headless component libraries
 
-- **User Tour Kit**: Headless, composable, TypeScript-first. Core under 8KB gzipped. 10 packages (tours, checklists, hints, announcements, surveys, analytics, scheduling, media, adoption). MIT free tier, $9.99 one-time Pro. React 18 and 19. WCAG 2.1 AA. No visual builder (the honest trade-off).
+- **User Tour Kit**: Headless, composable, TypeScript-first. Core under 23KB gzipped. 10 packages (tours, checklists, hints, announcements, surveys, analytics, scheduling, media, adoption). MIT free tier, $9.99 one-time Pro. React 18 and 19. WCAG 2.1 AA. No visual builder (the honest trade-off).
 
 We maintain detailed comparisons: [User Tour Kit vs React Joyride](/blog/tour-kit-vs-react-joyride), [best free open-source product tour libraries](/blog/best-free-product-tour-libraries-open-source), [best headless UI libraries for onboarding](/blog/best-headless-ui-libraries-onboarding).
 
@@ -398,7 +398,7 @@ The answer depends on your team and constraints. SaaS tools ($250-1,000+/month) 
 
 ### What is the best user onboarding tool for React?
 
-For React applications in 2026, the main options are React Joyride (most popular, 603K weekly downloads, 37KB), Shepherd.js (framework-agnostic, AGPL), Driver.js (lightweight, limited features), and User Tour Kit (headless, under 8KB core, composable). Which one fits depends on whether you need a visual builder (use a SaaS tool), a batteries-included library (React Joyride), or full rendering control (User Tour Kit).
+For React applications in 2026, the main options are React Joyride (most popular, 603K weekly downloads, 37KB), Shepherd.js (framework-agnostic, AGPL), Driver.js (lightweight, limited features), and User Tour Kit (headless, under 23KB core, composable). Which one fits depends on whether you need a visual builder (use a SaaS tool), a batteries-included library (React Joyride), or full rendering control (User Tour Kit).
 
 ### How do you make onboarding accessible?
 
