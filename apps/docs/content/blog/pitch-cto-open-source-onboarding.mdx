@@ -27,7 +27,7 @@ We built [Tour Kit](https://tourkit.dev/docs), so take everything here with appr
 
 ## What is open-source onboarding, and how does it differ from SaaS tools?
 
-Open-source onboarding is a code-first approach where product tours, tooltips, checklists, and feature announcements are built using MIT-licensed React libraries that ship inside your application bundle, rather than injected by a third-party SaaS vendor's external script. Unlike platforms like Appcues or Pendo that charge per monthly active user and control the rendering pipeline, an open-source library gives engineering teams full ownership of the onboarding logic, styling, and deployment lifecycle. As of April 2026, libraries like Tour Kit ship at under 8KB gzipped with zero runtime dependencies, compared to 50-200KB of uncontrollable injected scripts from SaaS alternatives.
+Open-source onboarding is a code-first approach where product tours, tooltips, checklists, and feature announcements are built using MIT-licensed React libraries that ship inside your application bundle, rather than injected by a third-party SaaS vendor's external script. Unlike platforms like Appcues or Pendo that charge per monthly active user and control the rendering pipeline, an open-source library gives engineering teams full ownership of the onboarding logic, styling, and deployment lifecycle. As of April 2026, libraries like Tour Kit ship at under 23KB gzipped with zero runtime dependencies, compared to 50-200KB of uncontrollable injected scripts from SaaS alternatives.
 
 The distinction matters because it changes who controls the onboarding experience. With SaaS, your product team builds flows in a vendor's editor, and those flows render through code you can't inspect or version. With a library, onboarding flows are TypeScript files that go through the same code review, testing, and CI/CD pipeline as the rest of your application.
 
@@ -85,7 +85,7 @@ CTOs respond to numbers, not opinions, and the three-year total cost of ownershi
     <tr>
       <td>Bundle size impact</td>
       <td>50-200KB+ injected script (uncontrollable)</td>
-      <td>8KB gzipped core (tree-shakeable)</td>
+      <td>23KB gzipped core (tree-shakeable)</td>
     </tr>
     <tr>
       <td>Training cost per engineer</td>

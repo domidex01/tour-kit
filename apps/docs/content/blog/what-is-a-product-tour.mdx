@@ -136,7 +136,7 @@ The implication for developers: build short tours (three to five steps), let use
 
 ## Product tours in Tour Kit
 
-[Tour Kit](https://usertourkit.com/) is a headless React library for building product tours that handles state, positioning, and focus management without prescribing any visual design. The core package ships under 8KB gzipped with zero runtime dependencies, and the architecture splits across 10 composable packages you install individually.
+[Tour Kit](https://usertourkit.com/) is a headless React library for building product tours that handles state, positioning, and focus management without prescribing any visual design. The core package ships under 23KB gzipped with zero runtime dependencies, and the architecture splits across 10 composable packages you install individually.
 
 Tour Kit requires React 18+ and is TypeScript-first. It doesn't include a visual builder. If your team needs no-code, a SaaS tool like Appcues or Userpilot is a better fit. Tour Kit is for teams that want full control within their existing component library.
 
@@ -154,7 +154,7 @@ Chameleon's analysis of 15 million interactions puts the average at 61%. Three-s
 
 ### Do product tours hurt performance?
 
-It depends on the library. Styled libraries like React Joyride ship at 37KB gzipped, adding measurably to Time to Interactive on mobile. Headless libraries like Tour Kit target under 8KB with zero dependencies. The real performance concern is the positioning engine: poorly implemented positioning causes layout thrashing during scroll events.
+It depends on the library. Styled libraries like React Joyride ship at 37KB gzipped, adding measurably to Time to Interactive on mobile. Headless libraries like Tour Kit target under 23KB with zero dependencies. The real performance concern is the positioning engine: poorly implemented positioning causes layout thrashing during scroll events.
 
 ### Are product tours accessible?
 
@@ -221,7 +221,7 @@ export const faqSchema = {
       "name": "Do product tours hurt performance?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "It depends on the library. Styled tour libraries ship at 30-40KB gzipped, adding to Time to Interactive. Headless libraries like Tour Kit target under 8KB with zero dependencies. The real performance concern is the positioning engine: poorly implemented positioning causes layout thrashing during scroll."
+        "text": "It depends on the library. Styled tour libraries ship at 30-40KB gzipped, adding to Time to Interactive. Headless libraries like Tour Kit target under 23KB with zero dependencies. The real performance concern is the positioning engine: poorly implemented positioning causes layout thrashing during scroll."
       }
     },
     {

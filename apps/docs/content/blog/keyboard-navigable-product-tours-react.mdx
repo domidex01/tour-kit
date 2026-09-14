@@ -17,7 +17,7 @@ ogImage: /og-images/keyboard-navigable-product-tours-react.png
 
 Product tours that only work with a mouse fail roughly 15% of your users. That number comes from the [WebAIM Million report (2025)](https://webaim.org/projects/million/), which found 95.9% of homepages have detectable WCAG failures. Missing keyboard support is among the top five. If your tour tooltip traps focus incorrectly or ignores arrow keys entirely, keyboard users can't advance steps, skip the tour, or even return to your app. Screen reader users hear nothing at all.
 
-We built keyboard navigation into Tour Kit from day one because we hit these problems ourselves. `useKeyboardNavigation` handles arrow keys, Enter, and Escape. Focus stays trapped within each tooltip via `useFocusTrap`. Step changes reach screen readers through the `announce()` utility. All of it ships in under 8KB gzipped for `@tour-kit/core` (verified on [bundlephobia](https://bundlephobia.com/)), with zero runtime dependencies.
+We built keyboard navigation into Tour Kit from day one because we hit these problems ourselves. `useKeyboardNavigation` handles arrow keys, Enter, and Escape. Focus stays trapped within each tooltip via `useFocusTrap`. Step changes reach screen readers through the `announce()` utility. All of it ships in under 23KB gzipped for `@tour-kit/core` (verified on [bundlephobia](https://bundlephobia.com/)), with zero runtime dependencies.
 
 By the end of this tutorial, you'll have a 5-step product tour where every interaction works from the keyboard alone, screen readers announce each step transition, and focus returns to the triggering element when the tour ends.
 
@@ -324,7 +324,7 @@ Tour Kit addresses WCAG 2.1 Success Criteria 2.1.1 (Keyboard), 2.1.2 (No Keyboar
 
 ### How does Tour Kit compare to React Joyride for keyboard support?
 
-React Joyride (37KB gzipped, as of April 2026) provides basic keyboard navigation but skips focus trapping and `aria-live` announcements. Its tooltip renders without `role="dialog"`, so screen readers don't scope their virtual cursor. Tour Kit ships at under 8KB gzipped with `useKeyboardNavigation`, `useFocusTrap`, and `announce()` built in.
+React Joyride (37KB gzipped, as of April 2026) provides basic keyboard navigation but skips focus trapping and `aria-live` announcements. Its tooltip renders without `role="dialog"`, so screen readers don't scope their virtual cursor. Tour Kit ships at under 23KB gzipped with `useKeyboardNavigation`, `useFocusTrap`, and `announce()` built in.
 
 ### Does adding keyboard navigation affect bundle size?
 
@@ -400,7 +400,7 @@ Not yet. Tour Kit doesn't support per-step keyboard config (a current limitation
       "name": "How does Tour Kit compare to React Joyride for keyboard support?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "React Joyride provides basic keyboard navigation but doesn't implement focus trapping within tooltips or aria-live step announcements. Tour Kit's core ships at under 8KB gzipped and includes useKeyboardNavigation, useFocusTrap, and announce() as first-class APIs."
+        "text": "React Joyride provides basic keyboard navigation but doesn't implement focus trapping within tooltips or aria-live step announcements. Tour Kit's core ships at under 23KB gzipped and includes useKeyboardNavigation, useFocusTrap, and announce() as first-class APIs."
       }
     },
     {

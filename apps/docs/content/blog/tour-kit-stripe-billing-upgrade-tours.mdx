@@ -349,7 +349,7 @@ Tour Kit's `startTour()` API accepts any trigger source. Connect a WebSocket or 
 
 ### Does this integration add latency to my Stripe webhook processing?
 
-No. The webhook handler stores the tour trigger and returns `200` to Stripe immediately. Tour rendering happens entirely on the client side when the user's browser picks up the trigger. Stripe's webhook timeout is 20 seconds, and storing a key-value pair takes single-digit milliseconds. Tour Kit's core is under 8KB gzipped, so the client-side overhead is minimal.
+No. The webhook handler stores the tour trigger and returns `200` to Stripe immediately. Tour rendering happens entirely on the client side when the user's browser picks up the trigger. Stripe's webhook timeout is 20 seconds, and storing a key-value pair takes single-digit milliseconds. Tour Kit's core is under 23KB gzipped, so the client-side overhead is minimal.
 
 ### What happens if the user isn't logged in when Stripe fires the event?
 

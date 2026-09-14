@@ -262,7 +262,7 @@ This matters beyond compliance. Roughly 15% of the global population has some fo
 
 A few libraries handle both patterns. Here's where they differ:
 
-**Tour Kit** provides both patterns through separate packages: `@tourkit/hints` (under 5KB gzipped) for contextual tooltips and `@tourkit/react` (under 12KB gzipped) for linear tours. Both are headless, meaning you render with your own components. TypeScript-first, WCAG 2.1 AA compliant, works with shadcn/ui and Tailwind.
+**Tour Kit** provides both patterns through separate packages: `@tourkit/hints` (under 6.5KB gzipped) for contextual tooltips and `@tourkit/react` (under 12KB gzipped) for linear tours. Both are headless, meaning you render with your own components. TypeScript-first, WCAG 2.1 AA compliant, works with shadcn/ui and Tailwind.
 
 Disclosure: we built Tour Kit, so take this with appropriate skepticism. The limitation: no visual builder, React 18+ only, and a smaller community than established tools. [Docs and source](https://usertourkit.com/).
 
@@ -284,7 +284,7 @@ Linear tours work when scoped correctly: under 5 steps, user-initiated, and focu
 
 ### Can I use both contextual tooltips and linear tours in the same app?
 
-Yes, and you should. The hybrid approach uses linear tours for first-time setup flows (3-5 steps, user-initiated) and contextual tooltips for ongoing feature discovery. Tour Kit supports this through separate packages: `@tourkit/react` for tours and `@tourkit/hints` for tooltips, sharing the same `@tourkit/core` foundation at under 17KB gzipped combined.
+Yes, and you should. The hybrid approach uses linear tours for first-time setup flows (3-5 steps, user-initiated) and contextual tooltips for ongoing feature discovery. Tour Kit supports this through separate packages: `@tourkit/react` for tours and `@tourkit/hints` for tooltips, sharing the same `@tourkit/core` foundation at under 23KB gzipped combined.
 
 ### How do contextual tooltips affect accessibility?
 

@@ -8,7 +8,7 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library offering tours, hints, checklists, announcements, and five more packages in a &lt;8KB core bundle for a $9.99 one-time fee. Appcues is a no-code onboarding platform starting at $750/month. userTourKit suits React teams wanting code ownership and tiny bundles. Appcues is better when non-technical PMs need to build tours without developers.
+userTourKit is a headless React library offering tours, hints, checklists, announcements, and five more packages in a &lt;23KB core bundle for a $9.99 one-time fee. Appcues is a no-code onboarding platform starting at $750/month. userTourKit suits React teams wanting code ownership and tiny bundles. Appcues is better when non-technical PMs need to build tours without developers.
 
 ## What is userTourKit?
 
@@ -32,7 +32,7 @@ The `useTour()` hook gives you `start`, `next`, `prev`, `skip`, `goTo`, and `res
 
 Both tools support persistent hotspots. Appcues calls them "Pins" and renders them as pulsating beacons attached to elements. They're configured through the visual builder.
 
-userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped, MIT licensed) provides `HintsProvider`, `HintHotspot`, `HintTooltip` components. Each hint has independent dismissal state persisted through storage adapters. The `useHint()` hook returns `isVisible`, `isDismissed`, `show`, `hide`, `dismiss` for programmatic control.
+userTourKit's `@tour-kit/hints` package (&lt;6.5KB gzipped, MIT licensed) provides `HintsProvider`, `HintHotspot`, `HintTooltip` components. Each hint has independent dismissal state persisted through storage adapters. The `useHint()` hook returns `isVisible`, `isDismissed`, `show`, `hide`, `dismiss` for programmatic control.
 
 Hints aren't sequential like tour steps. They suit feature discovery better than guided walkthroughs, which is why they ship as a separate package rather than bolted onto the tour engine.
 
@@ -94,7 +94,7 @@ Lighthouse accessibility score: 100.
 
 Appcues doesn't publish its bundle size. Their loading is multi-phase: bootstrap script from CDN (Fastly), full SDK fetch, API calls to check active flows, then flow content. Default installation is synchronous and render-blocking. An async option exists but needs a callback queue wrapper. Because the payload is account-specific, Bundlephobia can't measure it.
 
-userTourKit's core is &lt;8KB gzipped. React adds &lt;12KB. Hints, &lt;5KB. All three packages are tree-shakeable and code-split alongside the rest of your application bundle, which means you pay zero performance tax for features your users don't trigger. No CDN dependency, no render blocking. `LazyTour` from `@tour-kit/react/lazy` handles deferred loading when you want to push that cost even further down the line.
+userTourKit's core is &lt;23KB gzipped. React adds &lt;12KB. Hints, &lt;6.5KB. All three packages are tree-shakeable and code-split alongside the rest of your application bundle, which means you pay zero performance tax for features your users don't trigger. No CDN dependency, no render blocking. `LazyTour` from `@tour-kit/react/lazy` handles deferred loading when you want to push that cost even further down the line.
 
 ### Framework support and TypeScript
 
@@ -132,7 +132,7 @@ userTourKit's free tier (MIT) includes core, React bindings, and hints. The $9.9
 | No-code builder | 🚫 Code-only | ✅ Chrome extension |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 Not documented |
 | Headless/BYO UI | ✅ Full headless (UnifiedSlot) | 🚫 Opinionated DOM injection |
-| Core bundle (gzipped) | &lt;8KB | Opaque (multi-phase CDN) |
+| Core bundle (gzipped) | &lt;23KB | Opaque (multi-phase CDN) |
 | React 18 + 19 | ✅ Native hooks | 🚫 Global singleton |
 | TypeScript | ✅ Strict mode, full inference | ⚙️ Basic declarations |
 | SSR/Next.js | ✅ App Router compatible | 🚫 Client-only |
@@ -249,7 +249,7 @@ Yes. Export your Appcues flow definitions, then recreate them as userTourKit ste
 userTourKit supports React 18 and 19 with native hooks. The `useNextAppRouter()` adapter provides route-aware tours for Next.js App Router. SSR and SSG work with the included `createNoopStorage()` adapter. Full TypeScript strict mode support.
 
 **What is the bundle size of userTourKit vs Appcues?**
-userTourKit's core is &lt;8KB gzipped, the React package is &lt;12KB, and hints is &lt;5KB. Appcues doesn't publish its bundle size. Their multi-phase CDN loading (bootstrap, SDK, API calls, flow content) makes the total payload opaque and unmeasurable with standard tools like Bundlephobia.
+userTourKit's core is &lt;23KB gzipped, the React package is &lt;12KB, and hints is &lt;6.5KB. Appcues doesn't publish its bundle size. Their multi-phase CDN loading (bootstrap, SDK, API calls, flow content) makes the total payload opaque and unmeasurable with standard tools like Bundlephobia.
 
 **Does Appcues support checklists and analytics?**
 Checklists, advanced analytics, NPS surveys, A/B testing, custom CSS, and most integrations require Appcues' Grow plan at $750+/month. The previous Essentials tier had these features gated as well.

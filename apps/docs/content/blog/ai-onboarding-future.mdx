@@ -117,7 +117,7 @@ There's a real tension here. AI's value in onboarding comes from predicting what
 
 ### Performance budgets don't care about intelligence
 
-Loading a 200KB AI inference SDK to decide which tooltip to show next is a bad trade. Tour Kit's core ships at under 8KB gzipped. Adding a client-side ML model for "smart" step prediction would double or triple that. On mobile, where onboarding matters most (75% of users abandon within the first week if they struggle getting started, per Smashing Magazine), bundle size directly correlates with abandonment.
+Loading a 200KB AI inference SDK to decide which tooltip to show next is a bad trade. Tour Kit's core ships at under 23KB gzipped. Adding a client-side ML model for "smart" step prediction would double or triple that. On mobile, where onboarding matters most (75% of users abandon within the first week if they struggle getting started, per Smashing Magazine), bundle size directly correlates with abandonment.
 
 The practical approach is server-side inference. Compute the personalized tour sequence before the page loads. Send down a simple step array. The client stays fast and dumb. Let the AI layer live where compute is cheap (the server) and keep the rendering layer where compute is expensive (the browser) as lean as possible.
 

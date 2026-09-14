@@ -25,7 +25,7 @@ This article answers the question directly, compares the five most-used librarie
 
 ## Short answer
 
-To add a product tour to a React app, install a tour library, define your steps as an array of objects (each targeting a DOM element by CSS selector or ref), wrap your app in the library's provider component, and trigger the tour on first visit. Tour Kit does this in under 8KB gzipped with full TypeScript types, WCAG 2.1 AA accessibility, and native React 19 support. The whole setup takes about ten minutes.
+To add a product tour to a React app, install a tour library, define your steps as an array of objects (each targeting a DOM element by CSS selector or ref), wrap your app in the library's provider component, and trigger the tour on first visit. Tour Kit does this in under 23KB gzipped with full TypeScript types, WCAG 2.1 AA accessibility, and native React 19 support. The whole setup takes about ten minutes.
 
 ## The five main approaches
 
@@ -71,7 +71,7 @@ Ryan Trimble demonstrated on [CSS-Tricks](https://css-tricks.com/one-of-those-on
 <tr><td>Driver.js</td><td>~5KB gzipped</td><td>N/A (vanilla JS)</td><td>Not documented</td><td>No</td><td>MIT</td></tr>
 <tr><td>Intro.js</td><td>Not published</td><td>Not tested</td><td>No focus trap, bad ARIA</td><td>No</td><td>AGPL v3</td></tr>
 <tr><td>Reactour</td><td>Smaller</td><td>Not tested</td><td>Vague claims</td><td>No</td><td>MIT</td></tr>
-<tr><td>Tour Kit</td><td>core &lt;8KB gzip</td><td>Yes (native)</td><td>WCAG 2.1 AA</td><td>Yes</td><td>MIT</td></tr>
+<tr><td>Tour Kit</td><td>core &lt;23KB gzip</td><td>Yes (native)</td><td>WCAG 2.1 AA</td><td>Yes</td><td>MIT</td></tr>
 </tbody>
 </table>
 
@@ -174,7 +174,7 @@ We built Tour Kit, so take this recommendation with appropriate skepticism. Ever
 
 That said: for most React apps shipping in 2026, a headless tour library with React 19 support is the pragmatic choice. The React 19 compatibility gap alone eliminates React Joyride and react-shepherd. Driver.js works but requires manual React integration. Building from scratch costs 40-80 hours of engineering time.
 
-Tour Kit's core ships at under 8KB gzipped with zero runtime dependencies. It has real limitations: no visual builder (you need a developer), no mobile SDK, React 18+ only, and a smaller community than React Joyride.
+Tour Kit's core ships at under 23KB gzipped with zero runtime dependencies. It has real limitations: no visual builder (you need a developer), no mobile SDK, React 18+ only, and a smaller community than React Joyride.
 
 If you need a drag-and-drop tour editor for non-technical product managers, Tour Kit is the wrong choice. Look at Appcues or Userpilot instead.
 
@@ -202,7 +202,7 @@ Tour Kit is the only React tour library documenting WCAG 2.1 AA compliance with 
 
 ### How much does a product tour library add to bundle size?
 
-Bundle impact varies widely. Driver.js adds approximately 5KB gzipped, the smallest option. Tour Kit's core is under 8KB gzipped. React Joyride ships 498KB unpacked. According to [web.dev](https://web.dev/vitals/), every additional 10KB of JavaScript adds measurable First Input Delay impact on mobile.
+Bundle impact varies widely. Driver.js adds approximately 5KB gzipped, the smallest option. Tour Kit's core is under 23KB gzipped. React Joyride ships 498KB unpacked. According to [web.dev](https://web.dev/vitals/), every additional 10KB of JavaScript adds measurable First Input Delay impact on mobile.
 
 ### Can I style product tour tooltips with Tailwind or shadcn/ui?
 
@@ -278,7 +278,7 @@ export const faqJsonLd = {
       "name": "How much does a product tour library add to bundle size?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Bundle impact varies widely. Driver.js adds approximately 5KB gzipped (the smallest option). Tour Kit's core is under 8KB gzipped. React Joyride ships 498KB unpacked."
+        "text": "Bundle impact varies widely. Driver.js adds approximately 5KB gzipped (the smallest option). Tour Kit's core is under 23KB gzipped. React Joyride ships 498KB unpacked."
       }
     },
     {

@@ -250,11 +250,11 @@ Custom events through `track()` require a Vercel Pro or Enterprise plan. The fre
 
 ### How does Tour Kit minimize CLS compared to other tour libraries?
 
-Tour Kit renders overlays via React portals, outside the main document flow. The tooltip and backdrop don't push existing content around when they appear. Libraries that inject elements inline cause surrounding content to reflow, directly contributing to CLS. Core ships at under 8KB gzipped.
+Tour Kit renders overlays via React portals, outside the main document flow. The tooltip and backdrop don't push existing content around when they appear. Libraries that inject elements inline cause surrounding content to reflow, directly contributing to CLS. Core ships at under 23KB gzipped.
 
 ### Will adding two Vercel packages hurt my bundle size?
 
-Both `@vercel/analytics` and `@vercel/speed-insights` load as small async scripts. They don't block rendering or contribute to your main JS bundle in a meaningful way. Combined with Tour Kit's core (under 8KB gzipped), the total footprint of the tour + analytics integration stays well under 20KB. For comparison, a single SaaS onboarding tool's injected script typically runs 80-200KB.
+Both `@vercel/analytics` and `@vercel/speed-insights` load as small async scripts. They don't block rendering or contribute to your main JS bundle in a meaningful way. Combined with Tour Kit's core (under 23KB gzipped), the total footprint of the tour + analytics integration stays well under 20KB. For comparison, a single SaaS onboarding tool's injected script typically runs 80-200KB.
 
 ### Can I track tour events server-side?
 
@@ -338,7 +338,7 @@ Vercel Analytics supports server-side tracking via `import { track } from '@verc
       "name": "How does Tour Kit minimize CLS compared to other tour libraries?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit renders overlay elements via React portals, placing them outside the main document flow. This means the tour tooltip and backdrop don't push existing page content around when they appear. Tour Kit's core ships at under 8KB gzipped with zero runtime dependencies."
+        "text": "Tour Kit renders overlay elements via React portals, placing them outside the main document flow. This means the tour tooltip and backdrop don't push existing page content around when they appear. Tour Kit's core ships at under 23KB gzipped with zero runtime dependencies."
       }
     },
     {
@@ -346,7 +346,7 @@ Vercel Analytics supports server-side tracking via `import { track } from '@verc
       "name": "Will adding two Vercel packages hurt my bundle size?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Both @vercel/analytics and @vercel/speed-insights load as small async scripts. They don't block rendering or contribute to your main JS bundle in a meaningful way. Combined with Tour Kit's core (under 8KB gzipped), the total footprint stays well under 20KB."
+        "text": "Both @vercel/analytics and @vercel/speed-insights load as small async scripts. They don't block rendering or contribute to your main JS bundle in a meaningful way. Combined with Tour Kit's core (under 23KB gzipped), the total footprint stays well under 20KB."
       }
     },
     {

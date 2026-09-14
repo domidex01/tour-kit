@@ -49,9 +49,9 @@ We tested each tool in a Vite 6 + React 19 + TypeScript 5.7 project running a mo
 
 ## 1. Tour Kit -- best for React teams with design systems
 
-Tour Kit is a headless product tour library for React that gives you tour logic without prescribing UI. As of April 2026, the core ships at under 8KB gzipped with zero runtime dependencies. No Chrome extension needed. You define tours in code, version them in Git, render steps with your own components.
+Tour Kit is a headless product tour library for React that gives you tour logic without prescribing UI. As of April 2026, the core ships at under 23KB gzipped with zero runtime dependencies. No Chrome extension needed. You define tours in code, version them in Git, render steps with your own components.
 
-**Strengths:** Under 8KB gzipped core (React package adds 4KB). WCAG 2.1 AA compliant with keyboard navigation, focus management, ARIA live regions built in. Works with Tailwind, shadcn/ui, Radix, or any design system. Tours go through code review and CI like the rest of your app.
+**Strengths:** Under 23KB gzipped core (React package adds 4KB). WCAG 2.1 AA compliant with keyboard navigation, focus management, ARIA live regions built in. Works with Tailwind, shadcn/ui, Radix, or any design system. Tours go through code review and CI like the rest of your app.
 
 **Limitations:** No visual builder. Requires React developers. React 18+ only. Smaller community than React Joyride or Shepherd.js.
 
@@ -142,7 +142,7 @@ The other hidden cost is payload. We measured JS injected by each tool via Chrom
 <tr><th>Tool</th><th>JS Payload (gzipped)</th><th>LCP Impact</th></tr>
 </thead>
 <tbody>
-<tr><td>Tour Kit</td><td>&#126;8KB</td><td>Negligible</td></tr>
+<tr><td>Tour Kit</td><td>&#126;23KB</td><td>Negligible</td></tr>
 <tr><td>UserGuiding</td><td>&#126;65KB</td><td>Low</td></tr>
 <tr><td>Appcues</td><td>&#126;95KB</td><td>Moderate</td></tr>
 <tr><td>Userpilot</td><td>&#126;110KB</td><td>Moderate</td></tr>

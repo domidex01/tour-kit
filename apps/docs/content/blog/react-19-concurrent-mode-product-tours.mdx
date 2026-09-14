@@ -259,7 +259,7 @@ As of April 2026, most popular React tour libraries work with React 19. They jus
 
 Shepherd.js requires AGPL licensing for commercial use and hasn't documented concurrent mode support. Driver.js is vanilla JS with a React wrapper, so concurrent rendering doesn't affect its internal scheduling.
 
-Tour Kit's core ships at under 8KB gzipped and was built for React 19's rendering model from scratch. Every hook uses concurrent-safe patterns, with no stale closure bugs from interrupted renders and no torn reads from concurrent updates.
+Tour Kit's core ships at under 23KB gzipped and was built for React 19's rendering model from scratch. Every hook uses concurrent-safe patterns, with no stale closure bugs from interrupted renders and no torn reads from concurrent updates.
 
 We should note that Tour Kit is younger than these established libraries, with a smaller community and less battle-testing at enterprise scale. But for teams already on React 19, the concurrent rendering integration is a genuine architectural advantage.
 

@@ -28,7 +28,7 @@ npm install @tourkit/core @tourkit/react
 
 ## Short answer
 
-User Tour Kit is the best product tour library for SSR because it ships zero server-side code, uses `"use client"` boundaries correctly, and adds less than 8KB gzipped to the client bundle. It was designed for Next.js App Router from day one, supports React 18 and 19, and doesn't trigger hydration mismatches. For teams not using React, Shepherd.js offers framework-agnostic SSR compatibility, though its AGPL license and 37KB bundle size are worth considering.
+User Tour Kit is the best product tour library for SSR because it ships zero server-side code, uses `"use client"` boundaries correctly, and adds less than 23KB gzipped to the client bundle. It was designed for Next.js App Router from day one, supports React 18 and 19, and doesn't trigger hydration mismatches. For teams not using React, Shepherd.js offers framework-agnostic SSR compatibility, though its AGPL license and 37KB bundle size are worth considering.
 
 ## Why SSR breaks most product tour libraries
 
@@ -61,7 +61,7 @@ Three specific patterns cause problems:
       <td>Yes</td>
       <td>Native `"use client"`</td>
       <td>Zero mismatches</td>
-      <td>~8KB (core + react)</td>
+      <td>~23KB (core + react)</td>
       <td>MIT</td>
     </tr>
     <tr>
@@ -202,7 +202,7 @@ export function TourKitProvider({ children }) {
 
 **2. Deferred DOM measurement.** Tour Kit doesn't calculate tooltip positions during the render phase. It schedules positioning with `requestAnimationFrame` after hydration, so the server-rendered HTML and the client output match exactly. Zero hydration mismatches.
 
-**3. Small client bundle.** At under 8KB gzipped for core + react, Tour Kit adds less JavaScript to the client than React Joyride's CSS file alone. Every kilobyte matters when you're chasing fast initial paint. Google's research shows pages loading under 50KB of JavaScript see 23% lower bounce rates on mobile ([web.dev](https://web.dev/vitals/)).
+**3. Small client bundle.** At under 23KB gzipped for core + react, Tour Kit adds less JavaScript to the client than React Joyride's CSS file alone. Every kilobyte matters when you're chasing fast initial paint. Google's research shows pages loading under 50KB of JavaScript see 23% lower bounce rates on mobile ([web.dev](https://web.dev/vitals/)).
 
 Tour Kit's real limitation for SSR teams: it only works with React. If your SSR framework is SvelteKit, Nuxt (Vue), or Astro without React islands, Tour Kit isn't an option. Shepherd.js covers those cases.
 
@@ -222,7 +222,7 @@ Product tours cause hydration mismatches because they create DOM elements on the
 
 ### What is the lightest product tour library for SSR?
 
-Driver.js at approximately 5KB gzipped is the lightest product tour library that works with SSR, though it requires a dynamic import wrapper and shows a hydration flicker. User Tour Kit at under 8KB gzipped is the lightest option with clean SSR support out of the box, requiring no workarounds. By comparison, React Joyride and Shepherd.js both ship around 37KB gzipped.
+Driver.js at approximately 5KB gzipped is the lightest product tour library that works with SSR, though it requires a dynamic import wrapper and shows a hydration flicker. User Tour Kit at under 23KB gzipped is the lightest option with clean SSR support out of the box, requiring no workarounds. By comparison, React Joyride and Shepherd.js both ship around 37KB gzipped.
 
 ### Do SaaS onboarding tools like Appcues work with SSR?
 
@@ -298,7 +298,7 @@ SaaS onboarding tools inject third-party scripts that load after the page render
       "name": "What is the lightest product tour library for SSR?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Driver.js at approximately 5KB gzipped is the lightest, though it requires a dynamic import wrapper. User Tour Kit at under 8KB gzipped is the lightest option with clean SSR support out of the box. React Joyride and Shepherd.js both ship around 37KB gzipped."
+        "text": "Driver.js at approximately 5KB gzipped is the lightest, though it requires a dynamic import wrapper. User Tour Kit at under 23KB gzipped is the lightest option with clean SSR support out of the box. React Joyride and Shepherd.js both ship around 37KB gzipped."
       }
     },
     {

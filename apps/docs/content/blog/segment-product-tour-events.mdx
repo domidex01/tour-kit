@@ -290,7 +290,7 @@ Segment's free tier includes 1,000 monthly tracked users (MTUs), 2 sources, and 
 
 ### Does adding Segment increase my page load time?
 
-Analytics.js 2.0 loads about 16KB gzipped initially, with destination SDKs loaded on demand ([Segment Engineering Blog](https://segment.com/blog/analytics-js-2/)). Combined with Tour Kit's core at under 8KB gzipped, total overhead is roughly 24KB. Events fire asynchronously and don't block tour transitions. We measured no perceptible impact on Interaction to Next Paint (INP) in our test app.
+Analytics.js 2.0 loads about 16KB gzipped initially, with destination SDKs loaded on demand ([Segment Engineering Blog](https://segment.com/blog/analytics-js-2/)). Combined with Tour Kit's core at under 23KB gzipped, total overhead is roughly 24KB. Events fire asynchronously and don't block tour transitions. We measured no perceptible impact on Interaction to Next Paint (INP) in our test app.
 
 ### Can I use Tour Kit's Segment plugin with server-side rendering?
 
@@ -374,7 +374,7 @@ Tour Kit's analytics plugin interface is CDP-agnostic. Write a RudderStack plugi
       "name": "Does adding Segment increase my page load time?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Analytics.js 2.0 loads about 16KB gzipped initially, with destination SDKs loaded on demand. Combined with Tour Kit's core at under 8KB gzipped, total overhead is roughly 24KB. Events fire asynchronously and don't block tour transitions."
+        "text": "Analytics.js 2.0 loads about 16KB gzipped initially, with destination SDKs loaded on demand. Combined with Tour Kit's core at under 23KB gzipped, total overhead is roughly 24KB. Events fire asynchronously and don't block tour transitions."
       }
     },
     {

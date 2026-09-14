@@ -15,7 +15,7 @@ lastUpdated: "2026-04-03"
 
 # How to add a product tour to a Next.js App Router project
 
-Next.js App Router splits your application into Server Components and Client Components, which breaks most product tour libraries that expect a fully client-rendered tree. userTourKit is a headless React tour library (core under 8KB gzipped) that works inside `'use client'` boundaries without touching your Server Component layout. This tutorial walks you through installing userTourKit in a Next.js 15 project, defining tour steps, wiring up the App Router adapter for multi-page tours, and rendering tooltip UI with full control over markup and styling.
+Next.js App Router splits your application into Server Components and Client Components, which breaks most product tour libraries that expect a fully client-rendered tree. userTourKit is a headless React tour library (core under 23KB gzipped) that works inside `'use client'` boundaries without touching your Server Component layout. This tutorial walks you through installing userTourKit in a Next.js 15 project, defining tour steps, wiring up the App Router adapter for multi-page tours, and rendering tooltip UI with full control over markup and styling.
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -229,7 +229,7 @@ The `useNextAppRouter()` hook wraps `useRouter()` and `usePathname()` from `next
 
 ## What are the current limitations?
 
-userTourKit is React 18+ only. If your project runs React 17 or earlier, you need to upgrade first. The library does not ship a visual tour builder -- you define steps in code or JSON. For teams that need a drag-and-drop editor, tools like Appcues or Userflow are better fits, though they cost $249+/month at scale (source: published pricing pages, April 2026). The core bundle is under 8KB gzipped and the React package adds roughly 4KB, measured via bundlephobia.
+userTourKit is React 18+ only. If your project runs React 17 or earlier, you need to upgrade first. The library does not ship a visual tour builder -- you define steps in code or JSON. For teams that need a drag-and-drop editor, tools like Appcues or Userflow are better fits, though they cost $249+/month at scale (source: published pricing pages, April 2026). The core bundle is under 23KB gzipped and the React package adds roughly 4KB, measured via bundlephobia.
 
 **Disclosure:** userTourKit is our project. We built it because existing open-source tour libraries either ship opinionated CSS that fights design systems or lack Server Component compatibility.
 
@@ -263,9 +263,9 @@ userTourKit is React 18+ only. If your project runs React 17 or earlier, you nee
     </tr>
     <tr>
       <td>Bundle size (gzipped)</td>
-      <td>&#126;8KB core + &#126;4KB react</td>
+      <td>&#126;23KB core + &#126;4KB react</td>
       <td>&#126;15KB</td>
-      <td>&#126;8KB + Framer Motion</td>
+      <td>&#126;23KB + Framer Motion</td>
     </tr>
     <tr>
       <td>TypeScript</td>

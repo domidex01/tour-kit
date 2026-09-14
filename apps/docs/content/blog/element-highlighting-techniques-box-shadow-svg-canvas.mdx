@@ -305,7 +305,7 @@ But the Popover API doesn't create backdrop cutouts or dim the page. A hybrid ar
 
 ## How Tour Kit handles element highlighting
 
-Tour Kit uses SVG overlay cutouts by default through the `useTourHighlight()` hook in `@tourkit/core`. The highlighting module adds roughly 1.2KB gzipped to the core's total 8KB bundle. The implementation follows the same pattern as Driver.js and Shepherd.js: a single SVG at document root with `evenodd` fill-rule path subtraction.
+Tour Kit uses SVG overlay cutouts by default through the `useTourHighlight()` hook in `@tourkit/core`. The highlighting module adds roughly 1.2KB gzipped to the core's total 23KB bundle. The implementation follows the same pattern as Driver.js and Shepherd.js: a single SVG at document root with `evenodd` fill-rule path subtraction.
 
 ```tsx
 // src/components/TourStep.tsx
@@ -358,7 +358,7 @@ Tour Kit uses SVG overlay cutouts by default through `useTourHighlight()` in `@t
 
 **Internal linking suggestions:**
 - Link from [Floating UI vs Popper.js for tour positioning](/blog/floating-ui-vs-popper-js-tour-positioning) (related positioning concerns)
-- Link from [How Tour Kit ships at 8KB with zero dependencies](/blog/tour-kit-8kb-zero-dependencies) (architecture decisions)
+- Link from [How Tour Kit ships at 23KB with zero dependencies](/blog/tour-kit-8kb-zero-dependencies) (architecture decisions)
 - Link from [React spotlight highlight component](/blog/react-spotlight-highlight-component) (overlapping topic)
 - Link to this article from the benchmark article [React tour library benchmark 2026](/blog/react-tour-library-benchmark-2026)
 

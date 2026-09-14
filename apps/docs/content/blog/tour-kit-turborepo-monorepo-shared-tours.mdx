@@ -558,7 +558,7 @@ Tour Kit supports sharing product tours across multiple apps in a Turborepo or N
 
 ### Does Tour Kit tree-shake in a monorepo?
 
-Tour Kit ships every package with `"sideEffects": false` and explicit `exports` fields in `package.json`, which enables tree shaking across monorepo workspace boundaries. In our testing, a Vite app importing two of ten defined tours bundled 53% less tour-related code compared to a setup without tree shaking. Tour Kit core is under 8KB gzipped, and unused exports get eliminated at build time by Rollup or webpack.
+Tour Kit ships every package with `"sideEffects": false` and explicit `exports` fields in `package.json`, which enables tree shaking across monorepo workspace boundaries. In our testing, a Vite app importing two of ten defined tours bundled 53% less tour-related code compared to a setup without tree shaking. Tour Kit core is under 23KB gzipped, and unused exports get eliminated at build time by Rollup or webpack.
 
 ### How do I share tour completion state between apps?
 
@@ -566,7 +566,7 @@ Tour Kit's `TourKitProvider` accepts a `persistence` config with a `storageKey` 
 
 ### What's the bundle size impact of Tour Kit in a monorepo?
 
-Tour Kit's core package is under 8KB gzipped with zero runtime dependencies. The React wrapper adds roughly 4KB. In a monorepo with tree shaking enabled, each app only bundles the tour definitions and hooks it imports, not the entire shared package. For comparison, React Joyride ships at 37KB gzipped and doesn't support tree shaking of individual tour definitions.
+Tour Kit's core package is under 23KB gzipped with zero runtime dependencies. The React wrapper adds roughly 4KB. In a monorepo with tree shaking enabled, each app only bundles the tour definitions and hooks it imports, not the entire shared package. For comparison, React Joyride ships at 37KB gzipped and doesn't support tree shaking of individual tour definitions.
 
 ### Do I need Turborepo specifically, or does this work with Nx?
 

@@ -442,7 +442,7 @@ We measured the overhead of the event collector and heatmap renderer separately 
   </tbody>
 </table>
 
-Tour Kit's core ships at under 8KB gzipped. Adding the heatmap collector to production adds 0.3KB. The visualization itself lazy-loads in the dev dashboard, keeping the production bundle untouched.
+Tour Kit's core ships at under 23KB gzipped. Adding the heatmap collector to production adds 0.3KB. The visualization itself lazy-loads in the dev dashboard, keeping the production bundle untouched.
 
 ## What the heatmap tells you (and what it doesn't)
 
@@ -475,7 +475,7 @@ A product tour heatmap is a visual overlay showing where users click, dismiss, a
 
 ### How much does adding heatmap tracking affect bundle size?
 
-The event collector adds under 0.3KB gzipped to your production bundle. The visualization component (simpleheat + React wrapper) adds roughly 1.2KB but lazy-loads on demand, meaning it costs zero bytes in production unless you explicitly render the dashboard. Tour Kit's core is under 8KB gzipped, so the heatmap overhead stays well within performance budgets.
+The event collector adds under 0.3KB gzipped to your production bundle. The visualization component (simpleheat + React wrapper) adds roughly 1.2KB but lazy-loads on demand, meaning it costs zero bytes in production unless you explicitly render the dashboard. Tour Kit's core is under 23KB gzipped, so the heatmap overhead stays well within performance budgets.
 
 ### Can I use a product tour heatmap with libraries other than Tour Kit?
 

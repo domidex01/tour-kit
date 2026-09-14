@@ -25,7 +25,7 @@ npm install @tourkit/core @tourkit/react
 
 ## Short answer
 
-Shepherd.js technically works with React 19 as of react-shepherd 7.0.4, released March 11, 2026. But the fix was a peer dependency relaxation, not an architectural change. Shepherd's core is written in Svelte, and the React wrapper remains a thin layer around vanilla JavaScript. For React 19 projects, libraries built natively for React (Tour Kit at under 8KB gzipped with an MIT license, or React Joyride) avoid the wrapper indirection entirely.
+Shepherd.js technically works with React 19 as of react-shepherd 7.0.4, released March 11, 2026. But the fix was a peer dependency relaxation, not an architectural change. Shepherd's core is written in Svelte, and the React wrapper remains a thin layer around vanilla JavaScript. For React 19 projects, libraries built natively for React (Tour Kit at under 23KB gzipped with an MIT license, or React Joyride) avoid the wrapper indirection entirely.
 
 ## The 13-month compatibility gap
 
@@ -177,7 +177,7 @@ We built Tour Kit, so take this with appropriate skepticism. Every claim here is
 
 For React 19 projects, a React-native tour library removes an entire category of risk. Shepherd's 13-month gap wasn't a fluke. It was the predictable consequence of wrapping a non-React core. React Joyride (~706K weekly downloads) is the established choice. Tour Kit is newer and has a smaller community, but ships headless, accessible, and modular from the start.
 
-Tour Kit's core is under 8KB gzipped with zero runtime dependencies. It doesn't touch React internals. When React 20 lands, your tours won't break.
+Tour Kit's core is under 23KB gzipped with zero runtime dependencies. It doesn't touch React internals. When React 20 lands, your tours won't break.
 
 Get started at [https://usertourkit.com/](https://usertourkit.com/) or install directly:
 
@@ -201,7 +201,7 @@ Shepherd.js uses the AGPL-3.0 license. Any revenue-generating company needs a [c
 
 ### What are the best Shepherd.js alternatives for React 19?
 
-For React 19, the top alternatives are React Joyride (706K weekly downloads, MIT), Tour Kit (headless-first, under 8KB gzipped, MIT, WCAG 2.1 AA), and Driver.js (lightweight, MIT). All three are React-native and didn't need patches for React 19.
+For React 19, the top alternatives are React Joyride (706K weekly downloads, MIT), Tour Kit (headless-first, under 23KB gzipped, MIT, WCAG 2.1 AA), and Driver.js (lightweight, MIT). All three are React-native and didn't need patches for React 19.
 
 ### Will Shepherd.js break again with future React versions?
 

@@ -1323,7 +1323,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'Migrating from Shepherd.js to Tour Kit: AGPL to MIT',
     metaTitle: 'Migrating from Shepherd.js to Tour Kit: AGPL to MIT',
     description:
-      'Migrate from Shepherd.js to Tour Kit step by step. Replace AGPL licensing with MIT, get native React hooks, and cut your tour bundle to under 8KB gzipped.',
+      'Migrate from Shepherd.js to Tour Kit step by step. Replace AGPL licensing with MIT, get native React hooks, and cut your tour bundle to under 23KB gzipped.',
     keywords: [
       'migrate shepherd js tour kit',
       'shepherd js migration',

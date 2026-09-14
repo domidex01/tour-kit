@@ -440,7 +440,7 @@ Yes. The custom command pattern works with any product tour library that renders
 
 ### Does adding a product tour affect Cypress test performance?
 
-Tour Kit's core bundle is under 8KB gzipped, so the performance impact on test execution is negligible. The bigger factor is animation timing: each step transition adds 300ms of wait time by default. For a 7-step tour, that's about 2 extra seconds. Disable animations in test mode with `animated={false}` to cut that to near-zero.
+Tour Kit's core bundle is under 23KB gzipped, so the performance impact on test execution is negligible. The bigger factor is animation timing: each step transition adds 300ms of wait time by default. For a 7-step tour, that's about 2 extra seconds. Disable animations in test mode with `animated={false}` to cut that to near-zero.
 
 ### How do I test tour tooltips that only appear on hover?
 
@@ -536,7 +536,7 @@ Focus on four WCAG 2.1 AA criteria: 2.4.3 (focus order), 2.1.1 (keyboard accessi
       "name": "Does adding a product tour affect Cypress test performance?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit's core is under 8KB gzipped, so the performance impact on test execution is negligible. Animation timing is the bigger factor — each step transition adds 300ms. Disable animations in test mode with animated={false} to cut that to near-zero."
+        "text": "Tour Kit's core is under 23KB gzipped, so the performance impact on test execution is negligible. Animation timing is the bigger factor — each step transition adds 300ms. Disable animations in test mode with animated={false} to cut that to near-zero."
       }
     },
     {

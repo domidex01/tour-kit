@@ -63,7 +63,7 @@ Turborepo's `turbo.json` is 36 lines. That was the entire build configuration. I
 
 **Choice 2: tsup for every package.** I considered Rollup, Vite library mode, unbundled TypeScript output. tsup won because it produces ESM + CJS dual output with `.d.ts` declarations from a 10-line config file. Every package uses the same `tsup.config.ts` template. When a bundler bug hits one package, the fix applies to all of them. As of April 2026, tsup handles the `"exports"` field in `package.json` correctly for both Node and browser consumers, which is harder than it sounds.
 
-**Choice 3: headless-first, always.** Every component in Tour Kit ships without styles. No CSS files, no CSS-in-JS, no inline styles. You bring your own `<div>` and your own classes. This was a bet that developers using Tailwind and shadcn/ui would rather write their own 15 lines of JSX than fight 500 lines of someone else's CSS. It also meant the core package ships at under 8KB gzipped, because there's nothing to style.
+**Choice 3: headless-first, always.** Every component in Tour Kit ships without styles. No CSS files, no CSS-in-JS, no inline styles. You bring your own `<div>` and your own classes. This was a bet that developers using Tailwind and shadcn/ui would rather write their own 15 lines of JSX than fight 500 lines of someone else's CSS. It also meant the core package ships at under 23KB gzipped, because there's nothing to style.
 
 The headless approach also solved a problem I didn't anticipate: theming. React Joyride users open dozens of GitHub issues about customizing the tooltip's appearance. Tour Kit doesn't have a tooltip. You render whatever you want. That's zero theming bugs by design.
 
@@ -100,7 +100,7 @@ I'd still choose Biome again. The speed difference in a monorepo with 12 package
 
 Why does that matter? If I ever want Vue or Svelte adapters, the core logic is already framework-agnostic. Not a hypothetical requirement. Just a constraint that happens to produce better architecture even if no one ever writes `@tour-kit/vue`.
 
-**Bundle budgets caught regressions early.** Hard limits: core under 8KB gzipped, react under 12KB, hints under 5KB. Turborepo runs `size` as a build task. Every time I added a dependency or utility, the budget told me immediately whether it was worth the bytes.
+**Bundle budgets caught regressions early.** Hard limits: core under 23KB gzipped, react under 12KB, hints under 6.5KB. Turborepo runs `size` as a build task. Every time I added a dependency or utility, the budget told me immediately whether it was worth the bytes.
 
 One example: the analytics package nearly blew its budget when I added a batching queue for events. Instead of importing a third-party queue library, I extracted the queue into a 300-byte utility in core. That kind of decision only happens when there's a number on the dashboard yelling at you.
 
@@ -120,7 +120,7 @@ According to the [2025 State of JS survey](https://stateofjs.com/), Vitest now h
 | Time span | Dec 22, 2025 to Apr 11, 2026 (~3.5 months) |
 | npm downloads | 0 (pre-launch) |
 | GitHub stars | 0 (pre-launch) |
-| Core bundle size | Under 8KB gzipped |
+| Core bundle size | Under 23KB gzipped |
 | Runtime dependencies | 0 |
 | Build tool config (turbo.json) | 36 lines |
 

@@ -263,7 +263,7 @@ For everything else (new projects, active development, React 18+/19, TypeScript 
 
 ## How Tour Kit handles positioning
 
-Tour Kit uses `@floating-ui/dom` for tooltip positioning in the `@tour-kit/hints` package and the core positioning engine. We evaluated both Popper.js and Floating UI during early development and picked Floating UI for three reasons: tree-shaking (our hints package ships under 5kB gzipped), TypeScript-first middleware types, and the async `computePosition` pattern that avoids layout thrashing during step transitions.
+Tour Kit uses `@floating-ui/dom` for tooltip positioning in the `@tour-kit/hints` package and the core positioning engine. We evaluated both Popper.js and Floating UI during early development and picked Floating UI for three reasons: tree-shaking (our hints package ships under 6.5kB gzipped), TypeScript-first middleware types, and the async `computePosition` pattern that avoids layout thrashing during step transitions.
 
 The middleware pipeline we use internally: `offset(12)` for spacing, `flip()` for viewport boundary handling, `shift({ padding: 8 })` to keep tooltips away from screen edges, and a custom middleware that checks whether the target element is scrolled out of view before positioning (and scrolls it into view if needed).
 

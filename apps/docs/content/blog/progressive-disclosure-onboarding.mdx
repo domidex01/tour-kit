@@ -380,7 +380,7 @@ Here's something no other article on progressive disclosure covers: the library 
 
 A monolithic tour library that loads 40KB of tooltip, modal, checklist, and analytics code on first page load violates progressive disclosure at the technical level. Your user needs a tooltip. Why load the survey engine?
 
-Tour Kit's 10-package architecture is progressive disclosure applied to developer tooling. Install `@tourkit/core` (under 8KB gzipped) and `@tourkit/react` for Layer 1. Add `@tourkit/hints` when you need Layer 2. Bring in `@tourkit/checklists` and `@tourkit/announcements` for Layer 3. Each package tree-shakes independently.
+Tour Kit's 10-package architecture is progressive disclosure applied to developer tooling. Install `@tourkit/core` (under 23KB gzipped) and `@tourkit/react` for Layer 1. Add `@tourkit/hints` when you need Layer 2. Bring in `@tourkit/checklists` and `@tourkit/announcements` for Layer 3. Each package tree-shakes independently.
 
 ```bash
 # Layer 1: Orientation tours

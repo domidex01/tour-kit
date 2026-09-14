@@ -354,7 +354,7 @@ One honest limitation: Tour Kit doesn't have a visual builder for designing pers
 
 Does every user download all 30 steps when you define three persona configurations? Not if you split correctly.
 
-Tour Kit's core ships at under 8KB gzipped. Step configurations are plain objects, not components, so they're already small. For apps with rich persona-specific content (embedded videos, illustrations, interactive elements), lazy loading keeps payloads tight:
+Tour Kit's core ships at under 23KB gzipped. Step configurations are plain objects, not components, so they're already small. For apps with rich persona-specific content (embedded videos, illustrations, interactive elements), lazy loading keeps payloads tight:
 
 ```tsx
 // src/tours/lazy-persona-tours.ts
@@ -445,7 +445,7 @@ For a detailed walkthrough of funnel analysis with PostHog, see our guide on [tr
 
 ## Tools and libraries for persona-based onboarding
 
-**Tour Kit** (headless, composable) handles tour rendering and step logic. Persona resolution lives in your code. Under 8KB gzipped. No visual builder, React 18+ only.
+**Tour Kit** (headless, composable) handles tour rendering and step logic. Persona resolution lives in your code. Under 23KB gzipped. No visual builder, React 18+ only.
 
 **Appcues** and **Chameleon** provide drag-and-drop editors with built-in user segmentation. MAU-based pricing ($249+/month at scale), third-party script injection, and you don't own the tour data.
 
@@ -461,7 +461,7 @@ Start with three personas maximum. More creates maintenance overhead without pro
 
 ### Does persona-based onboarding hurt performance?
 
-Tour Kit's core adds under 8KB gzipped regardless of persona count. Step configurations are plain objects, not components, so they add negligible weight. Dynamic imports can split each persona's config into its own chunk, reducing per-user payload to 4-6KB. Fewer steps render per session, so persona-based tours are actually cheaper than generic ones.
+Tour Kit's core adds under 23KB gzipped regardless of persona count. Step configurations are plain objects, not components, so they add negligible weight. Dynamic imports can split each persona's config into its own chunk, reducing per-user payload to 4-6KB. Fewer steps render per session, so persona-based tours are actually cheaper than generic ones.
 
 ### Can I combine persona-based onboarding with feature flags?
 

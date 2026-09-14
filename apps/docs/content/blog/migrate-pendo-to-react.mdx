@@ -40,7 +40,7 @@ One former customer put it plainly: "High price was the decision criteria becaus
 Here are the specific technical pain points that push React teams toward a code-owned solution:
 
 - **SPA routing friction.** Pendo uses `window.pendo.initialize` and DOM mutation observers. React's virtual DOM and client-side routing cause "page mismatch" errors where guides target elements that have already unmounted
-- **54KB third-party script** on every page, loaded before your app code, fetching guide configs from Pendo's servers on each session. Tour Kit's core is under 8KB gzipped and tree-shakes to only what you import
+- **54KB third-party script** on every page, loaded before your app code, fetching guide configs from Pendo's servers on each session. Tour Kit's core is under 23KB gzipped and tree-shakes to only what you import
 - **Design system conflicts.** Pendo's theme editor constrains you to their CSS variables. Teams using Tailwind or shadcn/ui end up overriding every tooltip, modal, and badge to match design tokens
 - **Accessibility gaps.** Pendo claims WCAG 2.2 AA alignment but admits they're "in the process" of full compliance. Their own docs recommend badge-activated guides over automatic ones for accessibility ([Pendo Help Center](https://support.pendo.io/hc/en-us/articles/4403005253659-Guide-accessibility))
 - **Data lock-in.** Full data export (Data Sync to S3/Snowflake) requires the Ultimate tier at $100K+/year. Base and Core customers export guide configs via API but can't bulk-export analytics or event data in standard formats ([Pendo Data Export Methods](https://support.pendo.io/hc/en-us/articles/44083309544219-Methods-for-exporting-Pendo-data))
@@ -322,7 +322,7 @@ Every migration involves tradeoffs, and moving from a full-featured SaaS platfor
 </thead>
 <tbody>
 <tr><td>Annual cost (mid-market)</td><td>$40K-$80K</td><td>$0 (MIT) or $9.99 one-time Pro</td></tr>
-<tr><td>Bundle impact</td><td>54KB third-party script</td><td>&lt;8KB core gzipped, tree-shakeable</td></tr>
+<tr><td>Bundle impact</td><td>54KB third-party script</td><td>&lt;23KB core gzipped, tree-shakeable</td></tr>
 <tr><td>Guide creation</td><td>Visual builder, no-code</td><td>React components, requires developers</td></tr>
 <tr><td>Design system fit</td><td>Theme editor with constraints</td><td>Full headless, your CSS</td></tr>
 <tr><td>React 19 support</td><td>Manual initialization, SPA workarounds</td><td>Native hooks, zero workarounds</td></tr>

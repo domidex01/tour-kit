@@ -288,7 +288,7 @@ const videoSrc = navigator.onLine
 
 Adding a tour library to an Electron app that already ships 80-150MB of Chromium and Node.js barely moves the needle on download size, but it can affect startup time if you load tour code eagerly on the critical path. Electron's own performance guide puts it plainly: "The most successful strategy for building a performant Electron app is to profile the running code, find the most resource-hungry piece of it, and to [improve] it" ([Electron Perf Docs](https://www.electronjs.org/docs/latest/tutorial/performance)). Tour libraries are no exception.
 
-Tour Kit's core ships under 8KB gzipped. For context, the `request` module takes ~500ms to load in Electron while `node-fetch` loads in under 50ms ([Electron Perf Docs](https://www.electronjs.org/docs/latest/tutorial/performance)). Tour Kit loads in the renderer process and doesn't touch Node.js modules at all, so it avoids the heavy module resolution path entirely.
+Tour Kit's core ships under 23KB gzipped. For context, the `request` module takes ~500ms to load in Electron while `node-fetch` loads in under 50ms ([Electron Perf Docs](https://www.electronjs.org/docs/latest/tutorial/performance)). Tour Kit loads in the renderer process and doesn't touch Node.js modules at all, so it avoids the heavy module resolution path entirely.
 
 Lazy-load the tour component to keep it off the critical startup path:
 
@@ -409,7 +409,7 @@ Tour Kit, React Joyride, Shepherd.js, and Driver.js all run in Electron's render
 
 ### Does adding a product tour slow down an Electron app?
 
-Tour Kit's core bundle is under 8KB gzipped, which adds negligible weight to an Electron app already shipping 80-150MB. The real performance risk is blocking startup. Lazy-load the tour component with `React.lazy()` and defer tour initialization until after your app's critical UI renders. Profile with Electron's built-in DevTools (Chromium Performance tab) to verify zero startup impact.
+Tour Kit's core bundle is under 23KB gzipped, which adds negligible weight to an Electron app already shipping 80-150MB. The real performance risk is blocking startup. Lazy-load the tour component with `React.lazy()` and defer tour initialization until after your app's critical UI renders. Profile with Electron's built-in DevTools (Chromium Performance tab) to verify zero startup impact.
 
 ### How do you persist tour progress in Electron without a server?
 

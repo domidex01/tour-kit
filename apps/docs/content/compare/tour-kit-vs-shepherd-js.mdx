@@ -16,7 +16,7 @@ If you landed here you're probably evaluating whether to **switch from Shepherd.
 
 ## The bottom line
 
-userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped, MIT-licensed. Shepherd.js is a multi-framework tour library built on Svelte internals, dual-licensed under AGPL-3.0 and a $50-$300 commercial license. userTourKit fits React teams that want JSX-native tours, MIT licensing, and a small bundle. Shepherd.js is still the right choice when you need Vue, Angular, or vanilla JS support.
+userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 23KB gzipped, MIT-licensed. Shepherd.js is a multi-framework tour library built on Svelte internals, dual-licensed under AGPL-3.0 and a $50-$300 commercial license. userTourKit fits React teams that want JSX-native tours, MIT licensing, and a small bundle. Shepherd.js is still the right choice when you need Vue, Angular, or vanilla JS support.
 
 ## What is userTourKit?
 
@@ -40,7 +40,7 @@ Where they diverge: userTourKit supports conditional branching with async resolv
 
 Shepherd.js doesn't include hints. If you need pulsing beacons for feature discovery, you'll build them yourself or pull in another library.
 
-userTourKit ships a dedicated `@tour-kit/hints` package (under 5KB gzipped, MIT licensed) with `HintHotspot` for pulsing indicators and `HintTooltip` for on-hover/click content. Each hint dismisses independently and persists across page loads via the storage adapter. Not a workaround bolted on top of the tour system.
+userTourKit ships a dedicated `@tour-kit/hints` package (under 6.5KB gzipped, MIT licensed) with `HintHotspot` for pulsing indicators and `HintTooltip` for on-hover/click content. Each hint dismisses independently and persists across page loads via the storage adapter. Not a workaround bolted on top of the tour system.
 
 ### Checklists and onboarding flows
 
@@ -92,7 +92,7 @@ Accessibility isn't opt-in here. It ships as the default behavior.
 
 Shepherd.js ships as a 656KB unpacked npm package, roughly 25-40KB gzipped for JS and CSS combined. That includes compiled Svelte runtime output. If you're already running React, you're loading two UI runtimes: React + ReactDOM plus Shepherd's compiled Svelte layer. As of March 2026, v15.2.2 is the latest release.
 
-userTourKit's core bundles at under 8KB gzipped. React package: under 12KB. Hints: under 5KB. Because userTourKit is native React, it shares your existing runtime.
+userTourKit's core bundles at under 23KB gzipped. React package: under 12KB. Hints: under 6.5KB. Because userTourKit is native React, it shares your existing runtime.
 
 No duplicate UI framework. On mobile connections where every kilobyte adds parse time, that gap matters.
 
@@ -134,7 +134,7 @@ userTourKit's free tier (core, React bindings, hints) is MIT licensed. No legal 
 | Next.js SSR | Native | Requires dynamic import workaround |
 | Step content | JSX components | HTML strings or DOM elements |
 | TypeScript | Strict mode, full inference | Partial, documented type gaps |
-| Core bundle (gzipped) | Under 8KB | ~25-40KB (includes Svelte runtime) |
+| Core bundle (gzipped) | Under 23KB | ~25-40KB (includes Svelte runtime) |
 | Multi-framework | React only | React, Vue, Angular, Ember, vanilla |
 | Positioning engine | Floating UI | Floating UI |
 | License | MIT (free tier) | AGPL-3.0 or $50-$300 commercial |
@@ -230,7 +230,7 @@ Yes. userTourKit supports React 18 and React 19, including Next.js App Router wi
 
 ### What is the bundle size of userTourKit vs Shepherd.js?
 
-userTourKit's core is under 8KB gzipped; the React package is under 12KB. Shepherd.js bundles at 25-40KB gzipped, including compiled Svelte runtime. A React project using Shepherd ships two UI runtimes.
+userTourKit's core is under 23KB gzipped; the React package is under 12KB. Shepherd.js bundles at 25-40KB gzipped, including compiled Svelte runtime. A React project using Shepherd ships two UI runtimes.
 
 ### Is Shepherd.js open source?
 
@@ -246,7 +246,7 @@ userTourKit. Its headless architecture and UnifiedSlot pattern let you swap in y
 
 ## Final verdict
 
-For React teams, userTourKit is the stronger choice: MIT licensing, JSX-native steps, a sub-8KB core, WCAG 2.1 AA by default, and a complete onboarding ecosystem beyond just tours. Shepherd.js earns its 13,300 GitHub stars through nine years of multi-framework reliability, and it's genuinely better if you need Vue or Angular support.
+For React teams, userTourKit is the stronger choice: MIT licensing, JSX-native steps, a sub-23KB core, WCAG 2.1 AA by default, and a complete onboarding ecosystem beyond just tours. Shepherd.js earns its 13,300 GitHub stars through nine years of multi-framework reliability, and it's genuinely better if you need Vue or Angular support.
 
 But the AGPL license and broken React 19 wrapper make it a harder sell for modern React projects. Pick based on your stack, not on star counts.
 

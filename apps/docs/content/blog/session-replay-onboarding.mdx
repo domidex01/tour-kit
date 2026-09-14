@@ -153,7 +153,7 @@ Sentry measured their replay SDK's overhead on production sites ([Sentry Docs](h
 
 Highlight.io's independent benchmark ([Highlight.io Blog](https://www.highlight.io/blog/session-replay-performance)) found 20-25% CPU increase during active recording, with 0.017-0.07 seconds added to interaction times.
 
-Combined weight matters more than either number alone. Tour Kit's core ships at under 8KB gzipped. Adding PostHog's replay SDK (52.4KB) multiplies your onboarding JavaScript by 7x. Two strategies help:
+Combined weight matters more than either number alone. Tour Kit's core ships at under 23KB gzipped. Adding PostHog's replay SDK (52.4KB) multiplies your onboarding JavaScript by 7x. Two strategies help:
 
 **Lazy-load replay for first-time users only.** Most replay value comes from new user sessions. Returning users who completed onboarding don't need recording.
 
@@ -247,7 +247,7 @@ Most teams make the same five mistakes when they first add replay to their analy
 
 ## Tour Kit's approach: analytics without replay lock-in
 
-Tour Kit doesn't bundle a session replay SDK, and that's deliberate. Tour Kit's core ships at under 8KB gzipped because it focuses on tour logic, not analytics infrastructure. The `@tourkit/analytics` package provides the event hooks (`onStepView`, `onStepComplete`, `onTourDismiss`) that feed into whatever replay tool your team already uses.
+Tour Kit doesn't bundle a session replay SDK, and that's deliberate. Tour Kit's core ships at under 23KB gzipped because it focuses on tour logic, not analytics infrastructure. The `@tourkit/analytics` package provides the event hooks (`onStepView`, `onStepComplete`, `onTourDismiss`) that feed into whatever replay tool your team already uses.
 
 This means you aren't locked into a specific replay vendor. Switch from PostHog to Sentry, or from FullStory to OpenReplay, without touching your tour code. The tour events remain the same; only the analytics provider callback changes.
 

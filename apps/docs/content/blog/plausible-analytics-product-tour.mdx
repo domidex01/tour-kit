@@ -17,7 +17,7 @@ published: true
 
 Your onboarding flow starts with a cookie consent banner. The user hasn't even seen your product yet and they're already making a trust decision. Roughly 55.6% of visitors reject or ignore consent prompts entirely ([Plausible, 2025](https://plausible.io/vs-google-analytics)), which means more than half your tour completion data never reaches Google Analytics.
 
-Plausible is a privacy-first analytics tool that ships at ~1 KB, needs no cookies, and requires no consent banner under GDPR. That makes it a natural fit for product tour tracking where accuracy matters and first impressions shouldn't start with legal text. We tested this integration in a Next.js 15 app with Tour Kit and `plausible-tracker@0.3.9`, and the entire setup took under 20 minutes.
+Plausible is a privacy-first analytics tool that ships at ~4 KB, needs no cookies, and requires no consent banner under GDPR. That makes it a natural fit for product tour tracking where accuracy matters and first impressions shouldn't start with legal text. We tested this integration in a Next.js 15 app with Tour Kit and `plausible-tracker@0.3.9`, and the entire setup took under 20 minutes.
 
 This tutorial wires Tour Kit's lifecycle callbacks to Plausible custom events, builds a step-level event schema, and shows how to reconstruct tour funnels from the resulting data.
 

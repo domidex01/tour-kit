@@ -8,7 +8,7 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, scheduling, and more in a &lt;8KB core bundle. The Pro tier is $9.99 once. React Joyride is the most-downloaded React tour library at ~672K weekly npm installs (as of March 2026), shipping a monolithic inline-styles-only tour component at roughly 30KB gzipped. userTourKit fits teams wanting design system integration and onboarding scope beyond sequential tours. Joyride is better when you need the simplest possible setup at zero cost.
+userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, scheduling, and more in a &lt;23KB core bundle. The Pro tier is $9.99 once. React Joyride is the most-downloaded React tour library at ~672K weekly npm installs (as of March 2026), shipping a monolithic inline-styles-only tour component at roughly 30KB gzipped. userTourKit fits teams wanting design system integration and onboarding scope beyond sequential tours. Joyride is better when you need the simplest possible setup at zero cost.
 
 ## What is userTourKit?
 
@@ -32,7 +32,7 @@ Does that matter? Depends. Fixed-sequence tours work fine without it. But if you
 
 Joyride has beacons, but they're sequential tour entry points. Click a beacon, and the tour starts from that step. You can't show persistent, independent hints that live outside the tour flow.
 
-userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped) provides non-sequential hotspots. Each hint has its own lifecycle: show, hide, dismiss. Dismissed hints stay dismissed across page loads via the storage adapter.
+userTourKit's `@tour-kit/hints` package (&lt;6.5KB gzipped) provides non-sequential hotspots. Each hint has its own lifecycle: show, hide, dismiss. Dismissed hints stay dismissed across page loads via the storage adapter.
 
 `HintHotspot` renders a pulsing beacon; `HintTooltip` appears on hover or click. Need a persistent "new" indicator on a button? That's what this package is for. Joyride has no equivalent.
 
@@ -102,7 +102,7 @@ The architectural difference matters, though. userTourKit's accessibility is con
 
 React Joyride v3 ships at roughly 30KB gzipped with 10 runtime dependencies. That's about 30% smaller than v2, which is genuine progress. The `size-limit` budget in the repo confirms this target.
 
-userTourKit's core is under 8KB gzipped. The React UI package is under 12KB. Hints: under 5KB. That's roughly 3.75x smaller for core logic alone.
+userTourKit's core is under 23KB gzipped. The React UI package is under 12KB. Hints: under 6.5KB. That's roughly 3.75x smaller for core logic alone.
 
 The difference comes from architecture. userTourKit's headless core ships logic without opinionated UI components, and tree-shaking works because each package is a separate entry point. On mobile, where every kilobyte adds parse time, this gap matters. On a standard desktop SaaS dashboard? You probably won't notice.
 
@@ -138,7 +138,7 @@ If your project only needs tours and hints, userTourKit costs the same as Joyrid
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | ⚙️ Improved in v3, not audited |
 | Headless mode | ✅ Full headless architecture | 🚫 Monolithic component |
 | shadcn/ui + Tailwind | ✅ Native (CVA-based) | ⚙️ Requires component replacement |
-| Core bundle (gzipped) | &lt;8KB | ~30KB |
+| Core bundle (gzipped) | &lt;23KB | ~30KB |
 | React versions | 18, 19 | 16.8–19 |
 | TypeScript | Strict mode, generics | Native (v3), no generics |
 | Router integration | ✅ Next.js, React Router built-in | ⚙️ Manual via callbacks |
@@ -221,7 +221,7 @@ Yes. React 18 and 19, with built-in router adapters for Next.js App Router and P
 
 ### What is the bundle size of userTourKit vs React Joyride?
 
-userTourKit's core is &lt;8KB gzipped. The React UI package is &lt;12KB gzipped. React Joyride v3 ships at roughly 30KB gzipped. userTourKit achieves the smaller size through its headless architecture, shipping logic without opinionated UI components.
+userTourKit's core is &lt;23KB gzipped. The React UI package is &lt;12KB gzipped. React Joyride v3 ships at roughly 30KB gzipped. userTourKit achieves the smaller size through its headless architecture, shipping logic without opinionated UI components.
 
 ### Does React Joyride support checklists or analytics?
 
@@ -237,4 +237,4 @@ userTourKit's WCAG 2.1 AA compliance and team maintenance model fit enterprise r
 
 ## Final verdict
 
-React Joyride v3 is a competent, well-maintained tour component. If sequential product tours with default styling are all you need, it does the job at zero cost with the largest React tour community behind it. userTourKit solves a different problem: headless onboarding infrastructure that spans tours, hints, checklists, announcements, and analytics in a design-system-native architecture under 8KB. Your choice depends on scope, not quality.
+React Joyride v3 is a competent, well-maintained tour component. If sequential product tours with default styling are all you need, it does the job at zero cost with the largest React tour community behind it. userTourKit solves a different problem: headless onboarding infrastructure that spans tours, hints, checklists, announcements, and analytics in a design-system-native architecture under 23KB. Your choice depends on scope, not quality.
