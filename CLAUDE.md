@@ -238,7 +238,7 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     stub `createStorageAdapter` through `vi.mock` on core's main barrel, and
     `vi.mock` does not intercept a `/engine` subpath, so an engine that resolved
     its own would silently disarm all six.
-  - license <8.5 KB, measured 8 228. The licence-payment Wave 1 raised this
+  - license <8.5 KB, measured 8 392. The licence-payment Wave 1 raised this
     from 8 KB at 7 793: +302 B of that is `MULTI_LABEL_SUFFIXES`, the curated
     public-suffix table behind `toRegistrableDomain()`, and 21 B is the
     dev-host branch in `LicenseGate` that keeps the badge off localhost. Last-two-labels alone
@@ -247,26 +247,31 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     incomplete table is the one failure here that costs money, so the table
     does not get shrunk to fit the row. Grow the table before reaching for
     `tldts`: it carries the full PSL and does not fit this package at any
-    plausible budget. The +112 B from 8 116 is the module boundary under
+    plausible budget. The +276 B from 8 116 is the module boundary under
     `splitting: false`: the badge moved out to `lib/watermark-dom.ts` so the
     non-React bindings could share it, and with no chunk splitting this entry
     inlines it right back.
-  - license/headless subpath <7 KB, measured 6 378 — the React-free door, and
+  - license/headless subpath <7 KB, measured 6 590 — the React-free door, and
     the one row `vue` and `svelte` cannot show you. The licence package is
-    external to both their builds, so their own rows stay ~1.2 KB while this is
-    what a Vue consumer actually downloads: validation, cache, the domain
-    rules, `startLicenseGate` and the badge, whose logo alone is 4 KB of raw
-    path data before gzip.
+    external to both their builds, so their own rows stay ~1.2 KB while the
+    gate, the validation, the cache, the domain rules and the badge sit here;
+    the badge's logo alone is 4 KB of raw path data before gzip.
+    Like every other row this is the package's OWN bytes: `zod` is a real
+    runtime import of this entry and is external, so it is NOT in the 6 378.
+    Measured with esbuild, a consumer who bundles `startLicenseGate` ships
+    67 787 B gzipped once zod comes along, and zod does not tree-shake out
+    because the gate calls `validateLicenseKey`. Quote that number, not this
+    row, when someone asks what the licence costs their bundle.
   - media <9 KB
   - ai <7 KB (client), <8 KB (server)
   - scheduling <4 KB
   - scheduling/engine subpath <3.6 KB, measured 3 039 — twenty-four evaluation
     functions and three constants; the hooks, the gate and the analytics peer
     stay on the main entry.
-  - vue <1.5 KB, measured 1 280
+  - vue <1.5 KB, measured 1 329
   - svelte <1.3 KB, measured 1 033
 
-  Both binding rows moved ~15 B when the licence gate landed, and that is the
+  The binding rows moved 15-70 B when the licence gate landed, and that is the
   whole visible cost: `@tour-kit/license` is external to both builds, so all
   either entry gains is the import and the call. The bytes are in the
   `license/headless` row above.

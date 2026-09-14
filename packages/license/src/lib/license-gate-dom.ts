@@ -8,8 +8,12 @@
  * away, so the state never has to be observable — it only has to decide, once,
  * whether the badge goes up.
  *
- * Branch order is deliberately the same as the React pair's, for the same
- * reasons:
+ * The decision itself is NOT written here. `gateSignalsFor` in
+ * `lib/license-state.ts` is the one copy, shared with `<LicenseProvider>`'s
+ * memo, because a second hand-written copy of those four rules drifts — and
+ * the drift is the expensive kind, a paying customer's production app wearing
+ * the badge. What this module owns is the ORDER, which the React pair splits
+ * across a provider effect and a gate render:
  *
  * - A missing key is unlicensed on **every** host, so a forgotten env var
  *   surfaces locally instead of on the deploy.
@@ -23,9 +27,14 @@
  *
  * @module license-gate-dom
  */
-import { hasFreshCache } from './cache'
-import { getCurrentDomain, isDevEnvironment } from './domain'
-import { normalizeLicenseKey } from './license-state'
+import type { LicenseState } from '../types'
+import { isDevEnvironment } from './domain'
+import {
+  createErrorState,
+  createUnlicensedState,
+  gateSignalsFor,
+  normalizeLicenseKey,
+} from './license-state'
 import { validateLicenseKey } from './polar-client'
 import { mountWatermark, warnUnlicensed } from './watermark-dom'
 
@@ -55,42 +64,41 @@ export function startLicenseGate(options: LicenseGateOptions = {}): () => void {
 
   const key = normalizeLicenseKey(options.licenseKey ?? '')
 
-  // Dev bypass — only with a key actually configured.
-  if (key.length > 0 && isDevEnvironment()) return NOOP
-
   let disposed = false
   let release: (() => void) | null = null
 
   const gate = (): void => {
-    if (disposed) return
+    if (disposed || release !== null) return
     warnUnlicensed()
+    // A dev host WITH a key never reaches here — `gateSignalsFor` cleared it.
+    // A dev host without one does, and keeps the warning but not the badge.
     if (isDevEnvironment()) return
     release = mountWatermark()
   }
 
-  // A reachability failure inside the cache TTL is not an unlicensed app —
-  // both the returned `error` state and a thrown one get the same grace.
-  const gateUnlessGrace = (): void => {
-    const domain = getCurrentDomain()
-    if (domain && hasFreshCache(domain, key)) return
-    gate()
+  const decide = (state: LicenseState): void => {
+    if (gateSignalsFor(state, key).isGated) gate()
   }
 
   if (key.length === 0) {
-    gate()
+    decide(createUnlicensedState())
+  } else if (isDevEnvironment()) {
+    // Dev bypass — no Polar call at all, so no activation slot is consumed.
+    return NOOP
   } else {
     validateLicenseKey(
       key,
       options.organizationId,
       options.apiBase ? { apiBase: options.apiBase } : undefined
+    ).then(
+      // TWO-argument `then`, not `.then(...).catch(...)`: a chained catch also
+      // catches a throw from `decide` itself — a Trusted Types CSP refusing the
+      // badge, say — and would re-run the gate, taking a second hold while only
+      // one release is kept. The badge would then outlive its own provider.
+      decide,
+      // A thrown validation IS the provider's error state, grace window and all.
+      () => decide(createErrorState())
     )
-      .then((state) => {
-        if (state.status === 'valid' && state.tier === 'pro' && state.renderKey !== undefined)
-          return
-        if (state.status === 'error') return gateUnlessGrace()
-        gate()
-      })
-      .catch(gateUnlessGrace)
   }
 
   return () => {

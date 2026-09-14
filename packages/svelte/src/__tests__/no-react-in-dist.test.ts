@@ -71,6 +71,20 @@ describe('@tour-kit/svelte ships no React', () => {
     }
   })
 
+  it.skipIf(!distExists())('imports @tour-kit/license/headless, never the bare entry', () => {
+    // Same hazard as core, one package over: the licence package's bare entry
+    // is `<LicenseProvider>`/`<LicenseGate>`/`<LicenseWatermark>`, all React.
+    // Every assertion above would still pass if it were imported, because the
+    // React would live one hop away inside that package's own dist — which is
+    // exactly why this is an assertion and not a comment.
+    for (const file of [ESM, CJS, DTS]) {
+      const source = readFileSync(file, 'utf8')
+      expect(/from\s*["']@tour-kit\/license["']/.test(source), `${file} imports bare license`).toBe(
+        false
+      )
+    }
+  })
+
   it('the source never imports the bare main entry either', () => {
     // `readdirSync(..., { recursive: true })`, NOT `fs.globSync`: globSync
     // landed in Node 22 and CI runs Node 20, so the glob version passed on
@@ -87,6 +101,9 @@ describe('@tour-kit/svelte ships no React', () => {
     for (const rel of sources) {
       const source = readFileSync(join(PKG_ROOT, 'src', rel), 'utf8')
       expect(/from\s*["']@tour-kit\/core["']/.test(source), `${rel} imports bare core`).toBe(false)
+      expect(/from\s*["']@tour-kit\/license["']/.test(source), `${rel} imports bare license`).toBe(
+        false
+      )
       expect(/from\s*["']react["']/.test(source), `${rel} imports react`).toBe(false)
     }
   })

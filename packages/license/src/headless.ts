@@ -41,8 +41,4 @@ export type { TrialConfig } from './lib/trial'
 // DOM gate (React-free) — what `@tour-kit/vue` and `@tour-kit/svelte` mount.
 export { startLicenseGate } from './lib/license-gate-dom'
 export type { LicenseGateOptions } from './lib/license-gate-dom'
-export {
-  __resetLicenseWarningForTests,
-  mountWatermark,
-  warnUnlicensed,
-} from './lib/watermark-dom'
+export { mountWatermark, warnUnlicensed } from './lib/watermark-dom'

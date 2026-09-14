@@ -37,5 +37,23 @@ the accessible label and the click telemetry only exist once. Its one-per-page
 rule is a count now instead of an owner election; the election only existed
 because a React portal needs some component to own it.
 
-No behaviour changed for React consumers, and `@tour-kit/license`'s 222 tests
-plus every Pro package's licence-integration suite pass untouched.
+Two fixes in `@tour-kit/license` reach React consumers as well:
+
+- React-bearing prop types moved to `types/react.ts`. tsup rolls every type
+  module both entries reach into one shared declaration chunk that
+  `headless.d.ts` imports, so `LicenseGateProps`' `React.ReactNode` was
+  travelling into the React-free door with nothing to resolve it — a Vue or
+  Svelte app on `skipLibCheck: false` with no `@types/react` got `TS2503:
+  Cannot find namespace 'React'` from inside `node_modules`. The names are
+  unchanged and still exported from the root barrel.
+- `<LicenseGate>` and `startLicenseGate()` now share one `gateSignalsFor()`
+  rather than each deriving the same four rules, so a new bypass `renderKey`
+  cannot land on one binding and leave the other badging paying customers.
+
+`@tour-kit/license` also ships its `LICENSE.md` now — it declares `SEE LICENSE
+IN LICENSE.md` and the file was not in `files`, which was survivable while it
+was an internal React-only dependency and is not now that two public packages
+redistribute it.
+
+Everything else is unchanged for React consumers: 241 tests in the licence
+package and every Pro package's licence-integration suite pass untouched.

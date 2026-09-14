@@ -61,5 +61,7 @@ corner on non-development hosts. Pass the key to remove it:
 </script>
 ```
 
-The key is read once, on mount. On a development host it is never sent
-anywhere, so local work never consumes one of its activation slots.
+The key is read once, at mount, like every other option this binding takes — so
+pass it from static config (`$env/static/public`) rather than from something
+fetched at runtime. On a development host it is never sent anywhere, so local
+work never consumes one of its activation slots.

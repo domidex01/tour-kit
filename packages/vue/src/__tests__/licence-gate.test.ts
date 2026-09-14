@@ -5,13 +5,14 @@ import type { Tour } from '@tour-kit/core/engine'
  *
  * The whole gate is `@tour-kit/license`'s; what this file proves is that the
  * binding actually starts it, on mount, and takes it down again on unmount.
- * Nothing here re-tests the branch logic — `license-gate.test.tsx` owns that.
+ * Nothing here re-tests the branch logic — `license-gate-dom.test.ts` in
+ * `@tour-kit/license` owns that, including the licensed and unreachable-issuer
+ * paths this file cannot reach through a real provider.
  *
  * jsdom serves the page from `localhost`, which the licence reads as a
  * development host, so every production case below stubs `location` first. A
  * file that forgot to would pass its dev cases and silently skip its real one.
  */
-import { __resetLicenseWarningForTests } from '@tour-kit/license/headless'
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { h } from 'vue'
@@ -24,10 +25,6 @@ const badges = () => document.body.querySelectorAll('[data-tourkit-watermark]')
 const slot = { default: () => h('div', { 'data-testid': 'content' }, 'content') }
 
 beforeEach(() => {
-  // The unlicensed warning is once per page load by design, so without this
-  // the first test to trip it silences every later one — and the dev-host case
-  // below would pass or fail on file order alone.
-  __resetLicenseWarningForTests()
   vi.unstubAllGlobals()
   vi.spyOn(console, 'warn').mockImplementation(() => {})
 })
@@ -53,20 +50,13 @@ describe('@tour-kit/vue licence gate', () => {
     expect(badges()).toHaveLength(0)
   })
 
-  it('shows no badge on a development host, and says why once', async () => {
+  it('shows no badge on a development host', async () => {
     vi.stubGlobal('location', { hostname: 'localhost' })
 
     const wrapper = mount(TourProvider, { props: { tours }, slots: slot })
 
     await vi.waitFor(() => expect(wrapper.get('[data-testid="content"]').text()).toBe('content'))
     expect(badges()).toHaveLength(0)
-    // The warning is the half that survives on a dev host: a missing key has to
-    // be visible before the deploy, not after it.
-    expect(console.warn).toHaveBeenCalledWith(
-      expect.stringContaining('without a valid license'),
-      expect.any(String),
-      expect.any(String)
-    )
 
     wrapper.unmount()
   })
@@ -85,7 +75,6 @@ describe('@tour-kit/vue licence gate', () => {
     // Local work must never burn one of the key's finite activation slots.
     expect(fetchSpy).not.toHaveBeenCalled()
     expect(badges()).toHaveLength(0)
-    expect(console.warn).not.toHaveBeenCalled()
 
     wrapper.unmount()
   })

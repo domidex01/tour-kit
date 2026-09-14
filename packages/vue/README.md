@@ -47,7 +47,10 @@ corner on non-development hosts. Pass the key to remove it:
   :tours="tours"
   :license="{ licenseKey: import.meta.env.VITE_TOUR_KIT_LICENSE_KEY }"
 >
+  <RouterView />
+</TourProvider>
 ```
 
-The key is read once, on mount. On a development host it is never sent
-anywhere, so local work never consumes one of its activation slots.
+The prop is reactive: a key fetched after mount still takes the badge down. On
+a development host it is never sent anywhere, so local work never consumes one
+of its activation slots.

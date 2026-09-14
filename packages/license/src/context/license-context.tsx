@@ -2,21 +2,19 @@
 
 import { logger } from '@tour-kit/core'
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { clearCache, hasFreshCache } from '../lib/cache'
+import { clearCache } from '../lib/cache'
 import { getCurrentDomain, isDevEnvironment } from '../lib/domain'
 import {
   createDevBypassState,
+  createErrorState,
   createUnlicensedState,
+  gateSignalsFor,
   normalizeLicenseKey,
 } from '../lib/license-state'
 import { validateLicenseKey } from '../lib/polar-client'
 import { getDaysLeft } from '../lib/trial'
-import type {
-  LicenseContextValue,
-  LicenseProviderProps,
-  LicenseState,
-  TrialContextValue,
-} from '../types'
+import type { LicenseContextValue, LicenseState, TrialContextValue } from '../types'
+import type { LicenseProviderProps } from '../types/react'
 
 const LOADING_STATE: LicenseState = {
   status: 'loading',
@@ -93,17 +91,7 @@ export function LicenseProvider({
       setState(result)
       onValidateRef.current?.(result)
     } catch (error) {
-      const errorState: LicenseState = {
-        status: 'error',
-        tier: 'free',
-        activations: 0,
-        maxActivations: 0,
-        domain: null,
-        expiresAt: null,
-        validatedAt: Date.now(),
-        serverValidatedAt: null,
-        renderKey: undefined,
-      }
+      const errorState = createErrorState()
       setState(errorState)
       onErrorRef.current?.(error instanceof Error ? error : new Error(String(error)))
     }
@@ -122,31 +110,13 @@ export function LicenseProvider({
   }, [validate])
 
   // Derived gating signals — computed once per state change so consumers
-  // (`useLicenseGate`, `<LicenseGate>`, `<ProGate>`) never read localStorage
-  // on every render. Both gates now share this single source of truth.
-  const { isGated, isLoading, gracePeriodActive } = useMemo(() => {
-    const normalizedKey = normalizeLicenseKey(licenseKey)
-
-    // Dev bypass only applies when a non-empty key is configured. A missing
-    // key on localhost falls through to the normal status-based gating so the
-    // unlicensed watermark appears just like in production.
-    if (isDevEnvironment() && normalizedKey.length > 0) {
-      return { isGated: false, isLoading: false, gracePeriodActive: false }
-    }
-    if (state.status === 'loading') {
-      return { isGated: false, isLoading: true, gracePeriodActive: false }
-    }
-    if (state.status === 'valid' && state.tier === 'pro' && state.renderKey !== undefined) {
-      return { isGated: false, isLoading: false, gracePeriodActive: false }
-    }
-    if (state.status === 'error') {
-      const domain = getCurrentDomain()
-      // Use the normalized key so the hash matches what polar-client writes.
-      const grace = domain ? hasFreshCache(domain, normalizedKey) : false
-      return { isGated: !grace, isLoading: false, gracePeriodActive: grace }
-    }
-    return { isGated: true, isLoading: false, gracePeriodActive: false }
-  }, [state, licenseKey])
+  // (`useLicenseGate`, `<LicenseGate>`, `<ProGate>`) never read localStorage on
+  // every render. `gateSignalsFor` is shared with the non-React
+  // `startLicenseGate()`, so both bindings gate on one rule set.
+  const { isGated, isLoading, gracePeriodActive } = useMemo(
+    () => gateSignalsFor(state, licenseKey),
+    [state, licenseKey]
+  )
 
   // Trial slice — client-derived from issuedAt + trialDays because Polar's
   // validate endpoint has no `tier` field (Phase 0 task 0.6, memory #187).

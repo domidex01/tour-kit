@@ -243,12 +243,21 @@ export const budgets = [
   // row — the row moves. Growing it stays cheaper than `tldts`, which carries
   // the full PSL and would not fit in this package at any plausible budget.
   ['license', 'packages/license/dist/index.js', 8500],
-  // The React-free door, measured 6378. It exists as its own row because the
-  // `vue` and `svelte` rows below CANNOT see it: the licence package is
-  // external to both builds, so their own bytes stay ~1.2 KB while the code a
-  // Vue consumer actually downloads lives here. Validation, cache, domain
-  // rules, the DOM gate and the badge — the badge's own logo is 4 KB of raw
-  // path data before gzip, which is most of the gap to the React entry.
+  // The React-free door, measured 6590. It exists as its own row because the
+  // `vue` and `svelte` rows below cannot see it: the licence package is
+  // external to both builds, so their own bytes stay ~1.2 KB while the gate,
+  // the validation, the cache, the domain rules and the badge live here. The
+  // badge's logo alone is 4 KB of raw path data before gzip.
+  //
+  // This row is the package's OWN bytes, like every other row — `zod` is a
+  // real runtime dependency of the entry (`import {z} from 'zod'` survives in
+  // `dist/headless.js`) and is external, so it is not counted here. Measured
+  // with esbuild, a consumer who bundles `startLicenseGate` ships 67 787 B
+  // gzipped once zod comes with it, and zod does not tree-shake out because
+  // the gate calls `validateLicenseKey`. That is the number to quote at a
+  // consumer asking what the licence costs them, and it is tracked as a
+  // follow-up rather than hidden behind this row.
+  //
   // `splitting: false` in this package's tsup config, so the file IS the
   // closure.
   ['license:headless', 'packages/license/dist/headless.js', 7000],
