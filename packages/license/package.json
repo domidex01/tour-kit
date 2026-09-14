@@ -56,7 +56,7 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "files": ["LICENSE.md", "dist", "README.md", "CHANGELOG.md"],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",
@@ -94,5 +94,13 @@
     "typescript": "catalog:",
     "vitest": "catalog:",
     "vitest-axe": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   }
 }

@@ -1,0 +1,266 @@
+/**
+ * The unlicensed badge and the unlicensed warning, in plain DOM.
+ *
+ * They live here rather than inside `<LicenseWatermark>` / `<LicenseWarning>`
+ * because neither is a React concern. `@tour-kit/vue` and `@tour-kit/svelte`
+ * ship under the same licence and owe their users the same badge, and a second
+ * implementation would be a second copy of the pricing copy, the UTM params,
+ * the accessible label and the click telemetry to keep in step. The two React
+ * components are bindings over this module now, so the repo has exactly one
+ * badge — the same rule `createSpotlight` settled for the spotlight.
+ *
+ * Everything here is framework-free and safe to import with no `document`:
+ * the only DOM touched is inside the exported functions.
+ *
+ * @module watermark-dom
+ */
+
+const WATERMARK_URL =
+  'https://usertourkit.com/pricing?utm_source=unlicensed_badge&utm_medium=in_app&utm_campaign=watermark'
+
+/**
+ * Declarations as pairs, applied with `setProperty`, rather than one
+ * `style.cssText` string.
+ *
+ * Not a style preference: jsdom's shorthand parser drops every declaration
+ * after a `background: rgba(...)` followed by `color: #fff` — measured, the
+ * whole string came back empty — which silently un-styled the badge in every
+ * test environment while browsers were fine. `setProperty` per declaration is
+ * parsed one at a time and cannot fail that way.
+ */
+type Declarations = ReadonlyArray<readonly [property: string, value: string]>
+
+const WRAPPER_STYLE: Declarations = [
+  ['position', 'fixed'],
+  ['right', '16px'],
+  ['bottom', '16px'],
+  ['z-index', '2147483647'],
+  ['pointer-events', 'none'],
+  [
+    'font-family',
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  ],
+]
+
+const LINK_STYLE: Declarations = [
+  ['pointer-events', 'auto'],
+  ['display', 'inline-flex'],
+  ['align-items', 'center'],
+  ['gap', '8px'],
+  ['padding', '6px 10px'],
+  ['border-radius', '8px'],
+  ['background', 'rgba(17, 24, 39, 0.92)'],
+  ['color', '#fff'],
+  ['font-size', '12px'],
+  ['line-height', '1.2'],
+  ['text-decoration', 'none'],
+  ['box-shadow', '0 4px 12px rgba(0, 0, 0, 0.15)'],
+]
+
+function applyStyle(element: HTMLElement, declarations: Declarations): void {
+  for (const [property, value] of declarations) element.style.setProperty(property, value)
+}
+
+const LABEL_STYLE: Declarations = [['font-weight', '600']]
+const CTA_STYLE: Declarations = [
+  ['margin-left', '6px'],
+  ['opacity', '0.85'],
+  ['text-decoration', 'underline'],
+]
+
+/**
+ * The logo, as markup, because eleven `<path>` elements are cheaper to carry as
+ * a string than to build node by node. It is parsed with `DOMParser`, never
+ * assigned to `innerHTML`: a page served with
+ * `require-trusted-types-for 'script'` throws on any string assignment to
+ * `innerHTML`, and this code runs inside the host's mount hook — in Svelte,
+ * one statement before the cleanup function is returned, so a throw there
+ * leaks every other listener the provider attached.
+ */
+const LOGO_SVG = `<svg width="14" height="14" style="flex-shrink:0" viewBox="0 0 926 1342" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M637.387 360.13C637.387 374.436 625.773 386.063 611.467 386.063H314.227C299.933 386.063 288.307 374.436 288.307 360.13C288.307 345.85 299.933 334.223 314.227 334.223H611.467C625.773 334.223 637.387 345.85 637.387 360.13Z" fill="#FFE20A"/><path d="M552.533 205.048V280.568H373.16V205.048C373.16 155.595 413.387 115.355 462.853 115.355C512.307 115.355 552.533 155.595 552.533 205.048Z" fill="#FFE20A"/><path d="M309.12 528.716L268.013 828.143C242.453 830.89 217.32 838.05 194.227 849.237C147.24 872.01 93.3601 872.01 46.3734 849.237L0 826.743V564.53C0 544.756 16.0267 528.716 35.8 528.716H309.12Z" fill="#0197F6"/><path d="M925.707 564.53V826.743L879.333 849.237C832.64 871.85 779.16 872.01 732.4 849.677L731.453 849.223C708.373 838.037 683.24 830.89 657.68 828.143L616.573 528.717H889.907C909.68 528.717 925.707 544.757 925.707 564.53Z" fill="#0197F6"/><path d="M813.68 1181.04C726.36 1282.76 599.44 1341.85 462.853 1341.85C326.253 1341.85 199.347 1282.76 112.027 1181.04C148.187 1182.36 184.56 1174.93 217.64 1158.89C240.56 1147.8 266.12 1141.92 291.573 1141.92C316.573 1141.92 341.68 1147.57 364.267 1158.3L365.507 1158.89C395.667 1173.52 429.32 1181.25 462.853 1181.25C496.333 1181.25 529.96 1173.53 560.08 1158.94L560.187 1158.89C606.867 1136.26 660.36 1136.12 707.12 1158.44L708.067 1158.89C741.147 1174.93 777.52 1182.36 813.68 1181.04Z" fill="#0197F6"/><path d="M925.64 886.41C924.333 968.836 901.293 1048.9 858.707 1118.98C817.36 1132.68 771.84 1129.89 732.373 1111.06L731.453 1110.62C701.307 1096 667.64 1088.26 634.12 1088.26C600.627 1088.26 566.973 1096 536.84 1110.58L536.773 1110.62C490.24 1133.2 436.893 1133.38 390.213 1111.25L388.907 1110.61C358.747 1096 325.08 1088.26 291.574 1088.26C258.054 1088.26 224.4 1096 194.227 1110.62C154.56 1129.85 108.667 1132.78 67.0001 1118.98C24.4134 1048.9 1.36013 968.836 0.0534668 886.41L22.9602 897.517C53.1336 912.143 86.7869 919.863 120.294 919.863C153.827 919.863 187.48 912.143 217.64 897.517C240.534 886.41 266.107 880.543 291.574 880.543C317.04 880.543 342.613 886.41 365.52 897.517C395.68 912.143 429.333 919.863 462.853 919.863C496.32 919.863 529.933 912.157 560.067 897.57L560.187 897.503C606.867 874.89 660.36 874.717 707.133 897.063L708.067 897.517C738.213 912.143 771.88 919.863 805.4 919.863C838.92 919.863 872.573 912.143 902.733 897.517L925.64 886.41Z" fill="#0197F6"/><path d="M798.72 280.568H625.974C611.16 280.568 599.16 268.554 599.16 253.741C599.16 238.928 611.16 226.915 625.974 226.915H798.72C813.534 226.915 825.534 238.928 825.534 253.741C825.534 268.554 813.534 280.568 798.72 280.568Z" fill="#0197F6"/><path d="M582.947 135.515C574.987 123.021 578.64 106.434 591.133 98.4744L738.853 4.20775C751.347 -3.75225 767.933 -0.085535 775.893 12.3945C783.867 24.8878 780.2 41.4745 767.707 49.4478L620 143.701C607.507 151.661 590.92 148.008 582.947 135.515Z" fill="#0197F6"/><path d="M299.72 280.568H126.987C112.173 280.568 100.173 268.554 100.173 253.741C100.173 238.928 112.173 226.915 126.987 226.915H299.72C314.547 226.915 326.547 238.928 326.547 253.741C326.547 268.554 314.547 280.568 299.72 280.568Z" fill="#0197F6"/><path d="M305.707 143.701L158 49.4478C145.507 41.4745 141.84 24.8878 149.813 12.3945C157.773 -0.085535 174.36 -3.75225 186.853 4.20775L334.574 98.4744C347.067 106.434 350.72 123.021 342.76 135.515C334.787 148.008 318.2 151.661 305.707 143.701Z" fill="#0197F6"/><path d="M503.213 638.796C503.213 643.29 499.573 646.93 495.093 646.93H430.613C426.133 646.93 422.493 643.29 422.493 638.796V596.583C422.493 574.29 440.56 556.223 462.853 556.223C474 556.223 484.093 560.73 491.387 568.036C498.693 575.343 503.213 585.436 503.213 596.583V638.796ZM550.2 439.703H375.507L322.04 829.01C345.213 832.223 367.907 839.05 388.92 849.236C411.827 860.343 437.4 866.21 462.853 866.21C488.307 866.21 513.867 860.343 536.773 849.236L536.787 849.223C536.787 849.223 536.787 849.223 536.8 849.223L536.867 849.196C557.853 839.023 580.52 832.196 603.653 828.996L550.2 439.703Z" fill="#FFE20A"/></svg>`
+
+function createLogo(): SVGElement | null {
+  const parsed = new DOMParser().parseFromString(LOGO_SVG, 'image/svg+xml')
+  const svg = parsed.documentElement
+  // `parseFromString` reports failure as a `<parsererror>` document rather than
+  // by throwing, so the tag name is the only honest check.
+  if (svg.nodeName === 'parsererror' || svg.nodeName.toLowerCase() !== 'svg') return null
+  return document.importNode(svg, true) as unknown as SVGElement
+}
+
+function span(text: string, style?: Declarations, ariaHidden = false): HTMLSpanElement {
+  const el = document.createElement('span')
+  el.textContent = text
+  if (style) applyStyle(el, style)
+  if (ariaHidden) el.setAttribute('aria-hidden', 'true')
+  return el
+}
+
+type WindowWithAnalytics = Window & {
+  gtag?: (event: 'event', name: string, params: Record<string, unknown>) => void
+  dataLayer?: Array<Record<string, unknown>>
+}
+
+/**
+ * Badge clicks land in the CONSUMER's analytics, never ours — it is their
+ * `gtag`/`dataLayer` on their page. Our own signal is the UTM on the pricing
+ * link. Kept anyway because a consumer who wants to know their app is showing
+ * an unlicensed badge deserves the event.
+ */
+function dispatchClickEvent(): void {
+  if (typeof window === 'undefined') return
+
+  const win = window as WindowWithAnalytics
+  const hostname = window.location?.hostname ?? ''
+  const payload = {
+    placement: 'watermark',
+    hostname,
+  }
+
+  try {
+    if (typeof win.gtag === 'function') {
+      win.gtag('event', 'unlicensed_badge_clicked', payload)
+      return
+    }
+    if (Array.isArray(win.dataLayer)) {
+      win.dataLayer.push({ event: 'unlicensed_badge_clicked', ...payload })
+    }
+  } catch {
+    // Analytics dispatch must never throw.
+  }
+}
+
+function createBadge(): HTMLElement {
+  const section = document.createElement('section')
+  section.setAttribute('data-tourkit-watermark', '')
+  section.setAttribute('aria-label', 'userTourKit license required')
+  applyStyle(section, WRAPPER_STYLE)
+
+  const link = document.createElement('a')
+  link.href = WATERMARK_URL
+  link.target = '_blank'
+  link.rel = 'noopener noreferrer'
+  applyStyle(link, LINK_STYLE)
+  link.setAttribute(
+    'aria-label',
+    'userTourKit unlicensed \u2014 remove this badge with a one-time licence, from $9.99'
+  )
+  link.addEventListener('click', dispatchClickEvent)
+
+  const logo = createLogo()
+  if (logo) link.appendChild(logo)
+  link.append(
+    span('userTourKit', LABEL_STYLE),
+    span('\u00b7', undefined, true),
+    span('Unlicensed'),
+    span('Remove from $9.99', CTA_STYLE)
+  )
+
+  section.appendChild(link)
+  return section
+}
+
+let holders = 0
+let node: HTMLElement | null = null
+
+/**
+ * Show the badge, and return the release.
+ *
+ * One badge per page no matter how many packages ask: the count, not the
+ * caller, decides. This replaced an owner election that existed only because a
+ * React portal needs some component to own it — in DOM the node has no owner,
+ * so holding a count is the whole mechanism. The badge appears on the first
+ * hold and survives every release but the last, which is the behaviour the
+ * election was buying.
+ */
+export function mountWatermark(): () => void {
+  if (typeof document === 'undefined') return () => {}
+
+  holders += 1
+  // `!node.isConnected` is the load-bearing half. Trusting the pointer alone
+  // made the badge STICKY-OFF: anything that detached it — a router clearing
+  // `document.body`, a devtools delete, a test's cleanup — left `node` non-null
+  // forever, so every later hold appended nothing and the count never fell back
+  // to zero to reset it. One `remove()` would have bought a whole session
+  // un-badged, which is a one-line bypass of the thing this module is for.
+  if (node === null || !node.isConnected) {
+    try {
+      node = createBadge()
+      document.body.appendChild(node)
+    } catch {
+      // The badge is enforcement, not function. A page that refuses to build it
+      // — a Trusted Types policy, a `document.body` that is not there yet —
+      // gets no badge rather than a broken host: `mountWatermark` is called
+      // from inside the consumer's mount hook, and in Svelte one statement
+      // before the cleanup closure is returned, so a throw here would leak
+      // every listener the provider had already attached.
+      node = null
+    }
+  }
+
+  let released = false
+  return () => {
+    if (released) return
+    released = true
+    holders -= 1
+    if (holders <= 0) {
+      holders = 0
+      node?.remove()
+      node = null
+    }
+  }
+}
+
+/** Test-only: forget the badge and its hold count. */
+export function __resetWatermarkForTests(): void {
+  node?.remove()
+  node = null
+  holders = 0
+}
+
+// Module-level guard so the unlicensed warning prints once per page load even
+// when several packages each start a gate. Also absorbs React Strict Mode's
+// double effect invocation.
+let hasWarned = false
+
+/** Test-only: reset the once-per-session warning guard. */
+export function __resetLicenseWarningForTests(): void {
+  hasWarned = false
+}
+
+/**
+ * True only in a production build.
+ *
+ * `process.env.NODE_ENV` is written bare and inside a `try` on purpose. Bare,
+ * because that exact text is the token every bundler substitutes — the moment
+ * it is written `process.env?.NODE_ENV`, esbuild, webpack and Vite all stop
+ * matching it, the comparison survives minification, and the branch it guards
+ * can no longer be eliminated. Inside a `try`, because an undeclared `process`
+ * throws a *catchable* `ReferenceError`, which is what happens when this module
+ * is loaded unbundled in a browser.
+ *
+ * The earlier `typeof process !== 'undefined' && process.env?.NODE_ENV === …`
+ * failed open on both counts: no bundler could fold it, and in a Vite
+ * production bundle `process` is simply absent, so the guard read false and the
+ * warning shipped to every visitor's console.
+ */
+function isProductionBuild(): boolean {
+  try {
+    return process.env.NODE_ENV === 'production'
+  } catch {
+    return false
+  }
+}
+
+/** Print the unlicensed warning once, in development builds only. */
+export function warnUnlicensed(): void {
+  if (isProductionBuild()) return
+  if (hasWarned) return
+  hasWarned = true
+
+  console.warn(
+    '%c[TourKit]%c This application is using Tour Kit Pro without a valid license.\nA production licence is a one-time purchase from $9.99 \u2014 https://usertourkit.com/pricing',
+    'color: #e74c3c; font-weight: bold',
+    'color: inherit'
+  )
+}

@@ -21,8 +21,8 @@ import type * as React from 'react'
  * No `<LicenseProvider>` is required. `LicenseGate`'s no-provider branch
  * returns bare children on a development host and children plus a badge
  * everywhere else, which is exactly right for a consumer who has not configured
- * a key. And `LicenseWatermark` elects a single owner across every mounted
- * instance, so `react` + `hints` + a Pro package still renders one badge.
+ * a key. And the badge is held by one count across every mounted instance, so
+ * `react` + `hints` + a Pro package still renders one badge.
  */
 
 type TourProviderProps = React.ComponentProps<typeof CoreTourProvider>

@@ -27,6 +27,7 @@ import {
   liveOptionsFrom,
   validateTour,
 } from '@tour-kit/core/engine'
+import { type LicenseGateOptions, startLicenseGate } from '@tour-kit/license/headless'
 import {
   type InjectionKey,
   type MaybeRefOrGetter,
@@ -47,9 +48,22 @@ export const TOUR_KIT_KEY: InjectionKey<TourKit> = Symbol('tour-kit')
  * `BindingOptions` is core's — derived from `CreateTourEngineOptions`, so a new
  * engine option arrives here without an edit and a renamed one stops compiling.
  * Re-exported under the binding's own name because that is what a Vue consumer
- * will look for; it is an alias, not a second declaration.
+ * will look for; the only thing added to it is `license`, which core cannot
+ * carry — the licence package imports core, so the dependency only runs one
+ * way.
  */
-export type TourKitOptions = BindingOptions
+export type TourKitOptions = BindingOptions & {
+  /**
+   * Licence configuration. `@tour-kit/vue` ships under BUSL-1.1: production use
+   * needs a key, and development, evaluation, testing and CI do not.
+   *
+   * Leave it out and the binding is fully functional — it simply layers the
+   * unlicensed badge on non-development hosts. `LicenseGateOptions` is the
+   * licence package's own type for the same reason `BindingOptions` is core's:
+   * a field added there arrives here without an edit.
+   */
+  license?: LicenseGateOptions
+}
 
 /**
  * Provide a tour kit to this component's subtree.
@@ -79,6 +93,27 @@ export function provideTourKit(options: MaybeRefOrGetter<TourKitOptions>): TourK
 
   const detach: Array<() => void> = []
 
+  let releaseGate: (() => void) | null = null
+  const restartGate = (license: TourKitOptions['license']): void => {
+    releaseGate?.()
+    releaseGate = startLicenseGate(license)
+  }
+
+  // A key that arrives AFTER mount still has to take the badge down. Fetching
+  // licence config from an API, or hydrating it out of a store, is ordinary in
+  // a multi-tenant app, and React's `<LicenseProvider>` re-validates whenever
+  // `licenseKey` changes — a Vue binding that read the option once at mount
+  // would badge a paying customer's production app for the life of the page.
+  //
+  // Non-immediate like the two watchers above, and guarded on `releaseGate` so
+  // it is inert before mount and after teardown.
+  watch(
+    () => toValue(options).license?.licenseKey,
+    () => {
+      if (releaseGate !== null) restartGate(toValue(options).license)
+    }
+  )
+
   onMounted(() => {
     const o = toValue(options)
     // Parity with `tour-provider.tsx`'s post-commit push. Cheap, and not
@@ -96,6 +131,16 @@ export function provideTourKit(options: MaybeRefOrGetter<TourKitOptions>): TourK
     }
     detach.push(attachAdvanceOn(kit.handle))
     if (o.enableTestBridge) detach.push(attachTestBridge(kit.handle))
+
+    // Started here, not in `setup()`: the gate reads `location` and appends to
+    // `document.body`, and `onMounted` is the Vue hook that never fires on the
+    // server. It goes in `detach` like every other attachment, so a torn-down
+    // provider takes its badge with it.
+    restartGate(o.license)
+    detach.push(() => {
+      releaseGate?.()
+      releaseGate = null
+    })
   })
 
   onScopeDispose(() => {

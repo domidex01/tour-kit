@@ -3,7 +3,7 @@
 import { useContext } from 'react'
 import { LicenseContext } from '../context/license-context'
 import { isDevEnvironment } from '../lib/domain'
-import type { LicenseGateProps } from '../types'
+import type { LicenseGateProps } from '../types/react'
 import { LicenseWarning } from './license-warning'
 import { LicenseWatermark } from './license-watermark'
 

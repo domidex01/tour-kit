@@ -9,13 +9,14 @@ export type {
   LicenseCache,
   LicenseConfig,
   LicenseContextValue,
-  LicenseProviderProps,
-  LicenseGateProps,
   LicenseWarningProps,
   PolarValidateResponse,
   PolarActivateResponse,
   TrialContextValue,
 } from './types'
+// React-bearing props live apart so they stay out of the shared declaration
+// chunk that `/headless` imports — see `types/react.ts`.
+export type { LicenseProviderProps, LicenseGateProps } from './types/react'
 
 // Context and Provider
 export { LicenseProvider, LicenseContext, LicenseRenderContext } from './context/license-context'
