@@ -3,7 +3,7 @@
   "version": "2.1.0",
   "description": "Headless React onboarding & product tour engine — positioning, focus management, storage adapters for guided tours and walkthroughs.",
   "author": "Tour Kit Team",
-  "license": "MIT",
+  "license": "BUSL-1.1",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",
@@ -78,7 +78,7 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "files": ["LICENSE.md", "dist", "README.md", "CHANGELOG.md"],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",
