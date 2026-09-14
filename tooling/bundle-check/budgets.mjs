@@ -243,10 +243,20 @@ export const budgets = [
   // row — the row moves. Growing it stays cheaper than `tldts`, which carries
   // the full PSL and would not fit in this package at any plausible budget.
   ['license', 'packages/license/dist/index.js', 8500],
+  // The React-free door, measured 6378. It exists as its own row because the
+  // `vue` and `svelte` rows below CANNOT see it: the licence package is
+  // external to both builds, so their own bytes stay ~1.2 KB while the code a
+  // Vue consumer actually downloads lives here. Validation, cache, domain
+  // rules, the DOM gate and the badge — the badge's own logo is 4 KB of raw
+  // path data before gzip, which is most of the gap to the React entry.
+  // `splitting: false` in this package's tsup config, so the file IS the
+  // closure.
+  ['license:headless', 'packages/license/dist/headless.js', 7000],
   // v2 §1.5 — the two non-React bindings. Both are `external: ['@tour-kit/core',
-  // <framework>]`, so these rows measure the binding's own bytes: state bridge,
-  // provider lifecycle, two view helpers and a router adapter. Measured then
-  // gated at ~x1.2, the repo convention.
+  // '@tour-kit/license', <framework>]`, so these rows measure the binding's own
+  // bytes: state bridge, provider lifecycle, two view helpers, a router adapter
+  // and the call that starts the licence gate. Measured then gated at ~x1.2,
+  // the repo convention.
   ['vue', 'packages/vue/dist/index.js', 1500],
   ['svelte', 'packages/svelte/dist/index.js', 1300],
 ]

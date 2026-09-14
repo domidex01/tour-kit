@@ -16,8 +16,10 @@ Validates license keys against the Polar customer portal API, manages domain act
 - `src/context/license-context.tsx` — `LicenseProvider`, `LicenseContext`, `LicenseRenderContext`
 - `src/components/license-gate.tsx` — `<LicenseGate>` soft gate. Renders children unconditionally, layers a single small badge + dev-only warning on non-localhost hosts when unlicensed. Tolerates a missing `<LicenseProvider>`.
 - `src/components/pro-gate.tsx` — `<ProGate>` hard gate. Renders a branded placeholder when unlicensed. **Not used internally by Tour Kit's own Pro packages** — kept exported for downstream consumers who want a hard placeholder.
-- `src/components/license-watermark.tsx` — Small `Tour Kit · Unlicensed · Buy license` portal badge in the bottom-right corner. Singleton ownership transfer so multiple mounted instances coalesce to one DOM node. Inline-styled, max z-index, link `pointer-events: auto` over a `pointer-events: none` wrapper. Click emits `unlicensed_badge_clicked` via `window.gtag` or `window.dataLayer`.
-- `src/components/license-warning.tsx` — Console warning component for invalid licenses
+- `src/lib/watermark-dom.ts` — **the badge itself**, framework-free. Builds the bottom-right `userTourKit · Unlicensed · Remove from $9.99` node, inline-styled, max z-index, link `pointer-events: auto` over a `pointer-events: none` wrapper; click emits `unlicensed_badge_clicked` via `window.gtag` or `window.dataLayer`. `mountWatermark()` holds a count, not an owner — the badge appears on the first hold and survives every release but the last, so any number of packages asking still yields one node. Also holds `warnUnlicensed()` and its once-per-page-load guard.
+- `src/lib/license-gate-dom.ts` — `startLicenseGate()`, `<LicenseProvider>` + `<LicenseGate>` collapsed into one React-free call for `@tour-kit/vue` and `@tour-kit/svelte`. Same branch order as the React pair.
+- `src/components/license-watermark.tsx` — React binding over `mountWatermark()`. Renders `null`.
+- `src/components/license-warning.tsx` — React binding over `warnUnlicensed()`. Renders `null`.
 - `src/hooks/use-license.ts` — `useLicense()` context consumer
 - `src/hooks/use-is-pro.ts` — `useIsPro()` boolean shortcut
 - `src/headless.ts` — Types + lib functions re-exported without React dependency
@@ -37,8 +39,8 @@ Validates license keys against the Polar customer portal API, manages domain act
 
 ## API Surface
 
-**Headless** (`@tour-kit/license/headless`):
-`validateLicenseKey()`, `validateKey()`, `activateKey()`, `deactivateKey()`, `readCache()`, `writeCache()`, `clearCache()`, `getCurrentDomain()`, `isDevEnvironment()`, `validateDomainAtRender()`
+**Headless** (`@tour-kit/license/headless`) — React-free, and the entry the Vue and Svelte bindings load:
+`validateLicenseKey()`, `validateKey()`, `activateKey()`, `deactivateKey()`, `readCache()`, `writeCache()`, `clearCache()`, `getCurrentDomain()`, `isDevEnvironment()`, `validateDomainAtRender()`, `startLicenseGate()`, `mountWatermark()`, `warnUnlicensed()`
 
 **React** (`@tour-kit/license`):
 `<LicenseProvider>`, `<LicenseGate>`, `<LicenseWatermark>`, `<LicenseWarning>`, `useLicense()`, `useIsPro()`
@@ -57,7 +59,9 @@ Validates license keys against the Polar customer portal API, manages domain act
 - Watermark enforcement lives in pro packages via `useLicenseCheck()`, not in this package
 - Dev bypass applies only to `localhost`, `127.0.0.1`, and `*.local`; ephemeral/preview hosts get the separate **preview bypass** via `isEphemeralHost()`. Neither path consumes a Polar activation slot
 - A `403` from `activateKey` means the key is valid but out of slots — do NOT map it to `invalid`/watermark. It is handled in `validateLicenseKey` step 5a as a valid Pro state. Only a `403`/`404` from the `validate` call (not `activate`) is unlicensed
-- `headless.ts` entry point must not import React (tree-shaking boundary)
+- `headless.ts` entry point must not import React (tree-shaking boundary). It is no longer only a tree-shaking concern: `@tour-kit/vue` and `@tour-kit/svelte` depend on this package and have no React installed, which is why `react`/`react-dom` are **optional** peers here
+- The badge sets styles with `setProperty` per declaration, never `style.cssText`. jsdom's shorthand parser drops every declaration after `background: rgba(...)` + `color: #fff` — measured, the whole string came back empty — which silently un-styles the badge in every test environment while browsers stay fine
+- `console.warn` in `lib/watermark-dom.ts` is allowed by an explicit path entry in `tooling/biome/biome.json`. Move the warning and the allowlist entry moves with it
 - `organizationId` is optional in `LicenseProviderProps` but required for Polar validation to work
 - Cache keys are domain-scoped: `tourkit:license:{domain}`
 

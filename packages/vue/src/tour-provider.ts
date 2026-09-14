@@ -33,6 +33,7 @@ export const TourProvider = defineComponent({
       default: undefined,
     },
     keyboard: { type: [Boolean, Object] as PropType<TourKitOptions['keyboard']>, default: true },
+    license: { type: Object as PropType<TourKitOptions['license']>, default: undefined },
     enableTestBridge: { type: Boolean, default: false },
   },
   setup(props, { slots }) {

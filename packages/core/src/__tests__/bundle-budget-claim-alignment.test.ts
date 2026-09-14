@@ -132,6 +132,15 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
     mode: 'exact',
   },
   license: { pattern: /^\s*-\s*license\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
+  // Anchored on `license/headless subpath`, exactly as the four engine rows
+  // are. The sibling `license` pattern above requires whitespace after the
+  // name, so a bullet beginning `- license/headless` cannot satisfy it. This
+  // row exists because `vue` and `svelte` hold the licence package external:
+  // their own rows cannot show what a non-React consumer downloads.
+  'license:headless': {
+    pattern: /license\/headless subpath\s*<\s*([\d.]+)\s*KB/,
+    mode: 'exact',
+  },
   media: { pattern: /^\s*-\s*media\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
   'ai:client': { pattern: /-\s*ai\s*<\s*([\d.]+)\s*KB\s*\(client\)/, mode: 'exact' },
   'ai:server': { pattern: /<\s*([\d.]+)\s*KB\s*\(server\)/, mode: 'exact' },

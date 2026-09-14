@@ -94,5 +94,13 @@
     "typescript": "catalog:",
     "vitest": "catalog:",
     "vitest-axe": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   }
 }

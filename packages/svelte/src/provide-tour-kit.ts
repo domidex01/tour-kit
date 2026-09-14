@@ -22,6 +22,7 @@ import {
   engineOptionsFrom,
   validateTour,
 } from '@tour-kit/core/engine'
+import { type LicenseGateOptions, startLicenseGate } from '@tour-kit/license/headless'
 import { getContext, onMount, setContext } from 'svelte'
 import { type TourKit, createTourKit } from './create-tour-kit'
 
@@ -33,9 +34,22 @@ export const TOUR_KIT_KEY: symbol = Symbol('tour-kit')
  * `BindingOptions` is core's — derived from `CreateTourEngineOptions`, so a new
  * engine option arrives here without an edit and a renamed one stops compiling.
  * Re-exported under the binding's own name because that is what a Svelte
- * consumer will look for; it is an alias, not a second declaration.
+ * consumer will look for; the only thing added to it is `license`, which core
+ * cannot carry — the licence package imports core, so the dependency only runs
+ * one way.
  */
-export type TourKitOptions = BindingOptions
+export type TourKitOptions = BindingOptions & {
+  /**
+   * Licence configuration. `@tour-kit/svelte` ships under BUSL-1.1: production
+   * use needs a key, and development, evaluation, testing and CI do not.
+   *
+   * Leave it out and the binding is fully functional — it simply layers the
+   * unlicensed badge on non-development hosts. `LicenseGateOptions` is the
+   * licence package's own type for the same reason `BindingOptions` is core's:
+   * a field added there arrives here without an edit.
+   */
+  license?: LicenseGateOptions
+}
 
 /**
  * Provide a tour kit to this component's subtree.
@@ -65,6 +79,12 @@ export function provideTourKit(options: TourKitOptions): TourKit {
     }
     detach.push(attachAdvanceOn(kit.handle))
     if (options.enableTestBridge) detach.push(attachTestBridge(kit.handle))
+
+    // Started here, not in the `<script>`: the gate reads `location` and
+    // appends to `document.body`, and `onMount` is the one Svelte hook that
+    // never runs on the server. It joins `detach`, so a torn-down provider
+    // takes its badge with it.
+    detach.push(startLicenseGate(options.license))
 
     return () => {
       for (const d of detach) d()

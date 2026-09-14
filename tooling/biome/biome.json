@@ -78,7 +78,7 @@
         "packages/core/src/lib/test-bridge.ts",
         "packages/analytics/src/plugins/console.ts",
         "packages/license/src/components/license-test-mode.tsx",
-        "packages/license/src/components/license-warning.tsx",
+        "packages/license/src/lib/watermark-dom.ts",
         "packages/license/src/components/pro-gate.tsx",
         "packages/license/src/lib/domain.ts",
         "packages/license/src/lib/polar-client.ts",
