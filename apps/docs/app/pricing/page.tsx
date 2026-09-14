@@ -9,7 +9,7 @@ import type { Metadata } from 'next'
 
 const PRICING_TITLE = 'Pricing, userTourKit'
 const PRICING_DESCRIPTION =
-  'One-time pricing for userTourKit: $9.99, $49.99 or $299.99 for 1, 5 or unlimited projects. Free in development under BSL 1.1, a licence key in production. No subscriptions, and every version converts to MIT on its Change Date.'
+  'One-time pricing for userTourKit: $9.99, $49.00 or $299.00 for 1, 5 or unlimited projects. Free in development under BSL 1.1, a licence key in production. No subscriptions, and every version converts to MIT on its Change Date.'
 const PRICING_OG_IMAGE = `/api/og?title=${encodeURIComponent('Pricing')}&category=PRICING`
 const SITE_URL = 'https://usertourkit.com'
 

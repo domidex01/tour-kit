@@ -27,13 +27,13 @@ describe('trackEvent', () => {
   it('sends one event to both systems under the same name', async () => {
     const { trackEvent } = await loadAnalytics('phc_test')
 
-    trackEvent('pricing_buy_clicked', { placement: 'pricing_page_business', value: 49.99 })
+    trackEvent('pricing_buy_clicked', { placement: 'pricing_page_business', value: 49 })
     // the PostHog leg is a dynamic import, so it lands a microtask later
     await vi.waitFor(() => expect(capture).toHaveBeenCalledTimes(1))
 
     expect(sendGAEvent).toHaveBeenCalledWith('event', 'pricing_buy_clicked', {
       placement: 'pricing_page_business',
-      value: 49.99,
+      value: 49,
     })
 
     // The shared name is the point: GA and PostHog run side by side through
@@ -42,7 +42,7 @@ describe('trackEvent', () => {
     const [gaName] = sendGAEvent.mock.calls[0].slice(1)
     const [phName, phProps] = capture.mock.calls[0]
     expect(phName).toBe(gaName)
-    expect(phProps).toEqual({ placement: 'pricing_page_business', value: 49.99 })
+    expect(phProps).toEqual({ placement: 'pricing_page_business', value: 49 })
   })
 
   it('still reaches GA when PostHog is not configured', async () => {

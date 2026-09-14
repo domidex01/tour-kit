@@ -123,7 +123,7 @@ export default async function AlternativesPage({ params }: PageProps) {
               {
                 question: 'Is userTourKit free to use?',
                 answer:
-                  'userTourKit is free in development, evaluation, testing and CI. Every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited. Not recurring.',
+                  'userTourKit is free in development, evaluation, testing and CI. Every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.00 for five, $299.00 for unlimited. Not recurring.',
               },
               {
                 question: `Can I migrate from ${alt.competitor} to userTourKit?`,

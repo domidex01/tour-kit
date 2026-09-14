@@ -43,7 +43,7 @@ export const TIERS = [
   {
     id: 'business',
     name: 'Business',
-    price: 49.99,
+    price: 49,
     projects: 5,
     blurb: 'Five production projects. For an agency or a small portfolio.',
     highlight: true,
@@ -51,7 +51,7 @@ export const TIERS = [
   {
     id: 'premium',
     name: 'Premium',
-    price: 299.99,
+    price: 299,
     projects: 'unlimited',
     blurb: 'Unlimited production projects, forever, on the versions you buy.',
     highlight: false,

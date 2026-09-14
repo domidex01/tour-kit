@@ -11,7 +11,7 @@ export const PRICING_FAQS: PricingFaq[] = [
   {
     question: 'How much does the userTourKit React product tour library cost?',
     answer:
-      'Everything is free while you build. Development, evaluation, testing, CI and preview deploys cost nothing and have no feature gates, you get every package. Serving Tour Kit to end users of a deployed application needs a one-time licence key: $9.99 for one project, $49.99 for five, $299.99 for unlimited. No subscription, no per-seat fee, no upgrade fee.',
+      'Everything is free while you build. Development, evaluation, testing, CI and preview deploys cost nothing and have no feature gates, you get every package. Serving Tour Kit to end users of a deployed application needs a one-time licence key: $9.99 for one project, $49.00 for five, $299.00 for unlimited. No subscription, no per-seat fee, no upgrade fee.',
   },
   {
     question: 'Is the userTourKit Pro license a subscription?',
