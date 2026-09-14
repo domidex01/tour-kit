@@ -226,7 +226,7 @@ Tour Kit avoids this by shipping under 23 KB gzipped and deferring initializatio
 
 We tested these patterns on throttled Chrome DevTools (Slow 3G preset, 4x CPU slowdown) with a Vite + React 19 project. Here's what actually moved the needle:
 
-1. **Ship under 50 KB for the tour chunk.** Tour Kit core + react is under 23 KB gzipped combined. That's a 0.16-second download on 3G. React Joyride's unpacked 498 KB takes over 4 seconds.
+1. **Ship under 50 KB for the tour chunk.** Tour Kit core + react is under 35 KB gzipped combined. That's a 0.7-second download on 3G. React Joyride's unpacked 498 KB takes over 4 seconds.
 
 2. **Defer tour initialization with React.lazy.** Don't import the tour library at the top of your entry file. Wrap it in lazy + Suspense. This alone cut our test app's TTI by 400 ms on Slow 3G.
 

@@ -102,7 +102,7 @@ The architectural difference matters, though. userTourKit's accessibility is con
 
 React Joyride v3 ships at roughly 30KB gzipped with 10 runtime dependencies. That's about 30% smaller than v2, which is genuine progress. The `size-limit` budget in the repo confirms this target.
 
-userTourKit's core is under 23KB gzipped. The React UI package is under 12KB. Hints: under 6.5KB. That's roughly 3.75x smaller for core logic alone.
+userTourKit's core is under 23KB gzipped. The React UI package is under 12KB. Hints: under 6.5KB. That's roughly 1.6x smaller for core logic alone.
 
 The difference comes from architecture. userTourKit's headless core ships logic without opinionated UI components, and tree-shaking works because each package is a separate entry point. On mobile, where every kilobyte adds parse time, this gap matters. On a standard desktop SaaS dashboard? You probably won't notice.
 

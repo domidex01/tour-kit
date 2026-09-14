@@ -3180,7 +3180,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'How Tour Kit ships at 8KB gzipped with zero runtime dependencies',
     metaTitle: 'How Tour Kit ships at 8KB gzipped with zero runtime dependen',
     description:
-      'A technical breakdown of the architecture decisions that keep Tour Kit under 8.1KB gzipped. Tree-shaking, code splitting, peer dependencies, and tsup config.',
+      'A technical breakdown of the architecture decisions that keep Tour Kit under 23KB gzipped. Tree-shaking, code splitting, peer dependencies, and tsup config.',
     keywords: [
       'product tour library bundle size',
       'zero dependency tour library',

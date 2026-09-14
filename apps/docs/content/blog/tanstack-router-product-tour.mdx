@@ -293,7 +293,7 @@ export const Route = createRoute({
 
 **Combine with Tour Kit's analytics package.** Fire `tour:step_viewed` events that include the TanStack Router route path. Completion funnel analysis then shows exactly which page transition caused drop-offs, not just which step number. That distinction matters.
 
-As of April 2026, TanStack Router ships at roughly 12KB gzipped for the core router ([TanStack docs](https://tanstack.com/router/latest)). Combined with Tour Kit's core at under 23KB gzipped, the total routing + tour overhead stays under 20KB. That's lighter than React Joyride alone. TkDodo's article on [context inheritance in TanStack Router](https://tkdodo.eu/blog/context-inheritance-in-tan-stack-router) covers the context pattern in more depth if you want to pass additional data through route context.
+As of April 2026, TanStack Router ships at roughly 12KB gzipped for the core router ([TanStack docs](https://tanstack.com/router/latest)). Combined with Tour Kit's core at under 23KB gzipped, the total routing + tour overhead stays under 40KB. That's lighter than React Joyride alone. TkDodo's article on [context inheritance in TanStack Router](https://tkdodo.eu/blog/context-inheritance-in-tan-stack-router) covers the context pattern in more depth if you want to pass additional data through route context.
 
 Tour Kit doesn't ship with a built-in TanStack Router adapter yet. The adapter in this article is ~40 lines and follows the same `RouterAdapter` interface used by the Next.js and React Router adapters. If the community adopts this pattern, an official adapter makes sense as a future addition.
 
@@ -317,7 +317,7 @@ Tour Kit's `route` field accepts a resolved string path. For parameterized route
 
 ### What's the performance impact of adding Tour Kit to a TanStack Router app?
 
-Tour Kit's core ships at under 23KB gzipped with zero runtime dependencies. The router adapter adds ~40 lines that tree-shake if unused. Combined with TanStack Router's ~12KB, total routing and tour overhead stays under 20KB gzipped. React Joyride alone ships at 37KB.
+Tour Kit's core ships at under 23KB gzipped with zero runtime dependencies. The router adapter adds ~40 lines that tree-shake if unused. Combined with TanStack Router's ~12KB, total routing and tour overhead stays under 40KB gzipped. React Joyride alone ships at 37KB.
 
 ### Does Tour Kit support TanStack Start (SSR)?
 
