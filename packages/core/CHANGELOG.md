@@ -1,5 +1,48 @@
 # @tour-kit/core
 
+## 3.0.0
+
+### Major Changes
+
+- f62631b: Relicense `core`, `react` and `hints` from MIT to the Business Source License
+  1.1, bringing the published packages in line with what usertourkit.com has been
+  telling people since the pricing change.
+
+  Production use now requires a userTourKit licence key. Development, evaluation,
+  testing, CI and any non-production environment stay free and need no key — that
+  is the Additional Use Grant, written into each package's `LICENSE.md`.
+
+  Each published version converts to MIT on its Change Date, four years after that
+  version ships. BSL 1.1's own terms cap it there ("or the fourth anniversary of
+  the first publicly available distribution of a specific version, whichever comes
+  first"), so a version's conversion date cannot drift even if the stamped date in
+  a later release is not bumped.
+
+  Nothing is retroactive. Every version published up to and including 2.1.0 was
+  released under MIT, and an MIT grant cannot be withdrawn — those versions stay
+  MIT forever, and anyone already depending on them is unaffected until they
+  choose to upgrade.
+
+### Minor Changes
+
+- e70e310: `createHandle`, the engine-agnostic lifecycle primitive behind `createEngineHandle`, exported from `@tour-kit/core/engine`.
+
+  `createHandle<E, S>(factory, initial)` is the half of the handle that knows nothing about tours: lazy `ensure()`, a listener set that outlives any one engine, one fan-out on construction, and a `release()` whose `destroy()` is deferred by a microtask so a StrictMode teardown-and-rerun takes it back. `createEngineHandle` is now that composition plus the seventeen tour verbs — its signature and `EngineHandle`'s shape are unchanged, so the React, Vue and Svelte bindings are untouched.
+
+  A package that grows its own engine composes `createHandle` instead of writing a second lifecycle. `EngineLike`'s `flush` is optional, so an engine whose writes are synchronous needs none.
+
+- 9d1cba1: `createListeners`, the fault-isolated subscriber fan-out every engine keeps, exported from `@tour-kit/core/engine`.
+
+  A throwing subscriber no longer aborts the notify loop. `createTourEngine` already isolated listener faults; `createHintsEngine` re-derived the same loop in the v3 Phase 1 extraction and dropped the try/catch, so one broken subscriber stopped every listener registered after it from firing — after the state change and its storage write had already landed, leaving state, storage and subscribers out of step with nothing to surface the cause. Both engines now route through one implementation, and it has direct test coverage that core's inline version never had.
+
+  Exported from `/engine` because a package engine needs the same guarantee — `@tour-kit/hints/engine` uses it today, and `checklists`, `announcements` and `surveys` follow.
+
+- 978338b: `SyncStorage`, the synchronous storage-adapter shape, and `createPrefixedStorage` now preserves it.
+
+  Core's `Storage` permits `Promise`-returning methods so async adapters are possible, but several code paths read `getItem` inline and cannot use those. Each had re-declared the synchronous three-method shape locally. `SyncStorage` is now the one declaration, exported from the root, `/engine` and `utils`.
+
+  `createPrefixedStorage` is overloaded: hand it a synchronous adapter and you get a synchronous adapter back. It is a pure pass-through, so the wide return type was never accurate — it just forced every synchronous consumer to re-narrow with an `as` cast. `createNoopStorage()` is likewise typed `SyncStorage`, since every method on it is synchronous; narrowing a return type is safe for existing callers.
+
 ## 2.1.0
 
 ### Minor Changes
