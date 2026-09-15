@@ -318,7 +318,7 @@ Shepherd.js is a well-maintained, framework-agnostic tour library. Userorbit cal
 The key differences:
 
 - **React integration:** Tour Kit is React-native (hooks and providers). Shepherd has a React wrapper, but the core is vanilla JS. This matters for Server Components and concurrent features.
-- **Licensing:** Shepherd's core is MIT, but "a paid license is required for commercial use" of advanced features ([Usertour](https://www.usertour.io/blog/product-tour-joyride)). Tour Kit is MIT for core packages, $9.99 one-time for Pro.
+- **Licensing:** Shepherd's core is MIT, but "a paid license is required for commercial use" of advanced features ([Usertour](https://www.usertour.io/blog/product-tour-joyride)). Tour Kit is BUSL-1.1 for core packages (free in development, licence key in production), $9.99 one-time for Pro.
 - **Content model:** Shepherd uses HTML strings for custom step content. Tour Kit uses JSX, so you render React components directly inside steps.
 - **Accessibility:** Shepherd provides keyboard navigation and ARIA attributes. Tour Kit adds focus trapping and `prefers-reduced-motion`.
 
@@ -341,7 +341,7 @@ Tour Kit sits in the code-owned, developer-controlled camp. Use it when:
 
 ## What license does Tour Kit use?
 
-Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed. Free for commercial use, no restrictions. The extended packages (analytics, adoption, checklists, surveys, announcements, media, scheduling) require a Pro license at $9.99 one-time per project.
+Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are BUSL-1.1-licensed: free in development, evaluation, testing, and CI, with a licence key required in production. The extended packages (analytics, adoption, checklists, surveys, announcements, media, scheduling) require a Pro license at $9.99 one-time per project, which also covers production use of the core.
 
 For context, licensing varies widely across tour libraries:
 
@@ -356,8 +356,8 @@ For context, licensing varies widely across tour libraries:
   <tbody>
     <tr>
       <td>Tour Kit (core)</td>
-      <td>MIT</td>
-      <td>Free</td>
+      <td>BUSL-1.1</td>
+      <td>Free in dev, licence key in prod</td>
     </tr>
     <tr>
       <td>React Joyride</td>
