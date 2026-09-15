@@ -1,0 +1,261 @@
+---
+title: '@tour-kit/svelte'
+description: >-
+  Headless product tours for Svelte 5, built on the framework-agnostic Tour Kit
+  engine — `provideTourKit`, `getTour`, a spotlight bridge, a `focusTrap`
+  action, and a SvelteKit router adapter. No React anywhere in the dependency
+  or type chain.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+`@tour-kit/svelte` is a binding over [`@tour-kit/core/engine`](/docs/guides/headless-engine),
+the React-free core. It is headless in the strict sense: no component, no
+overlay, no positioning library. You render the UI, the engine owns the state
+machine.
+
+<Callout type="info">
+**No React, anywhere.** The package imports the `/engine` subpath only, never
+`@tour-kit/core` bare, so neither `react` nor `react-dom` appears in the runtime
+or the `.d.ts` chain. A per-package test enforces it on both the built files and
+the source, with a positive control.
+</Callout>
+
+## Install
+
+```bash
+pnpm add @tour-kit/svelte
+```
+
+Svelte 5 is a peer dependency — the binding uses `createSubscriber`, so Svelte 4
+is not supported. SvelteKit is optional.
+
+## Quick start
+
+Call `provideTourKit` from a component `<script>`. A `<script>` *is*
+initialisation, which is exactly where `setContext` has to run, so the
+requirement is satisfied by construction.
+
+```svelte
+<!-- +layout.svelte -->
+<script lang="ts">
+  import { afterNavigate, goto } from '$app/navigation'
+  import { page } from '$app/state'
+  import { createSvelteKitRouterAdapter, provideTourKit } from '@tour-kit/svelte'
+  import { tours } from '$lib/tours'
+
+  const kit = provideTourKit({
+    tours,
+    router: createSvelteKitRouterAdapter({
+      goto,
+      getPathname: () => page.url.pathname,
+      onNavigate: afterNavigate,
+    }),
+    routePersistence: { enabled: true, flowSession: { storage: 'sessionStorage' } },
+  })
+</script>
+
+{@render children()}
+```
+
+Anywhere below it, `getTour()` returns the same kit:
+
+```svelte
+<script lang="ts">
+  import { getTour } from '@tour-kit/svelte'
+
+  const tour = getTour()
+  const step = $derived(tour.state.currentStep)
+</script>
+
+{#if tour.state.isActive}
+  <p>{step?.content}</p>
+  <button onclick={() => tour.prev()}>Back</button>
+  <button onclick={() => tour.next()}>Next</button>
+{/if}
+```
+
+<Callout type="info">
+**`tour.state` is a getter, not a store and not a ref.** Read it directly —
+no `.value`, no `$` prefix. It is reactive inside `$derived`, `$effect` and
+templates, and a plain read everywhere else.
+</Callout>
+
+## The kit
+
+`getTour()` throws outside a provider. What it returns is one reactive snapshot
+plus the verbs.
+
+| Member | Type | Notes |
+| --- | --- | --- |
+| `state` | `readonly TourCallbackContext` | A getter. Reactive in `$derived` / `$effect` / templates |
+| `start`, `next`, `prev`, `goTo`, `skip`, `complete`, `stop` | verbs | Stable identity |
+| `goToStep`, `startTour`, `triggerBranchAction` | `Promise`-returning verbs | Step IDs are narrowed to your step union |
+| `reset`, `setData`, `setDontShowAgain` | verbs | |
+| `setOptions`, `setTours` | `(patch) => void` | The escape hatch — see below |
+
+<Callout type="warn">
+**Options are read once.** A component `<script>` runs once, so unlike
+[`@tour-kit/vue`](/docs/vue) there is no watcher re-reading your options object.
+`setOptions` and `setTours` are how you change things afterwards. Inventing
+reactivity the framework does not have would be the wrong shape for this binding.
+</Callout>
+
+<Callout type="warn">
+**`Escape` maps to `skip()`, not `stop()`**, and a skip persists. A user who
+presses Escape has dismissed the tour, not paused it.
+</Callout>
+
+## Routing
+
+`createSvelteKitRouterAdapter` takes `goto`, `getPathname` and `onNavigate` as
+arguments rather than importing `$app/*` itself — those modules do not resolve
+outside a SvelteKit app, and taking them as arguments is what lets the adapter be
+tested with three mocks.
+
+```ts
+createSvelteKitRouterAdapter({
+  goto,
+  getPathname: () => page.url.pathname,
+  onNavigate: afterNavigate,
+})
+```
+
+<Callout type="warn">
+Call the factory from a component `<script>`. It invokes `onNavigate`
+synchronously, and `afterNavigate` throws if called outside component
+initialisation.
+</Callout>
+
+## Behaviours
+
+The binding ships the two DOM behaviours that are genuinely hard to get right.
+Positioning is not among them: use `@floating-ui/dom` directly, as
+`examples/svelte-app` does.
+
+### `createSpotlight()`
+
+A bridge over core's spotlight state machine. Every field is a getter, so read
+them directly in the template.
+
+```svelte
+<script lang="ts">
+  import { createSpotlight, getTour, resolveTarget } from '@tour-kit/svelte'
+  import { onDestroy } from 'svelte'
+
+  const tour = getTour()
+  const spotlight = createSpotlight()
+
+  $effect(() => {
+    const target = tour.state.currentStep?.target
+    const el = target ? resolveTarget(target) : null
+    el ? spotlight.show(el) : spotlight.hide()
+  })
+
+  onDestroy(spotlight.destroy)
+</script>
+
+{#if spotlight.isVisible}
+  <div style={spotlight.overlayStyle}></div>
+  <div style={spotlight.cutoutStyle}></div>
+{/if}
+```
+
+`update()` re-reads the current target and works while hidden, where no live
+tracker exists. `destroy()` stops the tracker — call it from the owning
+component's `onDestroy`.
+
+### The `focusTrap` action
+
+Focus trapping is an action here, not a composable, because a Svelte action
+already has the lifecycle it needs:
+
+```svelte
+<script lang="ts">
+  import { focusTrap, getTour } from '@tour-kit/svelte'
+
+  const tour = getTour()
+</script>
+
+<div use:focusTrap={{ enabled: tour.state.isActive }} role="dialog" aria-modal="true">
+  …
+</div>
+```
+
+The action's `destroy` deactivates before releasing. For an action, node
+destruction *is* the card unmounting — which is exactly where React runs
+`deactivate()` — and releasing alone would strand focus on `<body>`.
+
+## Licensing
+
+`@tour-kit/svelte` ships under BUSL-1.1. Development, evaluation, testing, CI and
+any non-production environment are free and need no key. Production needs one.
+Without a key the binding still works in full and layers a small badge in the
+corner on non-development hosts. See [Licensing](/docs/licensing) for the full
+setup.
+
+```svelte
+<script lang="ts">
+  import { provideTourKit } from '@tour-kit/svelte'
+  import { PUBLIC_TOUR_KIT_LICENSE_KEY } from '$env/static/public'
+
+  const kit = provideTourKit({
+    tours,
+    license: { licenseKey: PUBLIC_TOUR_KIT_LICENSE_KEY },
+  })
+</script>
+```
+
+<Callout type="warn">
+**Pass the key from static config.** It is read once at mount, like every other
+option this binding takes, so a key fetched at runtime arrives too late to take
+the badge down. `$env/static/public` is the right source. On a development host
+the key is never sent anywhere, so local work never consumes an activation slot.
+</Callout>
+
+## SSR
+
+The binding is server-safe by construction. Two rules carry that.
+
+**Nothing constructs an engine in a `<script>`.** The engine is built lazily on
+the first *verb*, and every kit member except `state` is that construction in
+disguise — `setOptions` and `setTours` included. `createSubscriber`'s `start` is
+lazy, so reading `state` is safe in a `<script>` and on the server.
+
+**`onMount` owns the teardown, not `onDestroy`.** `onMount` does not run on the
+server, and the function it returns runs on unmount. `onDestroy` is the one
+lifecycle hook that *also* runs inside a server-rendered component, which makes
+it the wrong place for anything that touches the engine.
+
+<Callout type="info">
+**A child's `onMount` fires before the parent's.** So `onMount(() => tour.start())`
+in a page works even though the layout provider has not booted yet — the handle
+constructs on first use rather than on a schedule.
+</Callout>
+
+## Testing
+
+<Callout type="warn">
+**`resolve.conditions: ['browser']` in `vitest.config.ts` is mandatory.** Without
+it, Svelte 5 resolves its server build under Vitest and every lifecycle call
+throws `lifecycle_function_unavailable` — the whole suite fails at once and reads
+like a broken binding rather than a missing config line.
+</Callout>
+
+If you typecheck with `svelte-check`, run `svelte-kit sync` first. `$app/state`,
+`$app/navigation` and `.svelte-kit/tsconfig.json` do not exist until sync has
+generated them.
+
+## Everything from `/engine`, too
+
+The package barrel re-exports all of `@tour-kit/core/engine`, so types and
+helpers come from one import:
+
+```ts
+import type { Tour, TourStep } from '@tour-kit/svelte'
+```
+
+That is deliberate rather than lazy. `/engine` is already the curated React-free
+surface; a hand-picked subset would need its own alignment test and would still
+be wrong the day `/engine` grows. See
+[the engine guide](/docs/guides/headless-engine) for what lives there.

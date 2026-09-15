@@ -1,0 +1,165 @@
+---
+title: The headless engine
+description: >-
+  Every Tour Kit package ships a React-free `/engine` subpath — the state
+  machines, persistence and DOM behaviours with no `react` in the runtime or
+  the type chain. Use it from Vue, Svelte, vanilla JS, Node, or a `<script>` tag.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Tour Kit's logic does not depend on React. Seven packages publish an `/engine`
+subpath — a second entry point whose runtime and `.d.ts` chain never name
+`react`, `react-dom`, or a JSX runtime. If you are on Vue or Svelte, reach for
+the [bindings](/docs/vue) instead; this guide is for building your own, or for
+running the logic somewhere there is no component tree at all.
+
+<Callout type="info">
+Nothing moved to get here. Everything on an `/engine` subpath is reachable from
+its package's main entry at the same path with the same signature. What the
+subpath adds is a dependency and type chain you can build against without
+installing React.
+</Callout>
+
+## The subpaths
+
+| Subpath | What it gives you |
+| --- | --- |
+| `@tour-kit/core/engine` | The tour engine, the binding contract, storage adapters and the DOM behaviours |
+| `@tour-kit/hints/engine` | The hints state machine, its persistence, and hotspot positioning |
+| `@tour-kit/checklists/engine` | The reducer, the task dependency graph, progress, persistence |
+| `@tour-kit/announcements/engine` | The queue, frequency rules, audience, scheduling, persistence |
+| `@tour-kit/surveys/engine` | The queue, the six fatigue gates, audience, scheduling, NPS/CSAT/CES scoring |
+| `@tour-kit/analytics/engine` | The tracker and the five plugins, without the licence gate |
+| `@tour-kit/scheduling/engine` | Schedule evaluation — the functions and constants, no hooks |
+
+Each excludes its package's React surface. The components, hooks, context and
+licence gate stay on the main entry, which is why a consumer who imports only
+the subpath ships none of them.
+
+## What `@tour-kit/core/engine` exports
+
+The surface is large — around ninety values — but it groups into four things.
+
+**The engine and the binding contract.** `createTourEngine` builds the state
+machine. `createEngineHandle` wraps it in the lazy lifecycle every binding sits
+on: construction deferred to the first verb, a listener set that outlives any one
+engine, and a `release()` whose `destroy()` is deferred by a microtask.
+`pickActions` narrows a handle to the thirteen consumer verbs, `INITIAL_SNAPSHOT`
+is the frozen snapshot to read before the first verb, and `engineOptionsFrom` /
+`liveOptionsFrom` split your options object into construction-time and live
+halves.
+
+**The DOM behaviours**, each returning its own detach function: `attachKeyboard`,
+`attachAdvanceOn`, `attachTestBridge`, plus `createSpotlight`, `createFocusTrap`
+and `trackRect`.
+
+**Storage**, in four flavours — `createStorageAdapter`, `createMemoryStorage`,
+`createCookieStorage`, `createNoopStorage` — and `createPrefixedStorage` to
+namespace any of them.
+
+**Utilities** you would otherwise rewrite: `validateTour`, `matchRoutePattern`,
+`resolveTarget`, `waitForElement`, `evaluateAudience`, `interpolate`,
+`scrollIntoView`, `prefersReducedMotion`, and the `createTour` / `createStep`
+builders.
+
+Two lower-level primitives, both added in [3.0](/docs/migration/v3), exist for
+packages that grow an engine of their own.
+`createHandle` is the engine-agnostic half of `createEngineHandle` — compose it
+rather than writing a second lifecycle. `createListeners` is the fault-isolated
+subscriber fan-out, where one throwing subscriber does not abort the notify loop.
+
+## Building a binding
+
+The shape is the same in every framework. Construct a handle, subscribe, attach
+the behaviours on mount, detach and release on unmount.
+
+```ts
+import {
+  attachAdvanceOn,
+  attachKeyboard,
+  createEngineHandle,
+  createTourEngine,
+  pickActions,
+} from '@tour-kit/core/engine'
+
+const handle = createEngineHandle(() => createTourEngine({ tours }))
+
+// Safe before any verb — and on the server, where no effect runs.
+let snapshot = handle.getState()
+handle.subscribe(() => {
+  snapshot = handle.getState()
+  render(snapshot)
+})
+
+const actions = pickActions(handle) // start, next, prev, goTo, skip, …
+
+// On mount:
+const detach = [attachKeyboard(handle), attachAdvanceOn(handle)]
+void handle.boot()
+
+// On unmount:
+for (const d of detach) d()
+handle.release()
+```
+
+<Callout type="warn">
+**Never construct an engine during render, `setup()`, or a component
+`<script>`.** Every handle member except `getState` and `subscribe` builds the
+engine on first call — `setOptions` and `setTours` included. On the server that
+would mean registry writes, storage adapters and a `BroadcastChannel` where none
+belong. Reading state is free; everything else is a verb.
+</Callout>
+
+<Callout type="warn">
+**`release()`, not `destroy()`.** `release()` flushes synchronously and defers the
+destroy by a microtask, so a teardown immediately followed by a re-`ensure()` —
+React StrictMode, a hot reload — takes the same engine back.
+</Callout>
+
+For two worked examples, read
+[`@tour-kit/vue`](/docs/vue) and [`@tour-kit/svelte`](/docs/svelte). Both are thin:
+a reactivity bridge over the handle, the framework's lifecycle hooks, and
+nothing else.
+
+## From a `<script>` tag
+
+`@tour-kit/core` ships the `/engine` barrel as a self-contained IIFE, and its
+`unpkg` and `jsdelivr` fields point at it. There is no build step and no
+bundler.
+
+```html
+<script src="https://unpkg.com/@tour-kit/core@3"></script>
+<script>
+  const engine = TourKit.createTourEngine({ tours })
+  engine.subscribe(() => render(engine.getState()))
+  engine.start('onboarding')
+</script>
+```
+
+Everything on the `/engine` subpath is on the `TourKit` global. Pin the major
+version, as above, or a full version for reproducibility.
+
+<Callout type="info">
+The CDN build is compiled for the browser specifically, so it contains no
+`process.env` reads. A bundle built for Node would carry several, two of them
+unguarded, and the first `interpolate()` call or segment audience check would
+throw `ReferenceError: process is not defined`.
+</Callout>
+
+## The guarantee, and how it is held
+
+"React-free" is enforced, not asserted. Each binding and each engine subpath
+carries a test that scans both the built output and the source for `react`
+import specifiers, with a positive control so a scan that silently stops
+matching fails loudly rather than passing green.
+
+The rule that keeps it true is simple: a package on an engine path imports
+`@tour-kit/core/engine`, never `@tour-kit/core` bare. The bare specifier pulls
+React into the `.d.ts` chain even when no React value is used.
+
+<Callout type="warn">
+A substring search is not the test. `grep -c react` over a Svelte bundle returns
+a hit for `svelte/reactivity` — a false positive. The real check matches import
+specifiers, not substrings.
+</Callout>
