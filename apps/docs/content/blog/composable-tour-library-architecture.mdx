@@ -184,7 +184,7 @@ Drawing package boundaries is the single hardest design decision in a composable
 
 The boundaries reflect different extension patterns:
 
-- **Core + React + Hints** are the foundation. MIT licensed. Every Tour Kit user installs at least core + react. Hints is separate because not every tour needs persistent hotspots.
+- **Core + React + Hints** are the foundation. BUSL-1.1 licensed (free in development). Every Tour Kit user installs at least core + react. Hints is separate because not every tour needs persistent hotspots.
 - **Analytics** uses a plugin architecture. Five built-in plugins (PostHog, Mixpanel, Amplitude, Google Analytics, console) ship as separate entry points within the package. You import only the plugin you use.
 - **Announcements and Surveys** both share a queue system pattern (priority-based scheduling, frequency rules, dismissal tracking) but target different UI intents. Announcements have 5 display variants (modal, slideout, banner, toast, spotlight). Surveys have 4 question types (rating, text, select, boolean) with NPS/CSAT/CES scoring.
 - **Scheduling** is a pure logic package with zero UI components. It exports timezone-aware date evaluation, business hours checking, blackout periods, and recurring patterns. Both announcements and surveys can optionally use it.
