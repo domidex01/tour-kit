@@ -50,7 +50,7 @@ Not all free plans are created equal. Some tools advertise "free" but mean a 14-
 <tr><td>Userpilot</td><td>SaaS</td><td>No (14-day trial)</td><td>--</td><td>--</td><td>Starter $249/mo</td></tr>
 <tr><td>WalkMe</td><td>SaaS</td><td>No</td><td>--</td><td>--</td><td>Enterprise ~$10K+/yr</td></tr>
 <tr><td>Whatfix</td><td>SaaS</td><td>No</td><td>--</td><td>--</td><td>Enterprise ~$10K+/yr</td></tr>
-<tr><td>Tour Kit</td><td>Open source</td><td>Yes (MIT, forever)</td><td>No limit</td><td>Unlimited</td><td>React 18+ only, no visual builder</td></tr>
+<tr><td>Tour Kit</td><td>Open source</td><td>Source-available (MIT in 2030)</td><td>No limit</td><td>Unlimited</td><td>React 18+ only, no visual builder</td></tr>
 <tr><td>React Joyride</td><td>Open source</td><td>Yes (MIT)</td><td>No limit</td><td>Unlimited</td><td>Inline styles only, 37KB gzipped</td></tr>
 <tr><td>Shepherd.js</td><td>Open source</td><td>AGPL (paid for commercial)</td><td>No limit</td><td>Unlimited</td><td>$50-$300 commercial license</td></tr>
 <tr><td>Intro.js</td><td>Open source</td><td>AGPL (paid for commercial)</td><td>No limit</td><td>Unlimited</td><td>$9.99-$299 commercial, maintenance mode</td></tr>
@@ -65,7 +65,7 @@ Sources: Vendor pricing pages accessed April 2026. Star counts from GitHub. Bund
 Two variables determine the right choice: your team's technical ability and your current MAU count. The framework below maps each scenario to the strongest free option as of April 2026.
 
 **If your team has React developers and wants full design control:**
-Use Tour Kit. The MIT-licensed core (under 23KB gzipped) gives you headless tour logic, and you render steps with your own components. Works with shadcn/ui, Radix, Tailwind, or any design system. No MAU limits. No vendor lock-in.
+Use Tour Kit. The core (under 23KB gzipped) gives you headless tour logic, and you render steps with your own components. Works with shadcn/ui, Radix, Tailwind, or any design system. No MAU limits. No vendor lock-in.
 
 **If you need a no-code tool and have under 5,000 MAU:**
 Product Fruits is the strongest SaaS free tier. Unlimited tours, 5,000 MAU cap, no trial countdown. That's 50x the MAU cap of UserGuiding's free plan.
@@ -92,7 +92,7 @@ The features you depend on in the free tier (tour configurations, targeting rule
 
 Open-source libraries avoid the MAU cliff entirely. Your tour code lives in your repo. Your data stays in your analytics stack. But open source has its own hidden cost: engineering time. The library gets you the first tour, then you need targeting, analytics, localization, checklists. Each of those is a build-or-buy decision.
 
-Tour Kit's approach splits the difference. The core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and permanently free. Extended packages for analytics, checklists, and surveys are available as a one-time $9.99 Pro license. No MAU limits on either tier.
+Tour Kit's approach splits the difference. Every package is free while you build, and serving them to end users is a one-time licence from $9.99. No MAU limits.
 
 ## What no other comparison mentions: accessibility
 
@@ -106,11 +106,11 @@ Shepherd.js is the only established open-source library that explicitly document
 
 Among SaaS tools, Pendo and Appcues mention accessibility in marketing copy but don't publish compliance reports on their free tiers. Userflow and Chameleon don't address it at all.
 
-Tour Kit is built with WCAG 2.1 AA compliance as a core requirement, not an afterthought. Focus management, keyboard navigation, screen reader announcements, and `prefers-reduced-motion` support ship in the base package. We score Lighthouse accessibility 100 across all component demos. That's the free MIT tier, not a premium add-on.
+Tour Kit is built with WCAG 2.1 AA compliance as a core requirement, not an afterthought. Focus management, keyboard navigation, screen reader announcements, and `prefers-reduced-motion` support ship in the base package. We score Lighthouse accessibility 100 across all component demos. That's in every package, not a premium add-on.
 
 ## What we'd actually recommend (and why)
 
-For most developer teams reading this article, the honest answer is Tour Kit's free tier. Not because we built it, but because the combination of MIT license, zero MAU restrictions, headless architecture, and built-in accessibility doesn't exist elsewhere in one package.
+For most developer teams reading this article, the honest answer is Tour Kit. Not because we built it, but because the combination of source-available licensing, zero MAU restrictions, headless architecture, and built-in accessibility doesn't exist elsewhere in one package.
 
 The tradeoff is real. Tour Kit requires React 18+ and developers who can write JSX. There's no visual builder, and the community is smaller than React Joyride's. If your team doesn't have React experience, Product Fruits (5,000 MAU free) or Userflow (1,000 MAU free) are the practical SaaS choices.
 
@@ -158,11 +158,11 @@ SaaS tools force a paid upgrade once you exceed the MAU cap. The jump is steep: 
 
 ### Do free onboarding tools support accessibility?
 
-Most free onboarding tools don't document accessibility compliance. Shepherd.js is the exception among open-source libraries, with built-in keyboard navigation and ARIA support. Tour Kit ships WCAG 2.1 AA compliance in its free MIT tier, including focus trapping, screen reader announcements, and reduced-motion support. SaaS free tiers rarely publish accessibility certifications.
+Most free onboarding tools don't document accessibility compliance. Shepherd.js is the exception among open-source libraries, with built-in keyboard navigation and ARIA support. Tour Kit ships WCAG 2.1 AA compliance in every package, including focus trapping, screen reader announcements, and reduced-motion support. SaaS free tiers rarely publish accessibility certifications.
 
 ### Should I use a free SaaS tool or an open-source library?
 
-Use a free SaaS tool if your team doesn't write code and you have fewer than 1,000 MAU. Use an open-source library if you have developers, want full UI control, and need to avoid vendor lock-in. Tour Kit splits the difference with an MIT-licensed headless core and optional Pro packages ($9.99 one-time) for analytics, checklists, and surveys -- no monthly fees regardless of user count.
+Use a free SaaS tool if your team doesn't write code and you have fewer than 1,000 MAU. Use an open-source library if you have developers, want full UI control, and need to avoid vendor lock-in. Tour Kit splits the difference with a headless core that is free to develop against and a one-time $9.99 licence to ship -- no monthly fees regardless of user count.
 
 {/* JSON-LD Schema */}
 export const jsonLd = {
@@ -234,7 +234,7 @@ export const faqSchema = {
       "name": "Do free onboarding tools support accessibility?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Most free onboarding tools don't document accessibility compliance. Shepherd.js has built-in keyboard navigation and ARIA support. Tour Kit ships WCAG 2.1 AA compliance in its free MIT tier, including focus trapping and screen reader announcements."
+        "text": "Most free onboarding tools don't document accessibility compliance. Shepherd.js has built-in keyboard navigation and ARIA support. Tour Kit ships WCAG 2.1 AA compliance in every package, including focus trapping and screen reader announcements."
       }
     },
     {
@@ -242,7 +242,7 @@ export const faqSchema = {
       "name": "Should I use a free SaaS tool or an open-source library?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Use a free SaaS tool if your team doesn't write code and you have fewer than 1,000 MAU. Use an open-source library if you have developers and want full UI control. Tour Kit offers an MIT-licensed headless core with optional Pro packages at $9.99 one-time."
+        "text": "Use a free SaaS tool if your team doesn't write code and you have fewer than 1,000 MAU. Use an open-source library if you have developers and want full UI control. Tour Kit offers a headless core that is free to build with and a one-time licence from $9.99 to ship."
       }
     }
   ]

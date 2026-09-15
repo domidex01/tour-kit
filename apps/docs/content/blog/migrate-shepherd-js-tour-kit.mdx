@@ -42,7 +42,7 @@ Google [completely prohibits AGPL-licensed software internally](https://www.open
 
 The licensing situation gets confusing because `react-shepherd` is published under MIT. But it depends on `shepherd.js` core, which is AGPL-3.0. AGPL obligations cascade through dependencies. A [FossID analysis](https://fossid.com/articles/how-react-component-became-licensing-time-bomb/) documented how React component libraries become "licensing time bombs" through exactly this pattern: an MIT wrapper around a restrictively licensed core.
 
-Tour Kit's entire codebase (all 10 packages) uses the MIT license. No dual licensing, no commercial tiers for the core functionality. [Tour Kit Pro](/pricing) exists at $9.99 one-time for extended packages, but the core tour engine is MIT forever.
+Tour Kit's entire codebase (all 10 packages) is public. The core, React, hints, Vue and Svelte packages are BSL 1.1 and convert to MIT on each release's Change Date; a [licence](/pricing) at $9.99 one-time covers serving any of them to end users.
 
 ### The React 19 compatibility gap
 
@@ -102,7 +102,7 @@ Shepherd.js and Tour Kit share the same core concepts (steps, targets, callbacks
     </tr>
     <tr>
       <td><code>shepherd.js</code> (AGPL-3.0)</td>
-      <td><code>@tourkit/core</code> (MIT)</td>
+      <td><code>@tourkit/core</code> (BSL 1.1)</td>
       <td>No license risk</td>
     </tr>
   </tbody>
@@ -364,7 +364,7 @@ Once the migration is complete, you can start using Tour Kit features that Sheph
 
 Tour Kit uses a different step format than Shepherd.js, so you'll rewrite step definitions, but the content itself (titles, body text, target selectors) transfers directly. A 10-step tour typically takes 15-20 minutes to convert. The bigger change is building your own tooltip component, which Tour Kit requires because it's headless.
 
-### Is Tour Kit's MIT license really free for commercial use?
+### Is Tour Kit free for commercial use?
 
 Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed with no restrictions on commercial use, distribution, or modification. Unlike Shepherd.js's AGPL-3.0, MIT doesn't require source code disclosure for network-accessible applications. Tour Kit Pro adds extended packages at $9.99 one-time, but the core tour engine stays MIT.
 
@@ -460,7 +460,7 @@ Shepherd.js doesn't include built-in analytics. If you wired up custom event tra
     },
     {
       "@type": "Question",
-      "name": "Is Tour Kit's MIT license really free for commercial use?",
+      "name": "Is Tour Kit free for commercial use?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Tour Kit's core packages (@tourkit/core, @tourkit/react, @tourkit/hints) are MIT-licensed with no restrictions on commercial use, distribution, or modification. Unlike Shepherd.js's AGPL-3.0, MIT doesn't require source code disclosure for network-accessible applications. Tour Kit Pro ($9.99 one-time) adds extended packages but the core tour engine remains MIT."
