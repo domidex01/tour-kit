@@ -9,13 +9,13 @@
 [![npm version](https://img.shields.io/npm/v/@tour-kit/react?label=%40tour-kit%2Freact&color=0F172A)](https://www.npmjs.com/package/@tour-kit/react)
 [![npm version](https://img.shields.io/npm/v/@tour-kit/core?label=%40tour-kit%2Fcore&color=0F172A)](https://www.npmjs.com/package/@tour-kit/core)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@tour-kit/core?label=core%20gzip)](https://bundlephobia.com/package/@tour-kit/core)
-[![License](https://img.shields.io/badge/license-MIT%20%2B%20commercial-blue)](./LICENSE)
+[![License](https://img.shields.io/badge/license-BUSL--1.1%20%2B%20commercial-blue)](./NOTICE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](./tsconfig.json)
 [![WCAG 2.1 AA](https://img.shields.io/badge/a11y-WCAG%202.1%20AA-success)](apps/docs/content/docs/guides/accessibility.mdx)
 
-**Tour Kit is a headless React library for building product tours, onboarding flows, hints, checklists, in-app announcements, and microsurveys.** It ships as 12 composable packages, is TypeScript-first, WCAG 2.1 AA compliant, and designed natively for shadcn/ui — but works with any component library.
+**Tour Kit is a headless React library for building product tours, onboarding flows, hints, checklists, in-app announcements, and microsurveys.** It ships as 17 composable packages, is TypeScript-first, WCAG 2.1 AA compliant, and designed natively for shadcn/ui — but works with any component library.
 
-**Alternative to:** Shepherd.js, Driver.js, Intro.js, Reactour, React Joyride, Appcues, Userpilot, Pendo — when you want a code-owned, headless, MIT-licensed primitive instead of a hosted SaaS.
+**Alternative to:** Shepherd.js, Driver.js, Intro.js, Reactour, React Joyride, Appcues, Userpilot, Pendo — when you want a code-owned, headless, source-available primitive instead of a hosted SaaS.
 
 - 🌐 Website & docs: <https://usertourkit.com>
 - 📦 npm scope: [`@tour-kit/*`](https://www.npmjs.com/org/tour-kit)
@@ -64,15 +64,25 @@
 
 ## Packages
 
-Tour Kit is a monorepo of 12 packages. Three are MIT-licensed and free; nine are commercial (see [Licensing](#licensing)).
+Tour Kit is a monorepo of 17 packages. Five are source-available under BUSL-1.1, three are MIT-licensed utilities, and nine are commercial (see [Licensing](#licensing)).
 
-### Free packages (MIT)
+### Source-available packages (BUSL-1.1: free in development, licence key in production)
 
 | Package | Purpose | Bundle (gzip) |
 | --- | --- | --- |
 | [`@tour-kit/core`](packages/core) | Framework-agnostic hooks, types, position engine, storage adapters | < 8 KB |
 | [`@tour-kit/react`](packages/react) | Tour, TourStep, TourCard, TourOverlay, router adapters, multi-tour registry | < 12 KB |
 | [`@tour-kit/hints`](packages/hints) | Persistent hint beacons, hotspots, tooltips | < 5 KB |
+| [`@tour-kit/vue`](packages/vue) | Headless Vue 3 binding for the Tour Kit engine | — |
+| [`@tour-kit/svelte`](packages/svelte) | Headless Svelte 5 binding for the Tour Kit engine | — |
+
+### MIT-licensed utilities (free, no key)
+
+| Package | Purpose |
+| --- | --- |
+| [`@tour-kit/codemods`](packages/codemods) | Codemods to migrate from Joyride, Shepherd, and Driver.js to Tour Kit |
+| [`@tour-kit/testing-library`](packages/testing-library) | React Testing Library helpers for Tour Kit |
+| [`@tour-kit/playwright`](packages/playwright) | Playwright fixtures for Tour Kit |
 
 ### Commercial packages
 
@@ -93,7 +103,7 @@ Buy a commercial license at <https://usertourkit.com/pricing>.
 ## Installation
 
 ```bash
-# Free / open-source (MIT)
+# Source-available (BUSL-1.1: free in dev, licence key in prod)
 pnpm add @tour-kit/core @tour-kit/react   # styled tours
 pnpm add @tour-kit/hints                  # persistent hints
 
@@ -101,6 +111,9 @@ pnpm add @tour-kit/hints                  # persistent hints
 pnpm add @tour-kit/checklists @tour-kit/announcements @tour-kit/surveys
 pnpm add @tour-kit/adoption @tour-kit/analytics
 pnpm add @tour-kit/media @tour-kit/scheduling @tour-kit/ai
+
+# MIT utilities, dev-only (free, no key)
+pnpm add -D @tour-kit/codemods @tour-kit/testing-library @tour-kit/playwright
 ```
 
 `bun add` and `npm install` work too. Tour Kit requires **React 18 or 19** and **Node 18+**.
@@ -212,9 +225,9 @@ Full demos: [`examples/`](examples).
 | Multi-tour registry | ✅ | ❌ | Partial | ❌ | Partial |
 | WCAG 2.1 AA | ✅ | Partial | ✅ | Partial | Partial |
 | Tree-shakeable ESM | ✅ | ✅ | Partial | ❌ | ✅ |
-| Free core | ✅ MIT | ✅ MIT | ✅ MIT | ✅ AGPL/Commercial | ✅ MIT |
+| Source-available core | ✅ BUSL-1.1 | ✅ MIT | ✅ MIT | ✅ AGPL/Commercial | ✅ MIT |
 
-Tour Kit is closer in scope to **Userpilot**, **Pendo**, or **Appcues** — except it's a library you embed, not a SaaS, and the core is open-source.
+Tour Kit is closer in scope to **Userpilot**, **Pendo**, or **Appcues** — except it's a library you embed, not a SaaS, and the core is source-available.
 
 ## Use cases
 
@@ -228,10 +241,10 @@ Tour Kit is closer in scope to **Userpilot**, **Pendo**, or **Appcues** — exce
 ## FAQ
 
 **What is Tour Kit?**
-Tour Kit is a TypeScript-first React library for in-app onboarding. It bundles product tours, hints, checklists, announcements, surveys, adoption tracking, and an AI Q&A widget into 12 composable packages.
+Tour Kit is a TypeScript-first React library for in-app onboarding. It bundles product tours, hints, checklists, announcements, surveys, adoption tracking, and an AI Q&A widget into 17 composable packages.
 
 **Is Tour Kit free?**
-The core experience — `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` — is **free under MIT**. The other 9 packages are commercial; see [Licensing](#licensing).
+The core experience — `@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`, plus the `@tour-kit/vue` and `@tour-kit/svelte` bindings — is **source-available under BUSL-1.1: free in development, evaluation, testing, CI, and any non-production environment, with a licence key required in production**. The `@tour-kit/codemods`, `@tour-kit/testing-library`, and `@tour-kit/playwright` utilities are **MIT-licensed and free everywhere**. The other 9 packages are commercial; see [Licensing](#licensing).
 
 **Does Tour Kit work without shadcn/ui?**
 Yes. The styled components use Tailwind classes that pair nicely with shadcn, but the headless variants (`TourCardHeadless`, `TourOverlayHeadless`, etc.) work with any styling system — CSS modules, Emotion, vanilla CSS, anything.
@@ -240,7 +253,7 @@ Yes. The styled components use Tailwind classes that pair nicely with shadcn, bu
 Yes — both App Router and Pages Router are supported via dedicated router adapters. All components include `'use client'`.
 
 **How big is it?**
-The free core (`core` + `react` + `hints`) is under **25 KB gzipped combined**. Every package is `sideEffects: false` and ships ESM + CJS + TypeScript declarations.
+The source-available core (`core` + `react` + `hints`) is under **25 KB gzipped combined**. Every package is `sideEffects: false` and ships ESM + CJS + TypeScript declarations.
 
 **Is it accessible?**
 Yes. WCAG 2.1 AA compliant, with focus trap, keyboard navigation (arrow keys, Escape, Tab), `aria-live` announcements, and `prefers-reduced-motion` support.
@@ -256,9 +269,10 @@ Yes — Tour Kit is framework-agnostic. Router adapters are provided for Next.js
 
 ## Licensing
 
-Tour Kit uses a **dual licensing model** — see [`NOTICE.md`](./NOTICE.md) for the per-package breakdown.
+Tour Kit uses a **three-tier licensing model** — see [`NOTICE.md`](./NOTICE.md) for the per-package breakdown.
 
-- **MIT (free, open-source):** `@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints` — covered by the root [`LICENSE`](./LICENSE).
+- **BUSL-1.1 (source-available):** `@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`, `@tour-kit/vue`, `@tour-kit/svelte` — free in dev, licence key in production. Each version converts to MIT on its Change Date, four years after release. Terms in each package's `LICENSE.md`.
+- **MIT (free, open-source):** `@tour-kit/codemods`, `@tour-kit/testing-library`, `@tour-kit/playwright` — no key in any environment.
 - **Commercial (proprietary, paid):** `@tour-kit/adoption`, `@tour-kit/ai`, `@tour-kit/analytics`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/license`, `@tour-kit/media`, `@tour-kit/scheduling`, `@tour-kit/surveys`
 
 Each commercial package has a `LICENSE.md` describing its terms. Buy a license at <https://usertourkit.com/pricing>.
