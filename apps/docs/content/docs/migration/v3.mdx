@@ -1,0 +1,174 @@
+---
+title: Upgrade to 3.0
+description: >-
+  What changes when you move `@tour-kit/core`, `@tour-kit/react` and
+  `@tour-kit/hints` from 2.x to 3.0 — the BUSL-1.1 relicense, the production
+  licence badge that now reaches every install, and the provider that moved
+  packages.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
+
+<Callout type="warn">
+**One change affects every existing install.** After upgrading, a production
+deployment with no licence key configured renders a small
+`userTourKit · Unlicensed` badge in the bottom-right corner. It did not appear
+in 2.x. Nothing crashes, nothing is hidden, and nothing changes on localhost —
+but if you ship 3.0 without a key, the badge ships with it.
+</Callout>
+
+## What changed
+
+3.0 is a major release for one reason: `@tour-kit/core`, `@tour-kit/react` and
+`@tour-kit/hints` moved from MIT to the Business Source License 1.1. Everything
+else in this guide follows from that, and the API surface is otherwise
+source-compatible — there are no renamed exports, no changed props, and no
+removed functions to migrate.
+
+| Change | Action needed |
+| --- | --- |
+| Relicensed to BUSL-1.1 | Configure a licence key before your next production deploy |
+| Production badge reaches `react` and `hints` | None, unless you want it gone — configure a key |
+| `TourProvider` / `TourKitProvider` owned by `@tour-kit/react` | Check you import from `@tour-kit/react`, not `@tour-kit/core` |
+| Activation counts registrable domains | None — existing activations keep working, and you may free up slots |
+| `SyncStorage`, `createHandle`, `createListeners` added | None — additive |
+
+## The relicense
+
+Production use of `@tour-kit/core`, `@tour-kit/react` and `@tour-kit/hints` now
+requires a licence key. Development, evaluation, testing, CI and any
+non-production environment remain free and need no key — that is the Additional
+Use Grant, written into each package's `LICENSE.md`. The same applies to the
+`@tour-kit/vue` and `@tour-kit/svelte` bindings, which had their first public
+release under the same terms.
+
+Each published version converts to MIT on its Change Date, four years after that
+version ships. BSL 1.1 caps this itself — "or the fourth anniversary of the
+first publicly available distribution of a specific version, whichever comes
+first" — so a version's conversion date cannot drift even if a later release
+stamps a different date.
+
+<Callout type="info">
+**Nothing is retroactive.** Every version up to and including 2.1.0 was
+published under MIT, and an MIT grant cannot be withdrawn. Those versions stay
+MIT forever. If you are on 2.1.0 and do not want the new terms, staying there is
+a legitimate option — you keep an MIT licence in perpetuity for the code you
+already have.
+</Callout>
+
+## The production badge
+
+`LicenseGate` is a soft gate: it layers a badge over your UI rather than
+replacing, disabling, or blocking anything. Every provider still renders, every
+tour still runs, and no code path throws because a key is missing.
+
+The badge appears only on what the runtime reads as a production host. It does
+**not** appear on:
+
+- `localhost`, `127.0.0.1`, or any `*.local` hostname
+- Ephemeral preview URLs — Vercel branch and hash deploys
+  (`project-git-branch-team.vercel.app`), Netlify deploy previews
+  (`deploy-preview-123--site.netlify.app`), Cloudflare Pages previews
+  (`<hash>.<project>.pages.dev`), tunnels, and raw IPs
+
+<Callout type="warn">
+A bare `project.vercel.app` is treated as a **stable production host**, not a
+preview. The preview patterns deliberately match only branch, hash and
+deploy-preview URLs, so a project whose real front door is its default Vercel
+subdomain is gated like any other production deploy.
+</Callout>
+
+Mounting several packages does not multiply the badge. `LicenseWatermark`
+elects a single owner, so `@tour-kit/react` plus `@tour-kit/hints` plus any
+number of Pro packages still renders exactly one.
+
+### Removing it
+
+Configure a licence key. See [Licensing](/docs/licensing) for the full setup;
+the short version is an env var and a `<LicenseProvider>` around your app.
+
+<Tabs items={['Next.js', 'Vite']}>
+<Tab value="Next.js">
+```text
+NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY=TOURKIT-your-key-here
+```
+</Tab>
+<Tab value="Vite">
+```text
+VITE_TOUR_KIT_LICENSE_KEY=TOURKIT-your-key-here
+```
+</Tab>
+</Tabs>
+
+You do not need a `<LicenseProvider>` for the gate to behave correctly without a
+key — its no-provider branch returns bare children on a development host and
+children plus a badge elsewhere. You need one to supply the key that removes the
+badge.
+
+### The dev-host console warning
+
+A missing key still logs a development-only console warning, so an unset env var
+stays visible while you work. What changed is that the badge no longer renders on
+a development host even when a `<LicenseProvider>` is mounted with an empty key —
+the licence grants development use without charge, so the old behaviour had the
+runtime contradicting the terms.
+
+## Import providers from `@tour-kit/react`
+
+`TourProvider` and `TourKitProvider` are now owned by `@tour-kit/react` rather
+than re-exported from `@tour-kit/core`. Props and behaviour are identical and a
+type test asserts it, so the documented quickstart needs no edit.
+
+The distinction matters if you import from core directly. `@tour-kit/core` still
+exports its own `TourProvider`, and that one carries no licence dependency —
+core has to stay React-free at its `/engine` subpath, so the gate cannot live
+there. The version exported from `@tour-kit/react` is a thin shim that wraps
+core's in a `LicenseGate`.
+
+```tsx
+// Gated — the documented path
+import { TourProvider } from '@tour-kit/react'
+
+// Not gated — core's own component
+import { TourProvider } from '@tour-kit/core'
+```
+
+Both work and behave the same for your users. Prefer the `@tour-kit/react`
+import: it is the supported entry point, and reaching past it to core is not a
+licence workaround — the BUSL terms cover the package, not the import specifier.
+
+## Activation counts registrable domains
+
+A "project" now means a registrable domain. `foo.com` and `app.foo.com` consume
+one activation slot between them instead of two, on both the activation and the
+validation side. Existing activations keep working — the stored label is
+normalised at comparison time rather than migrated — and a key that was close to
+its limit may now have slots free.
+
+Preview and throwaway deploy URLs are skipped automatically and never consume a
+slot.
+
+## Additions you can ignore for now
+
+None of these require action; they are listed so you know they arrived.
+
+`SyncStorage` is the synchronous storage-adapter shape, exported from the root,
+`/engine` and `utils`. `createPrefixedStorage` is now overloaded — hand it a
+synchronous adapter and you get a synchronous adapter back, which removes the
+`as` cast synchronous consumers previously had to write. Narrowing a return type
+is safe for existing callers.
+
+`createHandle` and `createListeners` are exported from `@tour-kit/core/engine`
+for packages that grow their own engine. `createListeners` also fixes a real
+bug: `createHintsEngine` had re-derived the notify loop without its try/catch, so
+one throwing subscriber stopped every listener registered after it from firing.
+Both engines route through one fault-isolated implementation now.
+
+## Upgrade checklist
+
+1. Bump `@tour-kit/core`, `@tour-kit/react` and `@tour-kit/hints` to `3.0.0` — see [Installation](/docs/getting-started/installation).
+2. Decide on the licence — buy a key, or pin to `2.1.0` and keep MIT.
+3. If you bought a key, set the env var and mount `<LicenseProvider>`. See [Licensing](/docs/licensing).
+4. Deploy a preview and confirm no badge (previews are exempt), then check production. To rehearse a licence failure on a real domain first, see [test mode](/docs/licensing/trial).
+5. Grep for `from '@tour-kit/core'` on `TourProvider` / `TourKitProvider` and re-point to `@tour-kit/react`.

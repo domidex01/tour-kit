@@ -1,0 +1,254 @@
+---
+title: '@tour-kit/vue'
+description: >-
+  Headless product tours for Vue 3, built on the framework-agnostic Tour Kit
+  engine — `provideTourKit`, `useTour`, the spotlight and focus-trap
+  composables, and a `vue-router` adapter. No React anywhere in the dependency
+  or type chain.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
+
+`@tour-kit/vue` is a binding over [`@tour-kit/core/engine`](/docs/guides/headless-engine),
+the React-free core. It is headless in the strict sense: no card, no overlay, no
+positioning library. You render the UI, the engine owns the state machine.
+
+<Callout type="info">
+**No React, anywhere.** The package imports the `/engine` subpath only, never
+`@tour-kit/core` bare, so neither `react` nor `react-dom` appears in the runtime
+or the `.d.ts` chain. A per-package test enforces it on both the built files and
+the source, with a positive control so a broken scan fails loudly.
+</Callout>
+
+## Install
+
+```bash
+pnpm add @tour-kit/vue
+```
+
+Vue 3 is a peer dependency. `vue-router` is optional — you only need it if your
+tour spans routes.
+
+## Quick start
+
+There are two ways in, and they are the same code. `provideTourKit` is the
+composable; `<TourProvider>` is a thin component wrapper over it that takes the
+same options as props.
+
+<Tabs items={['provideTourKit', '<TourProvider>']}>
+<Tab value="provideTourKit">
+```vue
+<!-- App.vue -->
+<script setup lang="ts">
+import { createVueRouterAdapter, provideTourKit } from '@tour-kit/vue'
+import { useRouter } from 'vue-router'
+import { tours } from './tours'
+
+const kit = provideTourKit({
+  tours,
+  router: createVueRouterAdapter(useRouter()),
+  routePersistence: { enabled: true, flowSession: { storage: 'sessionStorage' } },
+})
+
+kit.start('onboarding')
+</script>
+
+<template>
+  <RouterView />
+</template>
+```
+</Tab>
+<Tab value="<TourProvider>">
+```vue
+<!-- App.vue -->
+<script setup lang="ts">
+import { TourProvider } from '@tour-kit/vue'
+import { tours } from './tours'
+</script>
+
+<template>
+  <TourProvider :tours="tours">
+    <RouterView />
+  </TourProvider>
+</template>
+```
+</Tab>
+</Tabs>
+
+Anywhere below the provider, `useTour()` returns the same kit:
+
+```vue
+<script setup lang="ts">
+import { useTour } from '@tour-kit/vue'
+
+const tour = useTour()
+</script>
+
+<template>
+  <div v-if="tour.state.value.isActive">
+    <p>{{ tour.state.value.currentStep?.content }}</p>
+    <button @click="tour.prev()">Back</button>
+    <button @click="tour.next()">Next</button>
+  </div>
+</template>
+```
+
+## The kit
+
+`useTour()` throws outside a provider. What it returns is one reactive snapshot
+plus the verbs.
+
+| Member | Type | Notes |
+| --- | --- | --- |
+| `state` | `Readonly<ShallowRef<TourCallbackContext>>` | Read `state.value`. New identity per transition |
+| `start`, `next`, `prev`, `goTo`, `skip`, `complete`, `stop` | verbs | Stable identity — safe to pass as props |
+| `goToStep`, `startTour`, `triggerBranchAction` | `Promise`-returning verbs | Step IDs are narrowed to your step union |
+| `reset`, `setData`, `setDontShowAgain` | verbs | |
+| `setOptions`, `setTours` | `(patch) => void` | Update live options or swap the tour set |
+
+`state` is a `shallowRef`, not a `ref`, deliberately. The engine returns the same
+object reference until the next transition, so identity comparison is the whole
+point — a deep `ref` would proxy the `stepVisitCount` Map and the `tour` object,
+and every downstream `Object.is` would break against the proxy.
+
+<Callout type="warn">
+**`Escape` maps to `skip()`, not `stop()`**, and a skip persists. A user who
+presses Escape has dismissed the tour, not paused it.
+</Callout>
+
+## Routing
+
+`createVueRouterAdapter` wraps a `vue-router` instance. It needs only three
+things from it, so anything with the same shape works in a test:
+
+```ts
+import { createVueRouterAdapter } from '@tour-kit/vue'
+import { useRouter } from 'vue-router'
+
+provideTourKit({
+  tours,
+  router: createVueRouterAdapter(useRouter()),
+  autoNavigate: true,
+})
+```
+
+`onRouteChange` fires immediately with the current route, matching every other
+adapter — the engine's route-restore path depends on it.
+
+## Behaviours
+
+The binding ships the two DOM behaviours that are genuinely hard to get right.
+Positioning is not among them: use `@floating-ui/dom` directly, as
+`examples/vue-app` does.
+
+### `useSpotlight()`
+
+A bridge over core's spotlight state machine. Returns computed refs plus three
+methods, and tears down its tracker on scope dispose.
+
+```vue
+<script setup lang="ts">
+import { resolveTarget, useSpotlight, useTour } from '@tour-kit/vue'
+import { watch } from 'vue'
+
+const tour = useTour()
+const { isVisible, overlayStyle, cutoutStyle, show, hide } = useSpotlight()
+
+watch(
+  () => tour.state.value.currentStep,
+  (step) => {
+    const el = step?.target ? resolveTarget(step.target) : null
+    el ? show(el) : hide()
+  }
+)
+</script>
+
+<template>
+  <div v-if="isVisible" :style="overlayStyle" />
+  <div v-if="isVisible" :style="cutoutStyle" />
+</template>
+```
+
+### `useFocusTrap()`
+
+```vue
+<script setup lang="ts">
+import { useFocusTrap, useTour } from '@tour-kit/vue'
+
+const tour = useTour()
+const { containerRef, activate, deactivate } = useFocusTrap(() => tour.state.value.isActive)
+</script>
+
+<template>
+  <div ref="containerRef" role="dialog" aria-modal="true">…</div>
+</template>
+```
+
+<Callout type="warn">
+**The card owns `deactivate()`, not the binding.** The `enabled` gate only
+decides whether `activate()` does anything. Restoring focus when the tour ends
+is your component's cleanup — the same contract as the React hook.
+</Callout>
+
+## Licensing
+
+`@tour-kit/vue` ships under BUSL-1.1. Development, evaluation, testing, CI and
+any non-production environment are free and need no key. Production needs one.
+Without a key the binding still works in full and layers a small badge in the
+corner on non-development hosts. See [Licensing](/docs/licensing) for the full
+setup.
+
+```vue
+<TourProvider
+  :tours="tours"
+  :license="{ licenseKey: import.meta.env.VITE_TOUR_KIT_LICENSE_KEY }"
+>
+  <RouterView />
+</TourProvider>
+```
+
+<Callout type="info">
+**The key is reactive here.** A key fetched from an API or hydrated out of a
+store after mount still takes the badge down — the binding watches `licenseKey`
+and restarts the gate when it changes. This differs from
+[`@tour-kit/svelte`](/docs/svelte), where options are read once. On a
+development host the key is never sent anywhere, so local work never consumes an
+activation slot.
+</Callout>
+
+## SSR and Nuxt
+
+The binding is server-safe by construction, and the rule behind that is worth
+knowing before you reach for a lifecycle hook.
+
+**Nothing constructs an engine during `setup()`.** The engine is built lazily on
+the first *verb*, and every kit member except `state` is that construction in
+disguise — `setOptions` and `setTours` included. Only reading `state` is free.
+
+This is why the provider's watchers are non-immediate. A `watchEffect`, or a
+`watch(..., { immediate: true })`, runs its callback synchronously inside
+`setup()`, which under Nuxt would mean registry writes, four storage adapters and
+a `BroadcastChannel` **on the server**. Watchers do not run during SSR at all, so
+a non-immediate `watch` is inert there by construction.
+
+<Callout type="info">
+**A child's `onMounted` fires before the provider's.** So
+`onMounted(() => tour.start())` in a page component lands before the provider has
+booted — and works anyway, because the handle constructs on first use rather than
+on a schedule. Do not "fix" this by constructing earlier.
+</Callout>
+
+## Everything from `/engine`, too
+
+The package barrel re-exports all of `@tour-kit/core/engine`, so types and
+helpers come from one import:
+
+```ts
+import type { Tour, TourStep } from '@tour-kit/vue'
+```
+
+That is deliberate rather than lazy. `/engine` is already the curated
+React-free surface; a hand-picked subset would need its own alignment test and
+would still be wrong the day `/engine` grows. See
+[the engine guide](/docs/guides/headless-engine) for what lives there.
