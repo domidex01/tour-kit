@@ -12,7 +12,7 @@ userTourKit is a headless React library with tours, hints, checklists, announcem
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and a $9.99 one-time Pro upgrade.
+userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with a source-available core (BUSL-1.1, free in development) and a $9.99 one-time Pro upgrade.
 
 ## What is Onborda?
 
@@ -32,7 +32,7 @@ Where Onborda falls short: cross-route tour transitions rely on a hardcoded 500m
 
 Onborda doesn't include hints. If you need persistent feature-discovery beacons outside a sequential tour, you're building them yourself.
 
-userTourKit ships `@tour-kit/hints` (under 6.5KB gzipped, MIT licensed) with `HintHotspot` for pulsing indicators and `HintTooltip` for on-hover/click content. Each hint dismisses independently and persists across page loads. Non-sequential by design, not a hack on top of the tour system.
+userTourKit ships `@tour-kit/hints` (under 6.5KB gzipped, BUSL-1.1 licensed) with `HintHotspot` for pulsing indicators and `HintTooltip` for on-hover/click content. Each hint dismisses independently and persists across page loads. Non-sequential by design, not a hack on top of the tour system.
 
 ### Checklists and onboarding flows
 
@@ -102,7 +102,7 @@ userTourKit's core is framework-agnostic. `@tour-kit/react` provides router adap
 
 ### Licensing and pricing
 
-Both libraries use MIT licensing for their core code. Onborda is fully MIT with no paid tier. userTourKit's free tier (core, react, hints) is MIT, while the Pro packages cost $9.99 as a one-time purchase.
+Onborda is fully MIT with no paid tier. userTourKit's source-available tier (core, react, hints) is BUSL-1.1 (free in development, licence key in production), while the Pro packages cost $9.99 as a one-time purchase.
 
 Onborda's fully-free model is genuinely attractive for budget-constrained projects. But free doesn't mean maintained. With no funding model and no releases since December 2024, Onborda's long-term sustainability depends entirely on volunteer effort from a single developer.
 
@@ -133,7 +133,7 @@ userTourKit's Pro tier funds ongoing development. Your mileage may vary on which
 | Framework support | Next.js, Vite, Remix, Astro, CRA | Next.js only |
 | shadcn/ui integration | ✅ Native UnifiedSlot | ⚙️ Compatible (manual) |
 | TypeScript | Strict mode, full inference | TypeScript, no strict evidence |
-| License | MIT (free) + $9.99 Pro | MIT |
+| License | BUSL-1.1 + $9.99 Pro | MIT |
 | Last release | Active | Dec 22, 2024 |
 | GitHub stars | — | ~1,400 |
 
@@ -232,7 +232,7 @@ NextStepjs, a fork that explicitly credits Onborda for "inspiration and some cod
 ## Frequently asked questions
 
 **Is userTourKit free?**
-The core packages (tours, hints, react components) are MIT licensed and free. Pro packages (analytics, checklists, announcements, media, scheduling) cost $9.99 one-time. No subscriptions, no per-seat fees.
+The core packages (tours, hints, react components) are BUSL-1.1 licensed and source-available. Pro packages (analytics, checklists, announcements, media, scheduling) cost $9.99 one-time. No subscriptions, no per-seat fees.
 
 **What is the difference between userTourKit and Onborda?**
 userTourKit is a headless React library spanning nine packages: tours, hints, checklists, announcements, analytics, scheduling. Onborda is a Next.js-only tour library powered by Framer Motion that covers tours only. userTourKit ships WCAG 2.1 AA accessibility by default. Onborda has none.

@@ -12,7 +12,7 @@ userTourKit is a headless React library shipping tours, hints, checklists, annou
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade. It ships with strict TypeScript, WCAG 2.1 AA compliance (Lighthouse Accessibility score: 100), and native support for shadcn/ui, Radix UI, and Base UI through its UnifiedSlot pattern.
+userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with a source-available core (BUSL-1.1, free in development) and $9.99 one-time Pro upgrade. It ships with strict TypeScript, WCAG 2.1 AA compliance (Lighthouse Accessibility score: 100), and native support for shadcn/ui, Radix UI, and Base UI through its UnifiedSlot pattern.
 
 ## What is Chameleon?
 
@@ -32,7 +32,7 @@ The trade-off is clear: Chameleon is faster for simple tours built by non-develo
 
 ### Hints and hotspots
 
-Both tools support persistent tooltips attached to UI elements. Chameleon calls them "Tooltips" and manages them through the dashboard. userTourKit's `@tour-kit/hints` package (&lt;6.5KB gzipped, MIT-licensed) provides `HintHotspot` beacons and `HintTooltip` components with per-hint dismiss state persisted via storage adapters. The key difference is that userTourKit hints are non-sequential and independently dismissible, while Chameleon tooltips follow its platform-wide targeting and frequency rules.
+Both tools support persistent tooltips attached to UI elements. Chameleon calls them "Tooltips" and manages them through the dashboard. userTourKit's `@tour-kit/hints` package (&lt;6.5KB gzipped, BUSL-1.1-licensed) provides `HintHotspot` beacons and `HintTooltip` components with per-hint dismiss state persisted via storage adapters. The key difference is that userTourKit hints are non-sequential and independently dismissible, while Chameleon tooltips follow its platform-wide targeting and frequency rules.
 
 Developers get programmatic control through `useHint('feature-id')` for individual hint state and `useHints()` for batch operations like `dismissAll` and `resetAll`. Chameleon's hints require the dashboard for any changes.
 
@@ -93,7 +93,7 @@ userTourKit ships WCAG 2.1 AA compliance by default, not as an opt-in. Focus tra
 
 Chameleon installs via a script tag or npm package (`@chamaeleonidae/chmln`, last published over 4 years ago at v1.0.1). The loader weighs approximately 18.5KB, and the CDN runtime it fetches is undisclosed. You're loading Chameleon's JavaScript on every page for every user, whether they see a tour or not.
 
-userTourKit's core is &lt;23KB gzipped. The React package adds &lt;12KB. Hints add &lt;6.5KB. All three MIT packages together total under 25KB gzipped, with tree-shaking eliminating unused code. The `LazyTour` component (imported from `@tour-kit/react/lazy`) code-splits the tour UI so it only loads when a tour activates. On a mobile connection, the parse time difference between 18.5KB+ (Chameleon's loader alone) and &lt;23KB (userTourKit's core) is measurable.
+userTourKit's core is &lt;23KB gzipped. The React package adds &lt;12KB. Hints add &lt;6.5KB. All three BUSL-1.1 packages together total under 25KB gzipped, with tree-shaking eliminating unused code. The `LazyTour` component (imported from `@tour-kit/react/lazy`) code-splits the tour UI so it only loads when a tour activates. On a mobile connection, the parse time difference between 18.5KB+ (Chameleon's loader alone) and &lt;23KB (userTourKit's core) is measurable.
 
 ### Framework support and TypeScript
 
@@ -109,14 +109,14 @@ According to Vendr's analysis of 27 Chameleon customers, the median annual contr
 
 Chameleon measures Monthly Tracked Users, meaning every unique user who *could* log in, not just those who interact with tours. One Capterra reviewer reported being charged for 5,000 users during beta testing when only 2 people were actively using the product.
 
-userTourKit's core packages (tours, hints, the headless architecture) are MIT-licensed and free. The Pro upgrade covering checklists, announcements, analytics, scheduling, plus media and adoption tracking costs $9.99 one-time. No MTU limits. No annual renewals. No escalation clauses. At 10,000 MAU over three years, Chameleon Growth costs roughly $52,500+. userTourKit costs $9.99.
+userTourKit's core packages (tours, hints, the headless architecture) are BUSL-1.1-licensed and source-available. The Pro upgrade covering checklists, announcements, analytics, scheduling, plus media and adoption tracking costs $9.99 one-time. No MTU limits. No annual renewals. No escalation clauses. At 10,000 MAU over three years, Chameleon Growth costs roughly $52,500+. userTourKit costs $9.99.
 
 ## Side-by-side comparison table
 
 | Category | userTourKit | Chameleon |
 |---|---|---|
-| Product tours | ✅ Built-in (MIT) | ✅ Visual builder |
-| Hints/hotspots | ✅ Built-in, &lt;5KB (MIT) | ✅ Tooltips |
+| Product tours | ✅ Built-in (BUSL-1.1) | ✅ Visual builder |
+| Hints/hotspots | ✅ Built-in, &lt;5KB (BUSL-1.1) | ✅ Tooltips |
 | Onboarding checklists | ✅ Pro ($9.99 one-time) | ⚠️ 1 on Startup, unlimited on Growth |
 | Announcements | ✅ Pro (5 variants) | ✅ Banners/modals |
 | Microsurveys | 🚫 Not available | ⚠️ 5 on Startup, unlimited on Growth |
@@ -135,7 +135,7 @@ userTourKit's core packages (tours, hints, the headless architecture) are MIT-li
 | TypeScript | ✅ Strict mode, full inference | ⚙️ DefinitelyTyped (community) |
 | Core bundle (gzipped) | &lt;23KB | ~18.5KB loader + CDN runtime |
 | Version control | ✅ Git-native | 🚫 Dashboard only |
-| License | MIT (free tier) | Proprietary SaaS |
+| License | BUSL-1.1 (source-available) | Proprietary SaaS |
 | Starting price | Free + $9.99 one-time Pro | $279/mo ($3,348/yr) |
 | SOC 2 | N/A (client-side library) | ✅ Growth+ |
 | Mobile SDK | 🚫 Web only | 🚫 Web only |
@@ -233,7 +233,7 @@ userTourKit is newer with a smaller community. You won't find years of Stack Ove
 ## Frequently asked questions
 
 **Is userTourKit free?**
-userTourKit's core packages (tours, hints, headless architecture) are MIT-licensed and free. The Pro upgrade adds checklists, announcements, analytics, scheduling, plus media and adoption tracking for a $9.99 one-time payment. No monthly fees. No MTU limits.
+userTourKit's core packages (tours, hints, headless architecture) are BUSL-1.1-licensed and source-available. The Pro upgrade adds checklists, announcements, analytics, scheduling, plus media and adoption tracking for a $9.99 one-time payment. No monthly fees. No MTU limits.
 
 **What is the difference between userTourKit and Chameleon?**
 userTourKit is a code-first React library where developers define tours in TypeScript. Chameleon is a SaaS platform where product managers build tours through a visual Chrome extension and manage targeting via a web dashboard. The key difference is who owns the tour: engineers or PMs.
@@ -245,13 +245,13 @@ Yes. userTourKit doesn't have an automated import tool, but the migration involv
 userTourKit supports React 18 and React 19 as peer dependencies. It ships dedicated router adapters for Next.js App Router (`useNextAppRouter`), Next.js Pages Router (`useNextPagesRouter`), and React Router v6+.
 
 **What is the bundle size of userTourKit vs Chameleon?**
-userTourKit's core is &lt;23KB gzipped. The React package adds &lt;12KB, hints add &lt;6.5KB. Chameleon's loader script alone weighs approximately 18.5KB, plus an undisclosed CDN runtime. userTourKit's full MIT stack totals under 25KB gzipped with tree-shaking support.
+userTourKit's core is &lt;23KB gzipped. The React package adds &lt;12KB, hints add &lt;6.5KB. Chameleon's loader script alone weighs approximately 18.5KB, plus an undisclosed CDN runtime. userTourKit's full source-available stack totals under 25KB gzipped with tree-shaking support.
 
 **Does Chameleon support checklists and analytics?**
 Chameleon offers Launchers (checklists) but caps the Startup plan at 1 Launcher. Analytics track basic experience metrics; deeper product analytics require Mixpanel, Amplitude, or PostHog. Both features need the Growth plan ($12,000+/year) for meaningful use.
 
 **Is Chameleon open source?**
-No. Chameleon is a proprietary SaaS platform with closed-source code. Tour definitions live in Chameleon's dashboard and cannot be exported to version control. userTourKit's core packages are MIT-licensed and fully open source on GitHub.
+No. Chameleon is a proprietary SaaS platform with closed-source code. Tour definitions live in Chameleon's dashboard and cannot be exported to version control. userTourKit's core packages are BUSL-1.1-licensed and fully visible on GitHub.
 
 **Which is better for enterprise: userTourKit or Chameleon?**
 Depends on what "enterprise" means for your team. If you need SOC 2 reports, SAML SSO, and governance controls from the tour platform itself, Chameleon's Growth and Enterprise tiers provide that. If your enterprise requirements center on accessibility compliance (WCAG 2.1 AA), design system consistency, and engineering best practices, userTourKit is the stronger fit. Neither offers a mobile SDK.

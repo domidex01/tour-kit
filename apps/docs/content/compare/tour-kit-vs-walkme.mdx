@@ -12,7 +12,7 @@ userTourKit is a headless React library that ships tours, hints, checklists, ann
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade.
+userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with a source-available core (BUSL-1.1, free in development) and $9.99 one-time Pro upgrade.
 
 ## What is WalkMe?
 
@@ -102,13 +102,13 @@ One TrustRadius reviewer reported being charged "tens of thousands of dollars" a
 
 As of Q1 2026, SAP has split WalkMe into separate "Digital Adoption" and "Digital Learning" SKUs. An Info-Tech analyst called this a potential "money grab." The SAP Enterprise Edition requires a minimum of 500 users.
 
-userTourKit's MIT-licensed free tier includes the core library, React bindings, and hints. The Pro tier costs $9.99 one-time (not recurring) and adds adoption tracking, analytics, announcements, checklists, media embedding, and scheduling. Zero contracts. Zero MAU limits. Buy it once and you're done.
+userTourKit's BUSL-1.1-licensed source-available tier includes the core library, React bindings, and hints. The Pro tier costs $9.99 one-time (not recurring) and adds adoption tracking, analytics, announcements, checklists, media embedding, and scheduling. Zero contracts. Zero MAU limits. Buy it once and you're done.
 
 ## Side-by-side comparison table
 
 | Category | userTourKit | WalkMe |
 |---|---|---|
-| Product tours | ✅ Built-in (core, MIT) | ✅ Smart Walk-Thrus |
+| Product tours | ✅ Built-in (core, BUSL-1.1) | ✅ Smart Walk-Thrus |
 | Hints / hotspots | ✅ Built-in (&lt;5KB) | ⚙️ ShoutOuts / Launchers (overlay-based) |
 | Onboarding checklists | ✅ Pro ($9.99 one-time) | ✅ Built-in |
 | Announcements | ✅ Pro (5 variants) | ⚙️ ShoutOuts only |
@@ -126,7 +126,7 @@ userTourKit's MIT-licensed free tier includes the core library, React bindings, 
 | Design system integration | ✅ Native (shadcn/ui, Radix, Base UI) | ⚙️ Requires !important CSS overrides |
 | Who builds flows | Developers | Non-technical users + developers |
 | Security model | First-party code you control | Third-party script with full DOM access |
-| License | MIT (free tier) | Proprietary, quote-based |
+| License | BUSL-1.1 (source-available) | Proprietary, quote-based |
 | Pricing | Free + $9.99 one-time Pro | $9K-$405K/year (median $43K) |
 | Implementation time | Minutes (npm install) | 3-6 months average |
 | Contract | None | Multi-year typical |
@@ -201,7 +201,7 @@ Analyst Jon Reed at Diginomica wrote after the SAP acquisition: "If I'm a Workda
 ## Frequently asked questions
 
 **Is userTourKit free?**
-userTourKit's core library, React bindings, and hints package are free under the MIT license with no restrictions. The Pro tier costs $9.99 one-time (not a subscription) and adds adoption tracking, analytics with five built-in plugins, announcements, checklists, media embedding, and scheduling with timezone support.
+userTourKit's core library, React bindings, and hints package are source-available under the BUSL-1.1 licence (free in development, licence key in production). The Pro tier costs $9.99 one-time (not a subscription) and adds adoption tracking, analytics with five built-in plugins, announcements, checklists, media embedding, and scheduling with timezone support.
 
 **What is the difference between userTourKit and WalkMe?**
 userTourKit is a headless React library that renders onboarding as native components inside your codebase. WalkMe is an enterprise platform that injects overlay guidance on top of any web application without source code access. userTourKit requires developers; WalkMe's visual editor doesn't. userTourKit costs $0-$9.99; WalkMe's median annual contract is $43,000.
@@ -219,7 +219,7 @@ userTourKit's core is under 23KB gzipped, React package under 12KB, hints under 
 WalkMe can work with SPAs, but it requires special configuration. Their documentation states SPA support must be enabled by contacting WalkMe support. It works by watching for DOM mutations rather than integrating with React's component lifecycle, which causes issues with dynamic elements and CSS-in-JS.
 
 **Is WalkMe open source?**
-No. WalkMe is proprietary software with quote-based pricing and multi-year contracts. userTourKit's free tier (core, React, hints) is MIT-licensed open source. The Pro packages use a proprietary license with a one-time $9.99 fee.
+No. WalkMe is proprietary software with quote-based pricing and multi-year contracts. userTourKit's free tier (core, React, hints) is BUSL-1.1-licensed source-available. The Pro packages use a proprietary license with a one-time $9.99 fee.
 
 **Which is better for enterprise: userTourKit or WalkMe?**
 For enterprise employee training across third-party applications (SAP, Salesforce, Workday), WalkMe is the stronger choice — it has FedRAMP Ready certification, SOC 2 Type 2, and a visual editor for non-technical content creators. For enterprise SaaS teams building customer-facing onboarding in React, userTourKit gives developers full code ownership at a fraction of the cost.
