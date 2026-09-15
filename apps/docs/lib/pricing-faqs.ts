@@ -21,7 +21,7 @@ export const PRICING_FAQS: PricingFaq[] = [
   {
     question: 'How many sites can I activate with one Pro license?',
     answer:
-      'Up to five production domains per Pro license. Localhost, preview environments, and staging URLs are unrestricted. Each production activation is permanent, there is no monthly check-in or auto-deactivation.',
+      'It depends on the tier: Starter covers one production project, Business covers five, and Premium is unlimited. Localhost, preview environments, and staging URLs are unrestricted on every tier. Each production activation is permanent, there is no monthly check-in or auto-deactivation.',
   },
   {
     question: 'Who handles checkout and tax for Pro purchases?',
