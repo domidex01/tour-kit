@@ -1,6 +1,6 @@
 ---
 title: "Looking for a Shepherd.js alternative? userTourKit vs Shepherd.js compared"
-description: "Switching from Shepherd.js? Compare userTourKit vs Shepherd.js: bundle size, licensing (AGPL vs MIT), React fit, and migration path. Find the right alternative for your stack in 2026."
+description: "Switching from Shepherd.js? Compare userTourKit vs Shepherd.js: bundle size, licensing (AGPL vs BUSL-1.1), React fit, and migration path. Find the right alternative for your stack in 2026."
 competitor: "Shepherd.js"
 competitorSlug: "shepherd-js"
 lastUpdated: "2026-04-26"
@@ -16,11 +16,11 @@ If you landed here you're probably evaluating whether to **switch from Shepherd.
 
 ## The bottom line
 
-userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 23KB gzipped, MIT-licensed. Shepherd.js is a multi-framework tour library built on Svelte internals, dual-licensed under AGPL-3.0 and a $50-$300 commercial license. userTourKit fits React teams that want JSX-native tours, MIT licensing, and a small bundle. Shepherd.js is still the right choice when you need Vue, Angular, or vanilla JS support.
+userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 23KB gzipped, BUSL-1.1-licensed (free in development). Shepherd.js is a multi-framework tour library built on Svelte internals, dual-licensed under AGPL-3.0 and a $50-$300 commercial license. userTourKit fits React teams that want JSX-native tours, source-available licensing, and a small bundle. Shepherd.js is still the right choice when you need Vue, Angular, or vanilla JS support.
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and a $9.99 one-time Pro upgrade.
+userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with a source-available core (BUSL-1.1, free in development) and a $9.99 one-time Pro upgrade.
 
 ## What is Shepherd.js?
 
@@ -40,7 +40,7 @@ Where they diverge: userTourKit supports conditional branching with async resolv
 
 Shepherd.js doesn't include hints. If you need pulsing beacons for feature discovery, you'll build them yourself or pull in another library.
 
-userTourKit ships a dedicated `@tour-kit/hints` package (under 6.5KB gzipped, MIT licensed) with `HintHotspot` for pulsing indicators and `HintTooltip` for on-hover/click content. Each hint dismisses independently and persists across page loads via the storage adapter. Not a workaround bolted on top of the tour system.
+userTourKit ships a dedicated `@tour-kit/hints` package (under 6.5KB gzipped, BUSL-1.1 licensed) with `HintHotspot` for pulsing indicators and `HintTooltip` for on-hover/click content. Each hint dismisses independently and persists across page loads via the storage adapter. Not a workaround bolted on top of the tour system.
 
 ### Checklists and onboarding flows
 
@@ -137,7 +137,7 @@ userTourKit's free tier (core, React bindings, hints) is MIT licensed. No legal 
 | Core bundle (gzipped) | Under 23KB | ~25-40KB (includes Svelte runtime) |
 | Multi-framework | React only | React, Vue, Angular, Ember, vanilla |
 | Positioning engine | Floating UI | Floating UI |
-| License | MIT (free tier) | AGPL-3.0 or $50-$300 commercial |
+| License | BUSL-1.1 (source-available) | AGPL-3.0 or $50-$300 commercial |
 | GitHub stars | New project | ~13,300 |
 | npm weekly downloads | New project | ~186K (core), ~19K (react-shepherd) |
 
@@ -155,7 +155,7 @@ userTourKit makes more sense when your stack is React and you want your tour cod
 
 It's also the pick when you need more than tours. Hints, checklists, announcements, analytics, and scheduling all ship as packages under one system. Building that yourself on top of Shepherd means pulling in multiple libraries and wiring them together.
 
-And if AGPL is a non-starter at your company, userTourKit's MIT free tier removes the conversation entirely.
+And if AGPL is a non-starter at your company, userTourKit's BUSL-1.1 source-available tier removes the conversation entirely.
 
 ## Migration path from Shepherd.js to userTourKit
 

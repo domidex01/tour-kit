@@ -12,7 +12,7 @@ userTourKit is a headless React library offering tours, hints, checklists, annou
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade.
+userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with a source-available core (BUSL-1.1, free in development) and $9.99 one-time Pro upgrade.
 
 ## What is Userflow?
 
@@ -100,7 +100,7 @@ Userflow charges $240/month (Startup, 3,000 MAUs) or $680/month (Pro, 10,000 MAU
 
 At 50,000 MAUs, annual costs reach $12,480-$15,840 depending on plan. Multiple G2 reviewers flagged pricing as their primary complaint: *"Maybe the price for the pro plan ;-)"* was a recurring theme.
 
-userTourKit's core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free. Pro packages cost $9.99 one-time. No MAU limits. No per-seat charges. No recurring fees.
+userTourKit's core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are BUSL-1.1-licensed and source-available. Pro packages cost $9.99 one-time. No MAU limits. No per-seat charges. No recurring fees.
 
 Three-year TCO at 10,000 MAUs: Userflow Pro runs $24,480. userTourKit runs $9.99. The math isn't close.
 
@@ -108,8 +108,8 @@ Three-year TCO at 10,000 MAUs: Userflow Pro runs $24,480. userTourKit runs $9.99
 
 | Feature | userTourKit | Userflow |
 |---|---|---|
-| Product tours | ✅ Built-in (core, MIT) | ✅ Visual builder |
-| Hints/hotspots | ✅ Built-in (&lt;5KB, MIT) | ✅ Launchers/beacons |
+| Product tours | ✅ Built-in (core, BUSL-1.1) | ✅ Visual builder |
+| Hints/hotspots | ✅ Built-in (&lt;5KB, BUSL-1.1) | ✅ Launchers/beacons |
 | Checklists | ✅ Pro ($9.99 one-time) | ✅ Built-in |
 | Announcements | ✅ Pro (5 variants) | ✅ Basic |
 | Surveys/NPS | 🚫 Not in scope | ✅ Built-in (limited on Startup) |
@@ -128,7 +128,7 @@ Three-year TCO at 10,000 MAUs: Userflow Pro runs $24,480. userTourKit runs $9.99
 | Core bundle (gzipped) | &lt;23KB | ~15KB stub + CDN |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 Not documented |
 | Self-hosted | ✅ Fully self-contained | 🚫 CDN-dependent |
-| Open source | ✅ MIT (free tier) | 🚫 Proprietary |
+| Source-available | ✅ BUSL-1.1 | 🚫 Proprietary |
 | Mobile SDK | 🚫 Web only | 🚫 Web only |
 | CRM integrations | 🚫 Bring your own | ✅ HubSpot, Salesforce (Pro) |
 | Pricing | Free + $9.99 one-time Pro | $240-$680+/mo recurring |
@@ -204,7 +204,7 @@ userTourKit is newer and has a smaller community footprint. Fewer Stack Overflow
 ## Frequently asked questions
 
 **Is userTourKit free?**
-The core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free with no usage limits. Pro packages (analytics, announcements, checklists, media, scheduling) cost $9.99 one-time. No MAU fees. No per-seat charges.
+The core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are BUSL-1.1-licensed and source-available with no usage limits. Pro packages (analytics, announcements, checklists, media, scheduling) cost $9.99 one-time. No MAU fees. No per-seat charges.
 
 **What is the difference between userTourKit and Userflow?**
 userTourKit is a headless React library where onboarding UI renders inside your component tree and config lives in your codebase. Userflow is a SaaS platform with a visual builder where content loads from Userflow's CDN at runtime. The architectural difference: userTourKit is code you own, Userflow is a service you rent.
@@ -222,7 +222,7 @@ userTourKit's core is &lt;23KB gzipped, React components add &lt;12KB, hints add
 Userflow doesn't document WCAG compliance to any specific level. userTourKit ships WCAG 2.1 AA compliant by default with focus trapping, screen reader announcements, keyboard navigation, and Lighthouse Accessibility score of 100.
 
 **Is Userflow open source?**
-No. Userflow is proprietary commercial software acquired by Beamer in February 2024 for approximately $60M. userTourKit's free tier is MIT-licensed. Pro packages use a proprietary license.
+No. Userflow is proprietary commercial software acquired by Beamer in February 2024 for approximately $60M. userTourKit's free tier is BUSL-1.1-licensed. Pro packages use a proprietary license.
 
 **Which is better for enterprise use?**
 Userflow offers enterprise plans with custom pricing and SSO. userTourKit doesn't offer enterprise support SLAs. For enterprises that need vendor support contracts, Userflow is the safer bet. For enterprises that want to own the code and avoid vendor dependency, userTourKit gives you full control.

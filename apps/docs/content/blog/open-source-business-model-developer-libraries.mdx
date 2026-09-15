@@ -19,7 +19,7 @@ You wrote a React library. People use it. GitHub stars climb. npm downloads tick
 
 The open-source services market hit $49 billion in 2025, projected to reach $105 billion by 2032 ([TechNews180](https://technews180.com/blog/open-source-models-that-work/)). But most of that money flows to companies with 50+ engineers and enterprise sales teams. If you're a solo developer or a small team shipping a React library, the playbook looks different.
 
-I built [Tour Kit](https://usertourkit.com/) as a solo developer. Ten packages, MIT-licensed core, TypeScript-strict, the whole thing. Along the way I had to choose a business model that wouldn't alienate the developers I was trying to serve. Here's what I learned, and what I'd tell you if you were making the same choice today.
+I built [Tour Kit](https://usertourkit.com/) as a solo developer. Seventeen packages, source-available core, TypeScript-strict, the whole thing. Along the way I had to choose a business model that wouldn't alienate the developers I was trying to serve. Here's what I learned, and what I'd tell you if you were making the same choice today.
 
 ## Three models that actually work for libraries
 
@@ -137,9 +137,9 @@ The practical stack for a solo developer selling Pro features in 2026:
 
 Full disclosure: I built Tour Kit, so this section is about my own decisions. Tour Kit is a younger project with a smaller community than React Joyride or Shepherd.js, and it doesn't have a visual builder, so take this with appropriate skepticism.
 
-Tour Kit uses open core. Three packages are MIT-licensed and always will be: `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints`. They give you everything you need to build product tours: hooks, providers, positioning, highlighting, keyboard navigation, WCAG 2.1 AA accessibility.
+Tour Kit uses source-available licensing. Five packages are BUSL-1.1-licensed: `@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`, plus `@tour-kit/vue` and `@tour-kit/svelte`. They give you everything you need to build product tours: hooks, providers, positioning, highlighting, keyboard navigation, WCAG 2.1 AA accessibility. Development, evaluation, testing, and CI are free with no key; production deployments need a $9.99 one-time licence key, and every version converts to MIT four years after release.
 
-Seven extended packages are proprietary and require a Pro license: adoption tracking, analytics, announcements, checklists, media embedding, scheduling, and surveys. These are features a solo developer building a side project doesn't need. They're features a product team onboarding 10,000 users per month does need.
+Nine extended packages are proprietary and require a Pro license: adoption tracking, analytics, announcements, checklists, media embedding, scheduling, surveys, AI, and license validation. These are features a solo developer building a side project doesn't need. They're features a product team onboarding 10,000 users per month does need.
 
 The price is [$9.99 one-time](/pricing). Not per seat, not per month. One payment, lifetime access, all future updates.
 
@@ -159,7 +159,7 @@ After testing different approaches with Tour Kit and watching projects like Shep
 
 1. **The free tier must be genuinely complete.** If developers feel like they're using crippled software, they'll resent you. The free tier should solve a real problem end-to-end.
 
-2. **Never move a feature from free to paid.** Add new paid features. Never reclassify existing ones. Shepherd.js's switch from MIT to AGPL cost them community trust. React's BSD+Patents license cost Facebook an ecosystem revolt.
+2. **Never move a feature from free to paid.** Add new paid features. Never reclassify existing ones. Shepherd.js's switch from MIT to AGPL cost them community trust. React's BSD+Patents license cost Facebook an ecosystem revolt. Tour Kit's own move from MIT to BUSL-1.1 in v3.0 followed this rule literally: every version up to 2.1.0 stays MIT forever, and only new versions carry the new terms.
 
 3. **Price for the buyer, not the builder.** A VP evaluating onboarding tools has budget. A junior developer learning React doesn't. Your pricing should reflect who's buying, not how many hours you spent.
 
@@ -191,7 +191,7 @@ GitHub Sponsors alone rarely covers full-time development. It works as supplemen
 
 ---
 
-*Tour Kit is an open-source product tour library for React. The core packages are MIT-licensed and free. Extended packages require a [Pro license](https://usertourkit.com/). This article reflects the author's own experience choosing a business model — your situation may differ.*
+*Tour Kit is an open-source product tour library for React. The core packages are BUSL-1.1-licensed and source-available. Extended packages require a [Pro license](https://usertourkit.com/). This article reflects the author's own experience choosing a business model — your situation may differ.*
 
 {/* Internal linking suggestions:
 - Link FROM: tour-kit-pricing-decision-building-in-public, tour-kit-free-vs-pro, tour-kit-polar-sh-managing-pro-subscriptions

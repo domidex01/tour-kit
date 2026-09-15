@@ -17,7 +17,7 @@ ogImage: /og-images/tour-kit-hubspot-crm-workflows.png
 
 Most product tour libraries stop at "tour finished." The data dies in a localStorage flag. Meanwhile your sales team refreshes HubSpot wondering which trial users actually engaged with the product. This article connects those two worlds: Tour Kit's lifecycle callbacks fire, HubSpot's CRM updates, and a workflow enrolls the contact automatically.
 
-We built this integration for a B2B SaaS dashboard and hit three gotchas along the way. Every code sample below runs against HubSpot's free CRM tier and Tour Kit's MIT packages. No $890/month Marketing Hub Professional required.
+We built this integration for a B2B SaaS dashboard and hit three gotchas along the way. Every code sample below runs against HubSpot's free CRM tier and Tour Kit's BUSL-1.1 source-available packages. No $890/month Marketing Hub Professional required.
 
 ```bash
 npm install @tourkit/core @tourkit/react @tourkit/analytics @hubspot/api-client
@@ -296,7 +296,7 @@ Tour Kit runs entirely in the user's browser and your server. No data passes thr
 
 ### How does this compare to Chameleon's HubSpot integration?
 
-Chameleon syncs HubSpot Lists into its targeting engine and pushes property updates back ([Chameleon docs](https://www.chameleon.io/integrations/hubspot)). It's managed and no-code. Tour Kit is code-first: you own the API route, data shape, and deployment. Chameleon charges per MAU; Tour Kit is $9.99 one-time Pro or free MIT.
+Chameleon syncs HubSpot Lists into its targeting engine and pushes property updates back ([Chameleon docs](https://www.chameleon.io/integrations/hubspot)). It's managed and no-code. Tour Kit is code-first: you own the API route, data shape, and deployment. Chameleon charges per MAU; Tour Kit is $9.99 one-time Pro or free BUSL-1.1 in development.
 
 {/* JSON-LD Schema */}
 export const jsonLd = {

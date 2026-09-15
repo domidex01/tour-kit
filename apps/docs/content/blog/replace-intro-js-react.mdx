@@ -17,7 +17,7 @@ ogImage: /og-images/replace-intro-js-react.png
 
 Intro.js has 23,800 GitHub stars and 215K weekly npm downloads as of April 2026. It earned that popularity. But its React wrapper hasn't been updated in over three years, its AGPL license forces source disclosure for commercial apps, and its DOM-centric architecture fights React at every turn. If you've been patching around positioning bugs, writing `!important` overrides for Tailwind, or manually bridging Intro.js callbacks to React state, this guide is the exit ramp.
 
-We'll replace an Intro.js tour with Tour Kit, a headless React library that ships under 23KB gzipped (core) and uses MIT licensing. Every code example below compiles against `@tourkit/core` 0.x and `@tourkit/react` 0.x.
+We'll replace an Intro.js tour with Tour Kit, a headless React library that ships under 23KB gzipped (core) and uses BUSL-1.1 licensing (free in development). Every code example below compiles against `@tourkit/core` 0.x and `@tourkit/react` 0.x.
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -37,7 +37,7 @@ Intro.js was built as a framework-agnostic vanilla JavaScript library. It manipu
 
 **Accessibility is incomplete.** Sandro Roth's [evaluation of tour libraries](https://sandroroth.com/blog/evaluating-tour-libraries/) found that Intro.js popovers use `dialog` role but lack `aria-labelledby` and `aria-describedby`. Navigation buttons are `<a>` tags with `role="button"` instead of actual `<button>` elements. There is no focus trap.
 
-Tour Kit addresses all five. It renders nothing by default (you provide the UI), runs inside React's component tree, uses MIT licensing, and ships with WCAG 2.1 AA compliance including focus trapping and full ARIA attributes.
+Tour Kit addresses all five. It renders nothing by default (you provide the UI), runs inside React's component tree, uses BUSL-1.1 licensing, and ships with WCAG 2.1 AA compliance including focus trapping and full ARIA attributes.
 
 ## What we're building
 

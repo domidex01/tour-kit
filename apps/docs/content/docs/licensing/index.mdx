@@ -8,13 +8,13 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 
 ## Overview
 
-userTourKit uses a **Free + Pro** licensing model:
+userTourKit uses a **source-available + Pro** licensing model:
 
-- **Free packages** (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and never require a license key.
-- **Pro packages** (`@tour-kit/adoption`, `@tour-kit/analytics`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/media`, `@tour-kit/scheduling`, `@tour-kit/ai`) require a valid license key for production use.
+- **Source-available packages** (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`, plus the `@tour-kit/vue` and `@tour-kit/svelte` bindings) are BUSL-1.1-licensed: free for development, evaluation, testing, CI, and any non-production environment, with a licence key required in production.
+- **Pro packages** (`@tour-kit/adoption`, `@tour-kit/analytics`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/media`, `@tour-kit/scheduling`, `@tour-kit/ai`, `@tour-kit/surveys`) require a valid license key for production use. The same $9.99 one-time key also covers production use of the source-available packages.
 
 <Callout type="info">
-Free packages never require a license key. You can use `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` without any licensing setup.
+Source-available packages never require a license key in development, evaluation, testing, or CI. Production deployments need a key: use `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` key-free until you ship.
 </Callout>
 
 Without a valid license, pro packages still render and function normally but display an "UNLICENSED" watermark overlay and a console warning. There is never a crash or blank screen.
@@ -239,7 +239,7 @@ const isPro = useIsPro()
 
 ### Do free packages need a license?
 
-No. `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` are MIT-licensed and work without any license key.
+No. `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` are BUSL-1.1-licensed and work without any license key in development, evaluation, testing, and CI. Production deployments need a licence key.
 
 ### What happens if my key expires?
 
