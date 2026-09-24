@@ -30,7 +30,10 @@ describe('@tour-kit/vue package.json', () => {
   })
 
   it('depends on core and peers on vue', () => {
-    expect(pkg.dependencies?.['@tour-kit/core']).toBe('workspace:*')
+    // #154: core is a caret range, not an exact pin — an exact pin shipped a
+    // nested stale core in consumers who updated core alone, which is how the
+    // lifecycle-hook regression hid from the reporter.
+    expect(pkg.dependencies?.['@tour-kit/core']).toBe('workspace:^')
     expect(pkg.peerDependencies?.vue).toBeDefined()
   })
 
