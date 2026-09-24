@@ -144,7 +144,10 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     22 879 (+20 B over the 22 857 the gate actually printed before it) for
     `createHandle`, the engine-agnostic half of `createEngineHandle`. The
     Phase 1 review took it to 22 924 for `createListeners`, the fault-isolated
-    subscriber fan-out both engines share — leaving only **76 B of headroom**,
+    subscriber fan-out both engines share — and issue #154's autoStart guard
+    took it to 22 960 (+36 B: `boot.ts` now runs `askStepGuards` on the
+    `source === 'auto'` cold start, so `onBeforeShow` can veto an autoStart),
+    leaving 40 B of headroom —
     so Phase 2 must re-baseline this row deliberately rather than discover it)
   - core/engine subpath <18.5 KB (the non-React consumer's worst case: the
     engine — reducer, boot resolver, actions, transition effects, four
@@ -170,7 +173,8 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     two of the three implementations. v3 Phase 1 took it to 18 124 (+25 B):
     `createHandle` plus its `EngineLike`/`Handle` types, which a package with
     its own engine composes instead of writing a second lifecycle —
-    `@tour-kit/hints/engine` is the first)
+    `@tour-kit/hints/engine` is the first) — and issue #154's autoStart guard
+    took it to 18 211 (+87 B: the guard itself, in the chunk both entries read)
   - core/engine IIFE (`dist/engine/index.global.js`, the CDN door) <18.5 KB,
     measured 17 492. It is the engine closure in one file — same source, one
     format — so it shares `core/engine`'s ceiling instead of the measured-×1.2

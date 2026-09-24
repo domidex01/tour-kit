@@ -269,10 +269,12 @@ describe('runBootStart', () => {
 })
 
 /**
- * Issue #121 — session restore fires `onEnter`, and only `onEnter`.
+ * Issue #121 — a *resume* (`flow` / `route`) fires `onEnter`, and only
+ * `onEnter`.
  *
  * No `onBeforeShow`: a veto on a cold restore would strand the user mid-tour
- * with no way to continue, and `boot()` is not cancellable.
+ * with no way to continue, and `boot()` is not cancellable. The cold `auto`
+ * start is the other family — it has its own block below (#154).
  */
 describe('runBootStart — step lifecycle on restore (#121)', () => {
   const decision: BootDecision = { tourId: 'r', stepIndex: 0, source: 'flow' }
@@ -354,5 +356,60 @@ describe('runBootStart — step lifecycle on restore (#121)', () => {
     await runBootStart(ctx, decision, { currentRoute: '/pricing', onClear: vi.fn() })
 
     expect(callOrder).toEqual(['navigate', 'onEnter:r1', 'dispatch:START_TOUR'])
+  })
+})
+
+/**
+ * Issue #154 — `auto` is a cold start, not a resume, so it carries the same
+ * step contract as `start()`: `onBeforeShow` is asked (and may veto), then
+ * `onEnter`. Before this, an `autoStart` tour fired `onEnter` while silently
+ * skipping `onBeforeShow` — invisible to every `start()`-path test.
+ */
+describe('runBootStart — step lifecycle on autoStart (#154)', () => {
+  const decision: BootDecision = { tourId: 'r', stepIndex: 0, source: 'auto' }
+  const callOrder: string[] = []
+
+  beforeEach(() => {
+    callOrder.length = 0
+  })
+
+  function ctxWith(step: Parameters<typeof visibleStep>[1]) {
+    const handle = createFakeEngineContext()
+    handle.setCurrentTour(makeTour('r', [visibleStep('r1', step)]))
+    return handle
+  }
+
+  it('asks onBeforeShow then onEnter before dispatching START_TOUR', async () => {
+    const { ctx, mocks } = ctxWith({
+      onBeforeShow: async () => {
+        await Promise.resolve()
+        callOrder.push('onBeforeShow:r1')
+        return undefined
+      },
+      onEnter: () => {
+        callOrder.push('onEnter:r1')
+      },
+    })
+    mocks.dispatch.mockImplementation((action: { type: string }) => {
+      callOrder.push(`dispatch:${action.type}`)
+    })
+
+    await runBootStart(ctx, decision, { currentRoute: '/', onClear: vi.fn() })
+
+    expect(callOrder).toEqual(['onBeforeShow:r1', 'onEnter:r1', 'dispatch:START_TOUR'])
+  })
+
+  it('a vetoed onBeforeShow suppresses the start entirely', async () => {
+    const { ctx, mocks } = ctxWith({
+      onBeforeShow: () => false,
+      onEnter: () => {
+        callOrder.push('onEnter:r1')
+      },
+    })
+
+    await runBootStart(ctx, decision, { currentRoute: '/', onClear: vi.fn() })
+
+    expect(mocks.dispatch).not.toHaveBeenCalled()
+    expect(callOrder).toEqual([])
   })
 })
