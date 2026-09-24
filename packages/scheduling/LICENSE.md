@@ -7,7 +7,7 @@ Free for development, evaluation, testing, continuous integration, and any other
 The Software is licensed under the Business Source License 1.1:
 
 Licensor:             domidex01
-Licensed Work:        @tour-kit/scheduling 2.0.0
+Licensed Work:        @tour-kit/scheduling 2.0.1
 Additional Use Grant: Production use of the Licensed Work — serving it to end users of a deployed application — is permitted up to the number of projects covered by a Tour Kit Pro license key obtained from the Licensor at https://usertourkit.com/pricing. Use beyond that scope requires a commercial license from the Licensor.
 Change Date:          2030-09-24
 Change License:       MIT
