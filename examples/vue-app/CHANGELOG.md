@@ -1,5 +1,16 @@
 # vue-tour-kit-demo
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [9d0be69]
+  - @tour-kit/hints@3.0.1
+  - @tour-kit/vue@1.0.1
+  - @tour-kit/announcements@7.0.1
+  - @tour-kit/surveys@6.0.1
+  - @tour-kit/scheduling@2.0.1
+
 ## 0.0.2
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @tour-kit/announcements
 
+## 7.0.1
+
+### Patch Changes
+
+- Updated dependencies [9d0be69]
+  - @tour-kit/core@3.0.1
+  - @tour-kit/analytics@0.13.1
+  - @tour-kit/license@1.4.1
+  - @tour-kit/media@0.13.6
+  - @tour-kit/scheduling@2.0.1
+
 ## 7.0.0
 
 ### Minor Changes
