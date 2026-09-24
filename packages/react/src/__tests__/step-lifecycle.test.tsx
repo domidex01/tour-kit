@@ -121,9 +121,9 @@ describe('step lifecycle hooks through @tour-kit/react (#154)', () => {
     }
 
     const order: string[] = []
-    const { on } = recorder(order)
+    const { on, note } = recorder(order)
     render(
-      <DeclarativeTour id="declared" autoStart>
+      <DeclarativeTour id="declared" autoStart onStart={note('onStart')}>
         <TourStep
           id="d1"
           target="#t1"
@@ -135,7 +135,9 @@ describe('step lifecycle hooks through @tour-kit/react (#154)', () => {
       </DeclarativeTour>
     )
 
-    await waitFor(() => expect(order).toEqual(['onBeforeShow:d1', 'onEnter:d1']))
+    // `onStart` rides along: #154 found autoStart firing none of the
+    // tour-level callbacks, which starved `<Tour>`'s analytics wrapper.
+    await waitFor(() => expect(order).toEqual(['onBeforeShow:d1', 'onEnter:d1', 'onStart']))
   })
 
   beforeEach(() => {

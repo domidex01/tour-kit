@@ -15,11 +15,11 @@ import { isVisibleStep } from '../../types/step'
 import type { Tour } from '../../types/tour'
 import type { FlowSessionV2 } from '../flow-session'
 import { waitForStepTarget } from '../wait-for-step-target'
+import { startImpl } from './actions'
 import type { PersistedRouteState } from './adapters/route-store'
 import type { TourEngineContext } from './context'
 import { buildCallbackContext, invokeAsyncCallback } from './helpers'
 import { findAutoStartTour } from './reducer'
-import { askStepGuards } from './start-tour'
 
 export type BootSource = 'flow' | 'route' | 'auto'
 
@@ -130,34 +130,35 @@ export async function runBootStart(
   const { currentRoute, signal, onClear } = opts
   const { router } = ctx
 
+  // #154 — `auto` is a cold start, not a resume, so it takes `start()`'s
+  // whole contract — which is why it routes through `startImpl` instead of
+  // sharing the resume path below. That buys the visibility walk to a
+  // landable step, the `onBeforeShow` veto (a `false` leaves the tour
+  // dormant), `onEnter`, and the start callbacks themselves (`onTourStart`,
+  // `tour.onStart`). Before this, an autoStart tour fired none of the
+  // tour-level callbacks, so a declarative `<Tour autoStart>` never reached
+  // the analytics `<Tour>` installs inside its own `onStart`.
+  if (decision.source === 'auto') {
+    await startImpl(ctx, decision.tourId, decision.stepIndex)
+    return
+  }
+
   const endTimer = createRestoreTimer(decision.source)
   const targetTour = ctx.getState().tours.get(decision.tourId) ?? null
   const targetStep = targetTour?.steps[decision.stepIndex]
 
   /**
-   * #121 / #154 — the two restore families differ on `onBeforeShow`.
+   * A resume (`flow` / `route`) runs the step's `onEnter` but never its
+   * `onBeforeShow` (#121): a veto mid-tour would strand the user, and
+   * `boot()` is not cancellable. `onShow` arrives on its own through the
+   * transition effects once START_TOUR lands.
    *
-   * `flow` / `route` resume a tour the user is already inside: a veto there
-   * would strand them mid-tour, and `boot()` is not cancellable, so only
-   * `onEnter` runs. `auto` is a *cold* start with the same contract as
-   * `start()`: `askStepGuards` runs `onBeforeShow` (vetoed → no dispatch) and
-   * `onEnter`, so a step that suppresses itself on start does so however the
-   * start was triggered.
-   *
-   * The `onEnter` guard on the resume branch keeps the no-callback path
-   * synchronous. That is the common case and it has a timing budget —
-   * awaiting unconditionally would cost every restore a tick for a callback
-   * almost no tour defines.
+   * The `onEnter` guard keeps the no-callback path synchronous. That is the
+   * common case and it has a timing budget — awaiting unconditionally would
+   * cost every restore a tick for a callback almost no tour defines.
    */
   const dispatchStart = async () => {
-    if (decision.source === 'auto') {
-      if (
-        targetTour &&
-        !(await askStepGuards(ctx, targetTour, decision.stepIndex, ctx.getData()))
-      ) {
-        return
-      }
-    } else if (targetStep?.onEnter) {
+    if (targetStep?.onEnter) {
       await invokeAsyncCallback('onEnter', () =>
         targetStep.onEnter?.({
           ...buildCallbackContext(ctx.getState(), targetTour, ctx.getData()),
