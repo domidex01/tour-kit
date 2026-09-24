@@ -225,7 +225,7 @@ And don't forget `aria-live="polite"` on dynamic tooltips. Screen readers won't 
 
 ## Tools and libraries for overlay rendering
 
-Tour Kit renders all overlays through `createPortal` with a single persistent portal container. The reconciler diffs tooltip content as part of your component tree, and the mount/unmount cycle is controlled through CSS visibility toggling for steps. Bundle size: under 8KB gzipped for core + react packages combined.
+Tour Kit renders all overlays through `createPortal` with a single persistent portal container. The reconciler diffs tooltip content as part of your component tree, and the mount/unmount cycle is controlled through CSS visibility toggling for steps. Bundle size: under 23KB gzipped for core + react packages combined.
 
 React Joyride uses portals but mounts a new overlay for each step transition. At 37KB gzipped (as of April 2026), the library includes its own positioning engine that runs outside the Fiber scheduler.
 

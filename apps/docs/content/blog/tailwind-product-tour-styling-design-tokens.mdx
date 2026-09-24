@@ -406,11 +406,11 @@ Tour Kit ships zero styles, so it works with any CSS setup. The `@theme` token p
 
 ### How does a headless tour library compare to styled ones for tailwind projects?
 
-Styled tour libraries like React Joyride and Shepherd.js ship 15-25KB of opinionated CSS. In a Tailwind project, you fight specificity to override those defaults. Tour Kit ships at under 8KB gzipped (core) with zero CSS, so your Tailwind classes are the only styles. No specificity wars, no `!important` hacks.
+Styled tour libraries like React Joyride and Shepherd.js ship 15-25KB of opinionated CSS. In a Tailwind project, you fight specificity to override those defaults. Tour Kit ships at under 23KB gzipped (core) with zero CSS, so your Tailwind classes are the only styles. No specificity wars, no `!important` hacks.
 
 ### Does adding a product tour affect performance?
 
-Tour Kit's core targets under 8KB gzipped with zero runtime dependencies. Combined with Tailwind's purge, you ship only the CSS classes your tour actually uses. Netflix delivers their entire Tailwind setup at 6.5KB of CSS. The main consideration is overlay rendering: Tour Kit uses CSS-based overlays rather than canvas, avoiding main-thread blocking.
+Tour Kit's core targets under 23KB gzipped with zero runtime dependencies. Combined with Tailwind's purge, you ship only the CSS classes your tour actually uses. Netflix delivers their entire Tailwind setup at 6.5KB of CSS. The main consideration is overlay rendering: Tour Kit uses CSS-based overlays rather than canvas, avoiding main-thread blocking.
 
 ### Can I use these Tailwind tokens with other tour libraries?
 
@@ -510,7 +510,7 @@ The `@theme` token definitions are plain CSS. Any tour library that accepts cust
       "name": "How does a headless tour library compare to styled ones for Tailwind projects?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Styled tour libraries ship 15-25KB of opinionated CSS. In a Tailwind project, you fight specificity to override defaults. A headless library like Tour Kit ships under 8KB gzipped with zero CSS, so your Tailwind classes are the only styles. No specificity wars, no dead CSS."
+        "text": "Styled tour libraries ship 15-25KB of opinionated CSS. In a Tailwind project, you fight specificity to override defaults. A headless library like Tour Kit ships under 23KB gzipped with zero CSS, so your Tailwind classes are the only styles. No specificity wars, no dead CSS."
       }
     },
     {
@@ -518,7 +518,7 @@ The `@theme` token definitions are plain CSS. Any tour library that accepts cust
       "name": "Does adding a product tour affect performance?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit's core targets under 8KB gzipped with zero runtime dependencies. Combined with Tailwind's purge, you ship only the CSS classes your tour uses. Netflix ships their entire Tailwind setup at 6.5KB of CSS — a well-built tour adds negligible weight."
+        "text": "Tour Kit's core targets under 23KB gzipped with zero runtime dependencies. Combined with Tailwind's purge, you ship only the CSS classes your tour uses. Netflix ships their entire Tailwind setup at 6.5KB of CSS — a well-built tour adds negligible weight."
       }
     },
     {

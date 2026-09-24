@@ -40,7 +40,7 @@ We weighted license and maintenance at 40% combined because [accessible interact
 
 | Library | Bundle (gzip) | React 19 | TypeScript | License | Accessibility | Best for |
 |---|---|---|---|---|---|---|
-| userTourKit | Under 8KB core | Yes | Strict | MIT | WCAG 2.1 AA | Design system teams |
+| userTourKit | Under 23KB core | Yes | Strict | BUSL-1.1 | WCAG 2.1 AA | Design system teams |
 | React Joyride | ~30KB | v3 only | Built-in (v3) | MIT | Partial | Quick drop-in tours |
 | Shepherd.js | ~25KB | Via wrapper | Built-in | MIT | Keyboard nav | Multi-framework teams |
 | Driver.js | ~5KB | Via hooks | Built-in | MIT | Minimal | Lightweight highlights |
@@ -56,7 +56,7 @@ Data verified April 2026. Sources: npm, GitHub, bundlephobia, official docs.
 
 <img src="/screenshots/user-tour-kit.avif" alt="Screenshot of userTourKit - Product Tours for React" width="800" style={{borderRadius: '8px'}} />
 
-userTourKit ships 10 composable packages under a single MIT license with no asterisks. The core weighs under 8KB gzipped. You install only the packages you need -- tours, hints, checklists, announcements, analytics, scheduling -- so your production bundle carries zero dead code. The headless architecture renders with your existing components (shadcn/ui, Radix, Tailwind, anything) rather than forcing its own opinions.
+userTourKit ships 10 composable packages under a single licence with no asterisks: free while you build, one key to ship. The core weighs under 23KB gzipped. You install only the packages you need -- tours, hints, checklists, announcements, analytics, scheduling -- so your production bundle carries zero dead code. The headless architecture renders with your existing components (shadcn/ui, Radix, Tailwind, anything) rather than forcing its own opinions.
 
 **The cost picture:** MIT license means unrestricted commercial use. The [Pro tier ($9.99 one-time)](/pricing) unlocks adoption tracking, analytics, announcements, checklists, media, and scheduling. Unlike SaaS models, there's no monthly bill that grows with your team. The trade-off: it's a younger project, so community resources (Stack Overflow threads, blog tutorials) are thinner than React Joyride's. You're investing in a smaller ecosystem with a bet on its growth trajectory.
 
@@ -181,7 +181,7 @@ Reactour takes a minimalist approach: define steps as `{ selector, content }` ob
 
 OnboardJS markets itself as a headless onboarding framework with a state machine core. The MIT-licensed open-source tier gives you tour logic, React bindings, and analytics plugins for PostHog and Supabase. But the product has a clear free-to-paid funnel: advanced features like dashboard management, multi-tour orchestration, and team collaboration sit behind a $59/month SaaS subscription.
 
-**The cost picture:** The MIT core is genuinely free and genuinely useful for basic tours. The question is where your needs land relative to the paywall. If you need analytics dashboards, A/B testing, or no-code tour editing, you're looking at $708/year -- more than 7x userTourKit Pro's one-time cost for comparable features. The project has a solo maintainer with an aggressive content strategy, which is both a strength (rapid iteration) and a risk (bus factor of one). Documentation is still maturing, so expect to spend time reading source code rather than polished guides.
+**The cost picture:** Tour Kit is genuinely free to develop against, and a one-time key from $9.99 covers shipping it. If you need analytics dashboards, A/B testing, or no-code tour editing, you're looking at $708/year -- many times userTourKit's one-time cost for comparable features. The project has a solo maintainer with an aggressive content strategy, which is both a strength (rapid iteration) and a risk (bus factor of one). Documentation is still maturing, so expect to spend time reading source code rather than polished guides.
 
 **Strengths:**
 - Headless architecture: you own every pixel of the tour UI
@@ -317,4 +317,4 @@ Rough estimates for a 5-step tour in a React 19 + TypeScript project: React Joyr
 
 ### Can I use these libraries in a commercial SaaS product for free?
 
-Eight of nine: yes. React Joyride, Shepherd.js, Driver.js, Reactour, OnboardJS (core), Onborda, GuideChimp, and userTourKit are all MIT-licensed, which permits unrestricted commercial use with no obligation to open-source your code. Intro.js is the exception: its AGPL-3.0 license requires you to either release your entire application's source code or purchase a commercial license. "Open source" does not automatically mean "free for commercial use" -- always check the specific license.
+Seven of nine: yes. React Joyride, Shepherd.js, Driver.js, Reactour, OnboardJS (core), Onborda, and GuideChimp are MIT-licensed, which permits unrestricted commercial use with no obligation to open-source your code. userTourKit's core is BUSL-1.1-licensed instead: free in development with a licence key for production. Intro.js is the exception: its AGPL-3.0 license requires you to either release your entire application's source code or purchase a commercial license. "Open source" does not automatically mean "free for commercial use" -- always check the specific license.

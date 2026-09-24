@@ -17,7 +17,7 @@ ogImage: /og-images/react-onboarding-wizard.png
 
 Most React "onboarding wizard" tutorials hand you a `currentStep` counter and call it done. Focus management when steps change? Missing. ARIA roles on the step indicators? Absent. Tracking where users drop off? Not even considered. You end up with something that looks like a wizard but fails screen readers and frustrates keyboard users.
 
-We tested five popular React stepper tutorials and found zero that implement `aria-current="step"` or manage focus on step transitions. Tour Kit takes a different approach. It gives you headless primitives for step sequencing, element highlighting, and scroll management while you keep full control of the rendering. The core ships at under 8KB gzipped with zero runtime dependencies (verified on [bundlephobia](https://bundlephobia.com/)). By the end of this tutorial, you'll have a working 4-step onboarding wizard with a stepper UI, proper ARIA roles, and optional analytics tracking.
+We tested five popular React stepper tutorials and found zero that implement `aria-current="step"` or manage focus on step transitions. Tour Kit takes a different approach. It gives you headless primitives for step sequencing, element highlighting, and scroll management while you keep full control of the rendering. The core ships at under 23KB gzipped with zero runtime dependencies (verified on [bundlephobia](https://bundlephobia.com/)). By the end of this tutorial, you'll have a working 4-step onboarding wizard with a stepper UI, proper ARIA roles, and optional analytics tracking.
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -281,7 +281,7 @@ The right stepper library depends on your bundle budget, accessibility requireme
   <tbody>
     <tr>
       <td>Bundle size (gzipped)</td>
-      <td>&lt;8KB core</td>
+      <td>&lt;23KB core</td>
       <td>&lt;1KB</td>
       <td>&#126;80KB+ (MUI dep)</td>
       <td>&#126;0.5-2KB</td>
@@ -374,7 +374,7 @@ A React onboarding wizard is a multi-step UI component that guides new users thr
 
 ### Does Tour Kit support React 19?
 
-Tour Kit works with both React 18.2+ and React 19. The library uses hooks (`useTour`, `useStep`) that are compatible with React's concurrent features. The core package ships at under 8KB gzipped with zero peer dependencies beyond React itself.
+Tour Kit works with both React 18.2+ and React 19. The library uses hooks (`useTour`, `useStep`) that are compatible with React's concurrent features. The core package ships at under 23KB gzipped with zero peer dependencies beyond React itself.
 
 ### How is Tour Kit different from React Joyride for wizards?
 
@@ -382,7 +382,7 @@ React Joyride is designed for tooltip-based product tours that highlight existin
 
 ### Does adding a stepper wizard affect performance?
 
-Tour Kit's core adds under 8KB gzipped to your bundle, compared to MUI Stepper at roughly 80KB+. As the LogRocket blog notes, "adding a third-party package for every development requirement isn't always a good choice" ([source](https://blog.logrocket.com/add-stepper-components-react-app/)). Under 8KB for step management, focus handling, and ARIA support is a reasonable trade-off.
+Tour Kit's core adds under 23KB gzipped to your bundle, compared to MUI Stepper at roughly 80KB+. As the LogRocket blog notes, "adding a third-party package for every development requirement isn't always a good choice" ([source](https://blog.logrocket.com/add-stepper-components-react-app/)). Under 23KB for step management, focus handling, and ARIA support is a reasonable trade-off.
 
 ### Can I use Tour Kit's wizard with shadcn/ui?
 
@@ -473,7 +473,7 @@ Yes. Tour Kit is headless, managing step logic through hooks without rendering a
       "name": "Does Tour Kit support React 19?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit works with both React 18.2+ and React 19. The library uses hooks (useTour, useStep) compatible with React's concurrent features. The core package ships at under 8KB gzipped with zero peer dependencies beyond React itself."
+        "text": "Tour Kit works with both React 18.2+ and React 19. The library uses hooks (useTour, useStep) compatible with React's concurrent features. The core package ships at under 23KB gzipped with zero peer dependencies beyond React itself."
       }
     },
     {
@@ -489,7 +489,7 @@ Yes. Tour Kit is headless, managing step logic through hooks without rendering a
       "name": "Does adding a stepper wizard affect performance?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit's core adds under 8KB gzipped to your bundle, compared to MUI Stepper which pulls in roughly 80KB+. Under 8KB for step management, focus handling, and ARIA support is a reasonable trade-off for most applications."
+        "text": "Tour Kit's core adds under 23KB gzipped to your bundle, compared to MUI Stepper which pulls in roughly 80KB+. Under 23KB for step management, focus handling, and ARIA support is a reasonable trade-off for most applications."
       }
     },
     {

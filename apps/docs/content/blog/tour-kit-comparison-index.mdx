@@ -19,7 +19,7 @@ We've published over 50 comparison articles, migration guides, and alternatives 
 
 Every comparison we've written is organized below by category: head-to-head matchups, library roundups, SaaS alternatives, migration paths, and pricing breakdowns. Each section includes a summary table so you can scan without clicking through, plus links to the full deep-dives when you want the details.
 
-**Quick install for Tour Kit (open-source, MIT):**
+**Quick install for Tour Kit (source-available, BUSL-1.1):**
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -29,7 +29,7 @@ npm install @tourkit/core @tourkit/react
 
 ## What is Tour Kit?
 
-Tour Kit is a headless, composable product tour library for React. It ships as 10 individual packages you install based on what you need: tours, hints, checklists, announcements, surveys, analytics, scheduling, and more. The core package weighs under 8KB gzipped with zero runtime dependencies. It works with any design system because it doesn't ship UI. You render your own components using the hooks and primitives it provides.
+Tour Kit is a headless, composable product tour library for React. It ships as 10 individual packages you install based on what you need: tours, hints, checklists, announcements, surveys, analytics, scheduling, and more. The core package weighs under 23KB gzipped with zero runtime dependencies. It works with any design system because it doesn't ship UI. You render your own components using the hooks and primitives it provides.
 
 That headless architecture is the thing every comparison on this page comes back to. Libraries like React Joyride and Shepherd.js ship pre-built tooltips. SaaS platforms like Appcues and Userpilot inject an external script. Tour Kit does neither. You get the tour logic, state management, positioning, and accessibility primitives. You write the JSX.
 
@@ -56,8 +56,8 @@ This table compares Tour Kit against every major open-source library and SaaS pl
 <tr>
 <td><strong>Tour Kit</strong></td>
 <td>Library</td>
-<td>&lt;8KB core (gzipped)</td>
-<td>MIT</td>
+<td>&lt;23KB core (gzipped)</td>
+<td>BUSL-1.1</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅ Native</td>
@@ -224,7 +224,7 @@ The open-source product tour ecosystem includes over a dozen actively maintained
 
 | Article | Focus |
 |---------|-------|
-| [Best free product tour libraries (open source only)](/blog/best-free-product-tour-libraries-open-source) | MIT and permissive licenses only |
+| [Best free product tour libraries (open source only)](/blog/best-free-product-tour-libraries-open-source) | MIT, BUSL-1.1 and AGPL options compared |
 | [Lightweight product tour libraries under 10KB](/blog/lightweight-product-tour-libraries-under-10kb) | Bundle size as the primary filter |
 | [Best product tour libraries for monorepo teams](/blog/best-product-tour-libraries-monorepo-design-system-teams) | Multi-package and design system integration |
 | [Best product tour tools with GDPR compliance](/blog/best-product-tour-tools-gdpr-compliance) | Privacy-first, no external scripts |
@@ -312,7 +312,7 @@ Money matters. These articles break down the real costs, not just sticker prices
 | [Cheapest product tour tool (2026)](/blog/cheapest-product-tour-tool-2026) | Price as the primary filter |
 | [Free trial vs freemium onboarding](/blog/free-trial-vs-freemium-onboarding) | Onboarding strategy, not tour tools |
 
-Tour Kit's pricing model is simple. The core three packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed and free forever. The seven extended packages require a one-time [$9.99 Pro license](/pricing). No monthly fees. No per-MAU pricing.
+Tour Kit's pricing model is simple. The core three packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are BUSL-1.1-licensed and source-available (free in development, licence key in production), as is every package. One one-time [$9.99 licence](/pricing) covers them all. No monthly fees. No per-MAU pricing.
 
 ## How to choose the right comparison
 
@@ -374,7 +374,7 @@ Browse the [documentation](https://usertourkit.com/) or check out the source on 
 
 ### What is the best product tour library for React in 2026?
 
-Tour Kit is the best product tour library for React developers who want full design control. Its headless architecture lets you render tours with your existing components, whether that's shadcn/ui, Radix, Tailwind, or something custom. The core package ships at under 8KB gzipped with native React 19 support. React Joyride remains the most popular by download count if you want pre-built UI instead.
+Tour Kit is the best product tour library for React developers who want full design control. Its headless architecture lets you render tours with your existing components, whether that's shadcn/ui, Radix, Tailwind, or something custom. The core package ships at under 23KB gzipped with native React 19 support. React Joyride remains the most popular by download count if you want pre-built UI instead.
 
 ### How does Tour Kit compare to SaaS tools like Appcues?
 
@@ -382,7 +382,7 @@ Tour Kit is a React library you install as a dependency. Appcues is a hosted pla
 
 ### Is Tour Kit free?
 
-The core three packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed and free forever. The seven extended packages require a one-time $9.99 Pro license. No subscriptions. No per-MAU pricing. See [Tour Kit free vs Pro](/blog/tour-kit-free-vs-pro) for the full breakdown.
+The core three packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are BUSL-1.1-licensed and source-available (free in development, licence key in production), as is every package. One one-time $9.99 licence covers them all. No subscriptions. No per-MAU pricing. See [pricing](/pricing) for the full breakdown.
 
 ### Can I migrate from React Joyride to Tour Kit?
 

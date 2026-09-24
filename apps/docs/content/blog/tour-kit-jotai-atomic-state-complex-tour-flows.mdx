@@ -17,7 +17,7 @@ ogImage: /og-images/tour-kit-jotai-atomic-state-complex-tour-flows.png
 
 Product tours break down the moment you need conditional steps. "Show step 3 only if the user completed steps 1 and 2" sounds simple until you're threading that logic through React Context or a Zustand store with manual selectors. Most tour libraries sidestep this problem entirely. They manage state internally and give you no way to compose it with the rest of your app.
 
-Tour Kit is a headless React product tour library (&lt;8KB gzipped) that gives you the tour logic without prescribing how you manage state. Jotai (~2.9KB gzipped) breaks state into independent atoms that compose through a dependency graph. Together, they turn complex tour flows into something you can actually reason about.
+Tour Kit is a headless React product tour library (&lt;23KB gzipped) that gives you the tour logic without prescribing how you manage state. Jotai (~2.9KB gzipped) breaks state into independent atoms that compose through a dependency graph. Together, they turn complex tour flows into something you can actually reason about.
 
 By the end of this tutorial, you'll have a multi-step product tour where steps depend on each other, progress persists across sessions, and only the components that need to re-render actually do.
 
@@ -406,7 +406,7 @@ Tour Kit and Jotai both work with Next.js App Router. Wrap your root layout in J
 
 ### How does Jotai's bundle size compare to other state managers for tour state?
 
-Jotai's core adds approximately 2.9KB gzipped to your bundle, compared to Zustand at 1.1KB and Redux Toolkit at 14KB ([Better Stack, 2025](https://betterstack.com/community/guides/scaling-nodejs/zustand-vs-redux-toolkit-vs-jotai/)). Combined with Tour Kit's core at under 8KB gzipped, the total stays under 11KB. That's lighter than React Joyride alone at 35KB+.
+Jotai's core adds approximately 2.9KB gzipped to your bundle, compared to Zustand at 1.1KB and Redux Toolkit at 14KB ([Better Stack, 2025](https://betterstack.com/community/guides/scaling-nodejs/zustand-vs-redux-toolkit-vs-jotai/)). Combined with Tour Kit's core at under 23KB gzipped, the total stays under 11KB. That's lighter than React Joyride alone at 35KB+.
 
 ### Is Jotai overkill for a simple 3-step tour?
 

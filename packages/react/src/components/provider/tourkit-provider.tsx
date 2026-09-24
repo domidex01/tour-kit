@@ -121,9 +121,9 @@ export function MultiTourKitProvider({
     [registerTour, unregisterTour, tours]
   )
 
-  // The multi-tour path gets the badge too. `LicenseWatermark` elects a single
-  // owner across instances, so mounting this alongside <TourProvider> or a Pro
-  // package still renders exactly one.
+  // The multi-tour path gets the badge too. The badge is held by a count in
+  // `@tour-kit/license`'s `mountWatermark`, so mounting this alongside
+  // <TourProvider> or a Pro package still renders exactly one.
   return (
     <LicenseGate require="pro">
       <TourRegistryContext.Provider value={registryValue}>

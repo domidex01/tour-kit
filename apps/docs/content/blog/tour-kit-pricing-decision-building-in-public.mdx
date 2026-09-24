@@ -27,7 +27,7 @@ ogImage: /og-images/tour-kit-pricing-decision-building-in-public.png
 
 I spent three weeks staring at a spreadsheet with one column: "Price." The rows were $49, $79, $99, $149, $199. Each had a napkin-math revenue projection. None of them felt right.
 
-Tour Kit is a headless product tour library for React. Ten packages, MIT core, TypeScript-first. The kind of thing most developers expect to be free. And most of it is. But the extended packages (surveys, scheduling, adoption tracking) need to pay for themselves or they stop getting maintained.
+Tour Kit is a headless product tour library for React. Seventeen packages, BUSL-1.1 source-available core, TypeScript-first. The kind of thing most developers expect to be free. And most of it is. But the extended packages (surveys, scheduling, adoption tracking) need to pay for themselves or they stop getting maintained.
 
 This is the full story of how I landed on $99 one-time. The spreadsheets, the wrong assumptions, the data that changed my mind, and the math I wish someone had shown me before I started.
 
@@ -35,7 +35,7 @@ This is the full story of how I landed on $99 one-time. The spreadsheets, the wr
 npm install @tourkit/core @tourkit/react
 ```
 
-The core and React packages are MIT. Free forever. What follows is about the Pro tier.
+The core and React packages are BUSL-1.1 (free in development, licence key in production). What follows is about the Pro tier.
 
 ## The starting point: subscription was the default
 
@@ -79,7 +79,7 @@ react-admin generates roughly 1 million euros per year from their open-core mode
 
 $99 it was.
 
-## Key decision 3: where to draw the MIT/Pro line
+## Key decision 3: where to draw the source-available/Pro line
 
 This is the decision that keeps open-core maintainers up at night. Draw the line wrong and your community revolts. The [n8n pricing controversy](https://psbigbig.medium.com/open-source-vs-open-core-what-the-n8n-pricing-debate-taught-me-and-why-my-project-cant-even-8c6273f21adb) showed what happens when the boundary feels arbitrary:
 
@@ -92,7 +92,7 @@ The split maps to *who benefits*, not what I could charge for:
 <table>
   <thead>
     <tr>
-      <th>MIT (free forever)</th>
+      <th>BUSL-1.1 (free in dev)</th>
       <th>Pro ($99 one-time)</th>
     </tr>
   </thead>
@@ -132,7 +132,7 @@ The split maps to *who benefits*, not what I could charge for:
   </tbody>
 </table>
 
-The MIT packages give you a complete product tour system. Steps, navigation, highlighting, hints, persistence, keyboard navigation, screen reader support. A solo developer building their first onboarding flow never hits a paywall.
+The BUSL-1.1 source-available packages give you a complete product tour system. Steps, navigation, highlighting, hints, persistence, keyboard navigation, screen reader support. A solo developer building their first onboarding flow never hits a paywall in development.
 
 The Pro packages solve organizational problems: NPS surveys, onboarding checklists, feature adoption tracking, scheduled announcements. These are things a product team needs, not a single developer. [OpenLogic's 2023 survey](https://www.getmonetizely.com/articles/monetizing-open-source-software-pricing-strategies-for-open-core-saas) found that 67% of enterprises using open-core products eventually upgrade to paid tiers. The funnel works when the boundary makes sense to the buyer.
 
@@ -160,7 +160,7 @@ Should have done that from the start.
 
 ## What worked: the boundary nobody argued with
 
-The MIT/Pro split landed without controversy. Not a single GitHub issue, not one angry tweet. I think it's because the boundary follows a natural line: individual developer needs (free) vs. organizational needs (paid). Nobody expects NPS survey infrastructure to be free. Nobody feels cheated that basic tour steps are MIT.
+The source-available/Pro split landed without controversy. Not a single GitHub issue, not one angry tweet. I think it's because the boundary follows a natural line: individual developer needs (free) vs. organizational needs (paid). Nobody expects NPS survey infrastructure to be free. Nobody feels cheated that basic tour steps are source-available.
 
 The $99 one-time model also eliminated an entire category of support tickets. No failed renewals. No "my subscription lapsed and tours stopped working." No mid-quarter budget reviews where someone cancels your tool. Once installed, Tour Kit works. Forever.
 
@@ -193,7 +193,7 @@ But it's not guaranteed either. Tour Kit doesn't have React Joyride's 603K weekl
 
 The $99 price isn't permanent. It's the launch price, and I'll adjust based on real data. If the Pro packages deliver enough value that teams would pay $149, the price goes up. If 54/month turns out to be too ambitious for a young library, it goes down.
 
-But the model stays: one-time payment, MIT core, Pro extensions. No monthly meter running between developers and their own code.
+But the model stays: one-time payment, BUSL-1.1 core, Pro extensions. No monthly meter running between developers and their own code.
 
 If you want to see the free tier in action, the core and React packages are on npm:
 

@@ -127,10 +127,10 @@ function WelcomeButton() {
 | TypeScript-native | ✅ | ✅ | Community types | ✅ | ✅ |
 | Multi-page / router-aware | ✅ | Manual | ❌ | Manual | ❌ |
 | Branching & skip logic | ✅ | Limited | ❌ | Limited | ❌ |
-| Bundle (gzip) | < 8 KB | ~24 KB | ~16 KB | ~10 KB | ~5 KB |
+| Bundle (gzip) | 23 KB full / 18 KB engine-only | ~24 KB | ~16 KB | ~10 KB | ~5 KB |
 | `prefers-reduced-motion` | ✅ | ❌ | ❌ | ❌ | ❌ |
 | RTL support | ✅ | ❌ | ❌ | ❌ | ❌ |
-| License | MIT | MIT | GPL/Commercial | MIT | MIT |
+| License | BUSL-1.1 (MIT after 4y) | MIT | GPL/Commercial | MIT | MIT |
 | Framework | Any React | React | Vanilla + wrappers | Any | Vanilla |
 
 ## API Reference
@@ -304,6 +304,15 @@ function App() {
 
 Full documentation: [https://usertourkit.com/docs/core](https://usertourkit.com/docs/core)
 
-## License
+## Licence
 
-MIT © Tour Kit Team
+[Business Source License 1.1](./LICENSE.md). Development, evaluation, testing,
+CI and any non-production environment are free and need no key. **Production
+use needs a licence key** — a one-time purchase from $9.99 at
+[usertourkit.com/pricing](https://usertourkit.com/pricing). Each version
+converts to MIT on its Change Date, four years after release.
+
+Versions up to and including 2.1.0 were published under MIT and stay MIT — an
+MIT grant cannot be withdrawn. This applies from 3.0.0 onward.
+
+© 2026 domidex01

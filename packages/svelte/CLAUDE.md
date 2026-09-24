@@ -62,7 +62,13 @@ overlay, no `@floating-ui/*`. The consumer renders their own card — see
   gate is `no-react-in-dist.test.ts`, which uses `specifierPattern` from
   `tooling/bundle-check/closure.mjs` and matches only actual import specifiers.
   Do not "fix" the substring.
-- **`private: true` until the v2 licence lands (§3.2).**
+- **The licence gate is started in `onMount`, and its release joins `detach`.**
+  `startLicenseGate` comes from `@tour-kit/license/headless` — the React-free
+  entry — and reads `location` plus `document.body`, so it cannot run in the
+  `<script>`. It is not optional and not a peer: an opt-in gate is no gate.
+- **BUSL-1.1, published.** Production use needs a key; development, evaluation,
+  testing and CI do not. Without a key the binding works in full and layers the
+  badge on non-development hosts.
 
 ## Commands
 

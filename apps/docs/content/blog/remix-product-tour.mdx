@@ -16,7 +16,7 @@ lastUpdated: "2026-04-07"
 
 # Product tours in Remix: setup, routing, and best practices
 
-Remix apps handle data through loaders and actions at the route level, which means product tour libraries that assume component-level state don't fit cleanly. Most React tour tutorials target Next.js or plain Create React App setups and skip Remix-specific patterns like nested route persistence, loader-driven tour config, and focus management across route transitions. userTourKit is a headless React product tour library (core under 8KB gzipped) that works with Remix's architecture instead of against it. By the end of this tutorial you'll have a working multi-step tour that persists across nested route changes and stores completion state through Remix actions.
+Remix apps handle data through loaders and actions at the route level, which means product tour libraries that assume component-level state don't fit cleanly. Most React tour tutorials target Next.js or plain Create React App setups and skip Remix-specific patterns like nested route persistence, loader-driven tour config, and focus management across route transitions. userTourKit is a headless React product tour library (core under 23KB gzipped) that works with Remix's architecture instead of against it. By the end of this tutorial you'll have a working multi-step tour that persists across nested route changes and stores completion state through Remix actions.
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -445,7 +445,7 @@ Yes. Define your steps array in a loader and pass it to the component through `u
 
 ### Does adding a product tour affect Remix performance?
 
-userTourKit's core is under 8KB gzipped, and the React package adds another 4KB. The spotlight overlay uses CSS transforms, not JavaScript-driven animations, so there's no layout thrashing. Remix's server-first rendering means the tour JavaScript only loads on the client during hydration, keeping your initial server response lean.
+userTourKit's core is under 23KB gzipped, and the React package adds another 4KB. The spotlight overlay uses CSS transforms, not JavaScript-driven animations, so there's no layout thrashing. Remix's server-first rendering means the tour JavaScript only loads on the client during hydration, keeping your initial server response lean.
 
 ### How is userTourKit different from using React Joyride in Remix?
 

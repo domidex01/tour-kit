@@ -50,7 +50,7 @@ The comparison below uses real pricing from vendor sites (as of April 2026), bun
     <tr>
       <td>Monthly cost (2,000 MAU)</td>
       <td>$279-$300/month</td>
-      <td>$0 (MIT) or $9.99 one-time (Tour Kit Pro)</td>
+      <td>$0 in dev (BUSL-1.1) or $9.99 one-time (Tour Kit Pro)</td>
     </tr>
     <tr>
       <td>Monthly cost (10,000 MAU)</td>
@@ -60,7 +60,7 @@ The comparison below uses real pricing from vendor sites (as of April 2026), bun
     <tr>
       <td>Bundle impact</td>
       <td>Third-party script (size unpublished)</td>
-      <td>Tour Kit core: &lt;8KB gzipped</td>
+      <td>Tour Kit core: &lt;23KB gzipped</td>
     </tr>
     <tr>
       <td>Design system match</td>
@@ -165,7 +165,7 @@ Chameleon's own documentation acknowledges that customization requires "signific
 
 ### Performance is a black box
 
-No-code tools inject third-party scripts into your application. None of them publish their payload sizes, initialization times, or Core Web Vitals impact. We tested Tour Kit's core at under 8KB gzipped with zero runtime dependencies. We can't make the same comparison with Appcues because they don't publish the number.
+No-code tools inject third-party scripts into your application. None of them publish their payload sizes, initialization times, or Core Web Vitals impact. We tested Tour Kit's core at under 23KB gzipped with zero runtime dependencies. We can't make the same comparison with Appcues because they don't publish the number.
 
 For teams with strict performance budgets, this opacity is a dealbreaker. Google's Core Web Vitals report shows pages loading large JS bundles see measurably higher bounce rates on mobile ([web.dev](https://web.dev/vitals/)).
 
@@ -203,11 +203,11 @@ npm install @tourkit/core @tourkit/react @tourkit/analytics
 
 ### Should I use Appcues or write my own product tours?
 
-Appcues makes sense when non-technical PMs need to create tours without developers, and $300-750/month fits your budget. Use a library like Tour Kit when you need design system consistency, WCAG 2.1 AA compliance, or $3,600+/year doesn't fit your runway. Tour Kit ships at under 8KB gzipped with analytics and surveys built in.
+Appcues makes sense when non-technical PMs need to create tours without developers, and $300-750/month fits your budget. Use a library like Tour Kit when you need design system consistency, WCAG 2.1 AA compliance, or $3,600+/year doesn't fit your runway. Tour Kit ships at under 23KB gzipped with analytics and surveys built in.
 
 ### How much do no-code onboarding tools cost in 2026?
 
-As of April 2026, no-code tools use MAU-based pricing: Appcues starts at $300/month, Userpilot at $299/month, Chameleon at $299/month, and Pendo ranges from $15,000 to $140,000+/year. All prices scale with your user base. Libraries like Tour Kit cost $0 (MIT) or $9.99 one-time for Pro features with no MAU scaling.
+As of April 2026, no-code tools use MAU-based pricing: Appcues starts at $300/month, Userpilot at $299/month, Chameleon at $299/month, and Pendo ranges from $15,000 to $140,000+/year. All prices scale with your user base. Libraries like Tour Kit cost $0 in development (BUSL-1.1) or $9.99 one-time for Pro features with no MAU scaling.
 
 ### Can a product tour library replace a no-code tool?
 
@@ -215,7 +215,7 @@ A library replaces a no-code tool for tour creation, step targeting, and UI rend
 
 ### Do no-code product tour tools affect performance?
 
-No-code tools inject third-party JavaScript into your application. None of the major vendors (Appcues, Userpilot, Chameleon, Pendo) publish their script payload sizes or Core Web Vitals impact. This makes performance impact unauditable. Tour Kit's core bundle is under 8KB gzipped with zero runtime dependencies, and it renders inside your React tree without script injection.
+No-code tools inject third-party JavaScript into your application. None of the major vendors (Appcues, Userpilot, Chameleon, Pendo) publish their script payload sizes or Core Web Vitals impact. This makes performance impact unauditable. Tour Kit's core bundle is under 23KB gzipped with zero runtime dependencies, and it renders inside your React tree without script injection.
 
 ### What is vendor lock-in risk with no-code onboarding tools?
 

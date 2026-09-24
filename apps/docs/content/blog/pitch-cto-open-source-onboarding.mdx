@@ -27,7 +27,7 @@ We built [Tour Kit](https://tourkit.dev/docs), so take everything here with appr
 
 ## What is open-source onboarding, and how does it differ from SaaS tools?
 
-Open-source onboarding is a code-first approach where product tours, tooltips, checklists, and feature announcements are built using MIT-licensed React libraries that ship inside your application bundle, rather than injected by a third-party SaaS vendor's external script. Unlike platforms like Appcues or Pendo that charge per monthly active user and control the rendering pipeline, an open-source library gives engineering teams full ownership of the onboarding logic, styling, and deployment lifecycle. As of April 2026, libraries like Tour Kit ship at under 8KB gzipped with zero runtime dependencies, compared to 50-200KB of uncontrollable injected scripts from SaaS alternatives.
+Open-source onboarding is a code-first approach where product tours, tooltips, checklists, and feature announcements are built using source-available React libraries that ship inside your application bundle, rather than injected by a third-party SaaS vendor's external script. Unlike platforms like Appcues or Pendo that charge per monthly active user and control the rendering pipeline, an open-source library gives engineering teams full ownership of the onboarding logic, styling, and deployment lifecycle. As of April 2026, libraries like Tour Kit ship at under 23KB gzipped with zero runtime dependencies, compared to 50-200KB of uncontrollable injected scripts from SaaS alternatives.
 
 The distinction matters because it changes who controls the onboarding experience. With SaaS, your product team builds flows in a vendor's editor, and those flows render through code you can't inspect or version. With a library, onboarding flows are TypeScript files that go through the same code review, testing, and CI/CD pipeline as the rest of your application.
 
@@ -85,7 +85,7 @@ CTOs respond to numbers, not opinions, and the three-year total cost of ownershi
     <tr>
       <td>Bundle size impact</td>
       <td>50-200KB+ injected script (uncontrollable)</td>
-      <td>8KB gzipped core (tree-shakeable)</td>
+      <td>23KB gzipped core (tree-shakeable)</td>
     </tr>
     <tr>
       <td>Training cost per engineer</td>
@@ -164,7 +164,7 @@ Tour Kit doesn't have a visual editor. That's a real limitation. It's also a fea
 
 ### "License compliance is a risk"
 
-Real concern. 63% of enterprises have experienced open-source license violations in the past two years ([CTO Magazine](https://ctomagazine.com/open-source-software-pros-and-cons/)). The mitigation is choosing permissive licenses. Tour Kit uses MIT, which allows unrestricted use, modification, and distribution with no copyleft obligations. No GPL contamination risk.
+Real concern. 63% of enterprises have experienced open-source license violations in the past two years ([CTO Magazine](https://ctomagazine.com/open-source-software-pros-and-cons/)). The mitigation is choosing permissive or source-available licenses. Tour Kit uses BUSL-1.1, which allows unrestricted development use, modification, and distribution with no copyleft obligations (production needs a licence key). No GPL contamination risk.
 
 Compare that to Shepherd.js, which uses AGPL, a copyleft license that can affect your proprietary codebase if you're not careful about distribution boundaries.
 

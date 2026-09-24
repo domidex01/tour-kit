@@ -14,23 +14,24 @@ const PACKAGES_ROOT = path.resolve(__dirname, '..')
  * This used to read `['core', 'react', 'hints', 'vue', 'svelte']` and was
  * named after a free tier that no longer exists — every package is now
  * BSL 1.1, so "free package" is not the reason any of these stay licence-free.
- * The reasons that survive are structural, and they are different per package:
+ * One structural reason survives, and it applies to exactly one package:
  *
- * - `core` has 77 B of dist-gzip headroom, and its `/engine` subpath must stay
- *   React-free while `LicenseGate` is a React component.
- * - `vue` and `svelte` import `@tour-kit/core/engine` only, so no React
- *   reaches their `.d.ts` chains — and they have no React tree to portal a
- *   badge from. They are covered by the licence and render no badge, which
- *   their READMEs state rather than leaving to silence.
+ * - `core` cannot import the licence package because the licence package
+ *   imports `core`. The rule here is a cycle guard, not a policy — and it is
+ *   also what keeps `core/engine` React-free and core's 77 B of dist-gzip
+ *   headroom intact.
  *
- * `react` and `hints` were removed deliberately: they now mount `LicenseGate`,
+ * `react` and `hints` were removed when they started mounting `LicenseGate`,
  * which is the whole point of the licence-payment work — the badge reaching
- * the two packages consumers actually install.
+ * the packages consumers actually install. `vue` and `svelte` followed when
+ * they went public under BUSL-1.1: they have no React tree to portal a badge
+ * from, so they start the DOM gate from `@tour-kit/license/headless` instead.
+ * That entry is React-free, which is what keeps their `.d.ts` chains clean.
  */
-const LICENCE_FREE_PACKAGES = ['core', 'vue', 'svelte']
+const LICENCE_FREE_PACKAGES = ['core']
 
 /** Packages that MUST import it — the positive control, so a broken scan fails. */
-const LICENCE_GATED_PACKAGES = ['react', 'hints']
+const LICENCE_GATED_PACKAGES = ['react', 'hints', 'vue', 'svelte']
 
 function getAllFiles(dir: string, extensions: string[]): string[] {
   const results: string[] = []

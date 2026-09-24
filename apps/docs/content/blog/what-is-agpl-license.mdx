@@ -75,18 +75,18 @@ The [SPDX License List](https://spdx.org/licenses/) maintained by the Linux Foun
 
 ## License choice in the product tour ecosystem
 
-When we built [Tour Kit](https://usertourkit.com/), we chose MIT licensing deliberately. The reasoning was practical: a product tour library gets bundled directly into your application's frontend. AGPL would mean every SaaS company using Tour Kit might need to disclose their application source code. That's a non-starter for most teams.
+When we built [Tour Kit](https://usertourkit.com/), we ruled out copyleft deliberately. The reasoning was practical: a product tour library gets bundled directly into your application's frontend. AGPL would mean every SaaS company using Tour Kit might need to disclose their application source code. That's a non-starter for most teams.
 
 MIT imposes zero restrictions. Copy it, modify it, sell products with it, never mention it again. The entire license text is 21 lines. Your legal team won't flag it because there's nothing to flag.
 
-The tradeoff is real, though. MIT doesn't prevent large companies from taking Tour Kit's code and building a competing product. AGPL would. We decided wider adoption mattered more than protection from theoretical competition. (For more on that decision, see [why we chose MIT over AGPL and BSL](/blog/why-we-open-sourced-tour-kit-mit-not-agpl-bsl).)
+The tradeoff was real, and we changed our mind about it: MIT didn't prevent large companies from taking Tour Kit's code and building a competing product, and it didn't fund the maintenance either. Tour Kit is BSL 1.1 today. (For more on that decision, see [why we chose MIT over AGPL and BSL](/blog/why-we-open-sourced-tour-kit-mit-not-agpl-bsl).)
 
 ```bash
 # MIT-licensed: install without a legal review
 npm install @tourkit/core @tourkit/react
 ```
 
-Tour Kit isn't alone in this approach. React, Next.js, Tailwind CSS, Radix UI, and shadcn/ui all use MIT. The libraries that form the modern React stack overwhelmingly chose permissive licensing because they're designed to be embedded in commercial products.
+React, Next.js, Tailwind CSS, Radix UI, and shadcn/ui all use MIT. The libraries that form the modern React stack overwhelmingly chose permissive licensing because they're designed to be embedded in commercial products.
 
 ## FAQ
 

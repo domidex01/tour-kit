@@ -81,8 +81,8 @@ export function HintsProvider({ children, hints, storage }: HintsProviderProps) 
 
   // `LicenseGate` renders children unconditionally and layers a badge on a
   // non-development host with no valid key, so nothing here can fail to render
-  // because a key is missing. `LicenseWatermark` elects a single owner across
-  // packages, so hints + react + a Pro package still shows exactly one badge.
+  // because a key is missing. The badge is held by a count across packages, so
+  // hints + react + a Pro package still shows exactly one badge.
   return (
     <LicenseGate require="pro">
       <HintsContext.Provider value={contextValue}>{children}</HintsContext.Provider>

@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped. Driver.js is a framework-agnostic highlight-and-tour library at ~5KB gzipped with zero dependencies. userTourKit suits React teams that want component-level control and built-in accessibility. Driver.js is better when you need a quick, lightweight tour on a non-React project.
+userTourKit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 23KB gzipped. Driver.js is a framework-agnostic highlight-and-tour library at ~5KB gzipped with zero dependencies. userTourKit suits React teams that want component-level control and built-in accessibility. Driver.js is better when you need a quick, lightweight tour on a non-React project.
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade.
+userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with a source-available core (BUSL-1.1, free in development) and $9.99 one-time Pro upgrade.
 
 ## What is Driver.js?
 
@@ -32,7 +32,7 @@ Driver.js has no built-in element observer. If your target element hasn't render
 
 Driver.js doesn't have hints. You can call `highlight()` on a single element, but there's no persistent hotspot system, no pulsing beacons, no per-hint dismissal state.
 
-userTourKit's `@tour-kit/hints` package (under 5KB gzipped) provides `HintsProvider`, `HintHotspot`, `HintTooltip` components. Each hint tracks its own dismissed state through the storage adapter, persisting across page loads.
+userTourKit's `@tour-kit/hints` package (under 6.5KB gzipped) provides `HintsProvider`, `HintHotspot`, `HintTooltip` components. Each hint tracks its own dismissed state through the storage adapter, persisting across page loads.
 
 The `useHint` hook gives you per-hint control: `isVisible`, `isDismissed`, `show`, `hide`, `dismiss`. Non-sequential by design. They sit on the page until the user interacts with them.
 
@@ -88,9 +88,9 @@ userTourKit ships WCAG 2.1 AA compliance by default. The `useFocusTrap` hook kee
 
 Driver.js wins here. Around 5KB gzipped with zero dependencies. That's genuinely small, and the number is accurate (the `package.json` contains only devDependencies).
 
-userTourKit's core ships under 8KB gzipped. The React package adds under 12KB, hints under 5KB. These are peer dependencies, so you only ship what you import. Tree-shaking works because all packages output ESM via tsup. But comparing tour functionality only, Driver.js is smaller.
+userTourKit's core ships under 23KB gzipped. The React package adds under 12KB, hints under 6.5KB. These are peer dependencies, so you only ship what you import. Tree-shaking works because all packages output ESM via tsup. But comparing tour functionality only, Driver.js is smaller.
 
-The trade-off is scope. Driver.js's 5KB gives you tours and highlighting. userTourKit's 8KB core includes the hook system, position engine, storage adapters, accessibility primitives, branching logic, persistence. That extra 3KB is the foundation for everything else in the ecosystem.
+The trade-off is scope. Driver.js's 5KB gives you tours and highlighting. userTourKit's 23KB core includes the hook system, position engine, storage adapters, accessibility primitives, branching logic, persistence. That extra 3KB is the foundation for everything else in the ecosystem.
 
 ### Framework support and TypeScript
 
@@ -110,7 +110,7 @@ userTourKit requires React 18 or later. If you're on React 16 or 17, or using Vu
 
 Both libraries use the MIT license for their core functionality. Driver.js is entirely MIT — no paid tier, no restrictions.
 
-userTourKit's three core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free. The extended packages (adoption, analytics, announcements, checklists, media, scheduling) require a one-time $9.99 Pro license. No subscriptions, no per-seat pricing.
+userTourKit's three core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are BUSL-1.1-licensed and source-available. The extended packages (adoption, analytics, announcements, checklists, media, scheduling) require a one-time $9.99 Pro license. No subscriptions, no per-seat pricing.
 
 For teams that only need tours and highlighting, Driver.js costs nothing. For teams that need checklists, analytics, or announcements, the choice is between Driver.js plus building those yourself, or userTourKit Pro at $9.99.
 
@@ -134,9 +134,9 @@ For teams that only need tours and highlighting, Driver.js costs nothing. For te
 | Router integration | ✅ Next.js, React Router | 🚫 Manual implementation |
 | Multi-page tours | ✅ Built-in persistence | ⚙️ Manual localStorage |
 | Conditional branching | ✅ Declarative + async | ⚙️ Via `setSteps()` in hooks |
-| Core bundle (gzipped) | &lt;8KB | ~5KB |
+| Core bundle (gzipped) | &lt;23KB | ~5KB |
 | Dependencies | React 18+ (peer) | Zero |
-| License | MIT (free tier) | MIT |
+| License | BUSL-1.1 (source-available) | MIT |
 | Pricing | Free + $9.99 one-time Pro | Free |
 | Framework support | React only | Any framework |
 
@@ -235,7 +235,7 @@ We built userTourKit, so take our perspective with appropriate skepticism. The n
 ## Frequently asked questions
 
 **Is userTourKit free?**
-The three core packages (@tour-kit/core, @tour-kit/react, @tour-kit/hints) are MIT-licensed and free. Extended packages for analytics, checklists, announcements, media, and scheduling require a one-time $9.99 Pro license. No subscriptions, no MAU caps.
+The three core packages (@tour-kit/core, @tour-kit/react, @tour-kit/hints) are BUSL-1.1-licensed and source-available. Extended packages for analytics, checklists, announcements, media, and scheduling require a one-time $9.99 Pro license. No subscriptions, no MAU caps.
 
 **What is the difference between userTourKit and Driver.js?**
 userTourKit is a React-specific headless library covering tours, hints, checklists, announcements, analytics, and scheduling. Driver.js is a framework-agnostic tour-and-highlight library. The core architectural difference: userTourKit uses React hooks and components, Driver.js uses imperative DOM manipulation.
@@ -247,7 +247,7 @@ Yes. Convert your step definitions from Driver.js's config object to userTourKit
 userTourKit supports React 18 and React 19. Built-in router adapters handle both Next.js App Router and Pages Router. SSR works through the noop storage adapter without hydration mismatches.
 
 **What is the bundle size of userTourKit vs Driver.js?**
-Driver.js ships at roughly 5KB gzipped with zero dependencies. userTourKit's core is under 8KB gzipped, the React package under 12KB, hints under 5KB. userTourKit packages are peer dependencies, so you only bundle what you import.
+Driver.js ships at roughly 5KB gzipped with zero dependencies. userTourKit's core is under 23KB gzipped, the React package under 12KB, hints under 6.5KB. userTourKit packages are peer dependencies, so you only bundle what you import.
 
 **Does Driver.js support checklists, analytics, or hints?**
 No. Driver.js provides step-by-step tours and element highlighting. For checklists, analytics plugins, persistent hints, announcements, or scheduling, you'd need to build those features yourself or use additional libraries.

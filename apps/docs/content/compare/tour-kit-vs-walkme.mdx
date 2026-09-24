@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library that ships tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped, for a $9.99 one-time Pro fee. WalkMe is SAP's enterprise digital adoption platform with a median annual contract of $43,000 and total first-year costs reaching $125,000-$500,000. userTourKit fits React teams building customer-facing product onboarding. WalkMe fits enterprises training thousands of employees across third-party applications like Salesforce and SAP S/4HANA.
+userTourKit is a headless React library that ships tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 23KB gzipped, for a $9.99 one-time Pro fee. WalkMe is SAP's enterprise digital adoption platform with a median annual contract of $43,000 and total first-year costs reaching $125,000-$500,000. userTourKit fits React teams building customer-facing product onboarding. WalkMe fits enterprises training thousands of employees across third-party applications like Salesforce and SAP S/4HANA.
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade.
+userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with a source-available core (BUSL-1.1, free in development) and $9.99 one-time Pro upgrade.
 
 ## What is WalkMe?
 
@@ -30,7 +30,7 @@ userTourKit takes a code-first approach. Steps are defined as a TypeScript array
 
 WalkMe provides ShoutOuts (modal popups) and Launchers (persistent on-screen buttons). But SAP's own training materials warn against overuse: "Numerous ShoutOuts popping up for end users or constantly replaying could lead to a frustrating user experience!" The overlay architecture makes subtle, contextual hints difficult because every element WalkMe adds is a foreign DOM node with its own styling.
 
-userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped) renders non-sequential hotspots as native React components. Each hint dismisses independently, persists across page loads, and inherits your design system's tokens. A pulsing beacon on a button looks like part of your app, not an overlay injected by a third-party script.
+userTourKit's `@tour-kit/hints` package (&lt;6.5KB gzipped) renders non-sequential hotspots as native React components. Each hint dismisses independently, persists across page loads, and inherits your design system's tokens. A pulsing beacon on a button looks like part of your app, not an overlay injected by a third-party script.
 
 ### Checklists and onboarding flows
 
@@ -86,7 +86,7 @@ The key difference in architecture shows up in the numbers. WalkMe loads a JavaS
 
 WalkMe still bundles its own internal `wmjQuery` library.
 
-userTourKit's core is under 8KB gzipped. The React package adds under 12KB. Hints add under 5KB. The total for all three free-tier packages is under 25KB gzipped, roughly 1.5% of WalkMe's CDN payload. userTourKit tree-shakes unused code, ships no jQuery, and runs zero continuous DOM scanning. On mobile connections, that difference translates to seconds of parse time.
+userTourKit's core is under 23KB gzipped. The React package adds under 12KB. Hints add under 6.5KB. The total for all three free-tier packages is under 25KB gzipped, roughly 1.5% of WalkMe's CDN payload. userTourKit tree-shakes unused code, ships no jQuery, and runs zero continuous DOM scanning. On mobile connections, that difference translates to seconds of parse time.
 
 ### Framework support and TypeScript
 
@@ -102,13 +102,13 @@ One TrustRadius reviewer reported being charged "tens of thousands of dollars" a
 
 As of Q1 2026, SAP has split WalkMe into separate "Digital Adoption" and "Digital Learning" SKUs. An Info-Tech analyst called this a potential "money grab." The SAP Enterprise Edition requires a minimum of 500 users.
 
-userTourKit's MIT-licensed free tier includes the core library, React bindings, and hints. The Pro tier costs $9.99 one-time (not recurring) and adds adoption tracking, analytics, announcements, checklists, media embedding, and scheduling. Zero contracts. Zero MAU limits. Buy it once and you're done.
+userTourKit's BUSL-1.1-licensed source-available tier includes the core library, React bindings, and hints. The Pro tier costs $9.99 one-time (not recurring) and adds adoption tracking, analytics, announcements, checklists, media embedding, and scheduling. Zero contracts. Zero MAU limits. Buy it once and you're done.
 
 ## Side-by-side comparison table
 
 | Category | userTourKit | WalkMe |
 |---|---|---|
-| Product tours | ✅ Built-in (core, MIT) | ✅ Smart Walk-Thrus |
+| Product tours | ✅ Built-in (core, BUSL-1.1) | ✅ Smart Walk-Thrus |
 | Hints / hotspots | ✅ Built-in (&lt;5KB) | ⚙️ ShoutOuts / Launchers (overlay-based) |
 | Onboarding checklists | ✅ Pro ($9.99 one-time) | ✅ Built-in |
 | Announcements | ✅ Pro (5 variants) | ⚙️ ShoutOuts only |
@@ -118,7 +118,7 @@ userTourKit's MIT-licensed free tier includes the core library, React bindings, 
 | Media embedding | ✅ Pro (7 platforms) | ⚠️ YouTube/Vimeo via editor |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | ⚙️ Not specified at WCAG level |
 | Headless / BYO UI | ✅ Full headless + styled | 🚫 Visual editor only |
-| Core bundle (gzipped) | &lt;8KB | ~1-2 MB CDN payload |
+| Core bundle (gzipped) | &lt;23KB | ~1-2 MB CDN payload |
 | Visual builder | 🚫 Code only | ✅ Desktop editor + browser extension |
 | Multi-app support | 🚫 Your React app only | ✅ Any web application |
 | Framework | React 18+ / 19 | Framework-agnostic (DOM overlay) |
@@ -126,7 +126,7 @@ userTourKit's MIT-licensed free tier includes the core library, React bindings, 
 | Design system integration | ✅ Native (shadcn/ui, Radix, Base UI) | ⚙️ Requires !important CSS overrides |
 | Who builds flows | Developers | Non-technical users + developers |
 | Security model | First-party code you control | Third-party script with full DOM access |
-| License | MIT (free tier) | Proprietary, quote-based |
+| License | BUSL-1.1 (source-available) | Proprietary, quote-based |
 | Pricing | Free + $9.99 one-time Pro | $9K-$405K/year (median $43K) |
 | Implementation time | Minutes (npm install) | 3-6 months average |
 | Contract | None | Multi-year typical |
@@ -201,7 +201,7 @@ Analyst Jon Reed at Diginomica wrote after the SAP acquisition: "If I'm a Workda
 ## Frequently asked questions
 
 **Is userTourKit free?**
-userTourKit's core library, React bindings, and hints package are free under the MIT license with no restrictions. The Pro tier costs $9.99 one-time (not a subscription) and adds adoption tracking, analytics with five built-in plugins, announcements, checklists, media embedding, and scheduling with timezone support.
+userTourKit's core library, React bindings, and hints package are source-available under the BUSL-1.1 licence (free in development, licence key in production). The Pro tier costs $9.99 one-time (not a subscription) and adds adoption tracking, analytics with five built-in plugins, announcements, checklists, media embedding, and scheduling with timezone support.
 
 **What is the difference between userTourKit and WalkMe?**
 userTourKit is a headless React library that renders onboarding as native components inside your codebase. WalkMe is an enterprise platform that injects overlay guidance on top of any web application without source code access. userTourKit requires developers; WalkMe's visual editor doesn't. userTourKit costs $0-$9.99; WalkMe's median annual contract is $43,000.
@@ -213,13 +213,13 @@ Yes, for customer-facing product tours built on your own React application. Expo
 userTourKit supports React 18 and React 19, with built-in router adapters for Next.js App Router, Next.js Pages Router, and React Router v6+. The headless architecture avoids hydration issues with server components.
 
 **What is the bundle size of userTourKit vs WalkMe?**
-userTourKit's core is under 8KB gzipped, React package under 12KB, hints under 5KB. WalkMe loads a JavaScript snippet that fetches approximately 1-2 MB of content payload from its CDN. userTourKit's entire free tier totals under 25KB gzipped.
+userTourKit's core is under 23KB gzipped, React package under 12KB, hints under 6.5KB. WalkMe loads a JavaScript snippet that fetches approximately 1-2 MB of content payload from its CDN. userTourKit's entire free tier totals under 25KB gzipped.
 
 **Does WalkMe work with React single-page applications?**
 WalkMe can work with SPAs, but it requires special configuration. Their documentation states SPA support must be enabled by contacting WalkMe support. It works by watching for DOM mutations rather than integrating with React's component lifecycle, which causes issues with dynamic elements and CSS-in-JS.
 
 **Is WalkMe open source?**
-No. WalkMe is proprietary software with quote-based pricing and multi-year contracts. userTourKit's free tier (core, React, hints) is MIT-licensed open source. The Pro packages use a proprietary license with a one-time $9.99 fee.
+No. WalkMe is proprietary software with quote-based pricing and multi-year contracts. userTourKit's free tier (core, React, hints) is BUSL-1.1-licensed source-available. The Pro packages use a proprietary license with a one-time $9.99 fee.
 
 **Which is better for enterprise: userTourKit or WalkMe?**
 For enterprise employee training across third-party applications (SAP, Salesforce, Workday), WalkMe is the stronger choice — it has FedRAMP Ready certification, SOC 2 Type 2, and a visual editor for non-technical content creators. For enterprise SaaS teams building customer-facing onboarding in React, userTourKit gives developers full code ownership at a fraction of the cost.

@@ -483,7 +483,7 @@ Fire a `step_viewed` event on every step transition and a `step_completed` event
 
 ### Does adding analytics to a product tour affect performance?
 
-Tour Kit's analytics events are lightweight JSON payloads batched in a queue. The `@tour-kit/analytics` package uses a flush interval (default: 5 seconds) and sends events asynchronously. In our testing, enabling analytics adds less than 1ms to each step transition. The analytics package itself is under 3KB gzipped, so the bundle size impact is minimal.
+Tour Kit's analytics events are lightweight JSON payloads batched in a queue. The `@tour-kit/analytics` package uses a flush interval (default: 5 seconds) and sends events asynchronously. In our testing, enabling analytics adds less than 1ms to each step transition. The analytics package itself is under 4KB gzipped, so the bundle size impact is minimal.
 
 ### What's the difference between tour skip and tour abandonment?
 

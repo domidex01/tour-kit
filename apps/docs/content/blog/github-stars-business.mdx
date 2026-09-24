@@ -23,7 +23,7 @@ If you're building an open-source developer library as a solo developer in 2026,
 
 ## The starting point
 
-Every open-source project starts with the same dopamine loop: push code, watch stars accumulate, feel validated, repeat. I launched Tour Kit as a headless React library for product tours with ten packages, MIT-licensed core, and TypeScript-strict configuration. Stars started accumulating almost immediately. And I started paying close attention to a number that felt meaningful but didn't map cleanly to anything else I was tracking.
+Every open-source project starts with the same dopamine loop: push code, watch stars accumulate, feel validated, repeat. I launched Tour Kit as a headless React library for product tours with ten packages, MIT-licensed core (since relicensed to BUSL-1.1 in v3.0), and TypeScript-strict configuration. Stars started accumulating almost immediately. And I started paying close attention to a number that felt meaningful but didn't map cleanly to anything else I was tracking.
 
 A GitHub star is a bookmark with social proof attached. Someone saw your repo, thought "looks interesting," and clicked a button. That's it. As of April 2026, a [study by He et al.](https://www.ndss-symposium.org/wp-content/uploads/madweb2024-4-paper.pdf) found over 4.5 million suspected fake stars on GitHub. Fake stars cost as little as EUR 0.08/star for bulk purchases and up to EUR 0.80/star for [premium stars from aged accounts](https://the-guild.dev/blog/judging-open-source-by-github-stars).
 
@@ -33,7 +33,7 @@ I'm not saying anyone starring Tour Kit is fake. But when a metric can be purcha
 
 The two architectural choices I made early on determined whether GitHub stars would be a vanity metric or a functional part of Tour Kit's growth strategy, and neither decision was obvious at the time.
 
-First, I went open core instead of hosted. MIT-licensed core packages, proprietary extended packages at [$9.99 one-time](https://usertourkit.com/). This means stars matter mostly as a trust signal. A developer evaluating two libraries with identical READMEs will click into the one with 5,000 stars before the one with 50. Is that fair? No. Is it how decisions actually get made? Yes.
+First, I went source-available instead of hosted. BUSL-1.1-licensed core packages, proprietary extended packages at [$9.99 one-time](https://usertourkit.com/). This means stars matter mostly as a trust signal. A developer evaluating two libraries with identical READMEs will click into the one with 5,000 stars before the one with 50. Is that fair? No. Is it how decisions actually get made? Yes.
 
 Second, I treated GitHub search ranking as a growth channel. GitHub's search results weight star counts. More stars means higher ranking, which drives organic discovery, which drives more stars. For a solo developer without a marketing budget, that flywheel is the single most concrete business value stars provide.
 
@@ -124,7 +124,7 @@ That last part is where the real work happens. Not in the star count.
 
 ---
 
-**Building something in open source?** [Tour Kit](https://usertourkit.com/) is headless, composable, and MIT-licensed at its core. Ten packages, under 8KB gzipped core, TypeScript-strict. [Check the repo](https://github.com/user-tour-kit/tour-kit) or install directly:
+**Building something in open source?** [Tour Kit](https://usertourkit.com/) is headless, composable, and BUSL-1.1-licensed at its core. Seventeen packages, under 23KB gzipped core, TypeScript-strict. [Check the repo](https://github.com/user-tour-kit/tour-kit) or install directly:
 
 ```bash
 npm install @tourkit/core @tourkit/react

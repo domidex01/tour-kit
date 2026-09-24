@@ -56,8 +56,8 @@ We weighted style isolation highest because it is the single most common reason 
 <td>Full</td>
 <td>Per-package</td>
 <td>Zero injected CSS</td>
-<td>Under 8KB core</td>
-<td>MIT</td>
+<td>Under 23KB core</td>
+<td>BUSL-1.1</td>
 <td>9.4</td>
 </tr>
 <tr>
@@ -92,7 +92,7 @@ We weighted style isolation highest because it is the single most common reason 
 <td>Partial</td>
 <td>Good</td>
 <td>Tailwind-native</td>
-<td>&#126;8KB + Framer</td>
+<td>&#126;23KB + Framer</td>
 <td>MIT</td>
 <td>6.8</td>
 </tr>
@@ -111,7 +111,7 @@ We weighted style isolation highest because it is the single most common reason 
 <td>Acceptable</td>
 <td>Styled-components</td>
 <td>&#126;12KB + SC</td>
-<td>MIT</td>
+<td>BUSL-1.1</td>
 <td>4.5</td>
 </tr>
 </tbody>
@@ -123,7 +123,7 @@ Data verified April 2026. Sources: npm, GitHub, bundlephobia, package source ins
 
 <img src="/screenshots/user-tour-kit.avif" alt="Screenshot of userTourKit - Product Tours for React" width="800" style={{borderRadius: '8px'}} />
 
-userTourKit is a headless product tour library structured as a monorepo itself. The core package (`@tourkit/core`) ships logic only, at under 8KB gzipped with zero runtime dependencies. The React package (`@tourkit/react`) adds hooks and renderless components. Neither package ships any CSS.
+userTourKit is a headless product tour library structured as a monorepo itself. The core package (`@tourkit/core`) ships logic only, at under 23KB gzipped with zero runtime dependencies. The React package (`@tourkit/react`) adds hooks and renderless components. Neither package ships any CSS.
 
 This matters for design system teams because you render tour UI with your own components. Your tooltip is your `<Tooltip>` from your design system, styled with your tokens, respecting your z-index scale. There is no style override to fight.
 

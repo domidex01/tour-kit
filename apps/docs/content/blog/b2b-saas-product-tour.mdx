@@ -222,7 +222,7 @@ No B2B SaaS guide mentions this, but your product tour library ships JavaScript 
 
 For a B2B app where users are on corporate networks, 37KB might seem negligible. But product tours load on every page, not just onboarding. If your tour library initializes eagerly, it competes with your actual application code for the main thread during startup.
 
-Tour Kit's approach: install only the packages you need. If you just want tours, that's `@tourkit/core` + `@tourkit/react` at under 12KB. Add `@tourkit/analytics` when you're ready to track, `@tourkit/checklists` when you need progress tracking. Each package tree-shakes independently.
+Tour Kit's approach: install only the packages you need. If you just want tours, that's `@tourkit/core` + `@tourkit/react` at under 23KB. Add `@tourkit/analytics` when you're ready to track, `@tourkit/checklists` when you need progress tracking. Each package tree-shakes independently.
 
 ## Common B2B product tour mistakes
 

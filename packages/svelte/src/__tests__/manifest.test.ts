@@ -11,6 +11,8 @@ const pkg = JSON.parse(
   readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../../package.json'), 'utf8')
 ) as {
   private?: boolean
+  license?: string
+  files?: string[]
   dependencies?: Record<string, string>
   devDependencies?: Record<string, string>
   peerDependencies?: Record<string, string>
@@ -39,7 +41,18 @@ describe('@tour-kit/svelte package.json', () => {
     expect(pkg.peerDependenciesMeta?.['@sveltejs/kit']?.optional).toBe(true)
   })
 
-  it('is private until the v2 licence lands (§3.2)', () => {
-    expect(pkg.private).toBe(true)
+  it('is published, under BUSL-1.1, with the licence text in the tarball', () => {
+    // The binding layers the unlicensed badge, so the terms it layers it under
+    // have to actually ship. `files` is explicit rather than left to npm's
+    // implicit licence-file include — the same call the core/react/hints
+    // relicense made.
+    expect(pkg.private).toBeUndefined()
+    expect(pkg.license).toBe('BUSL-1.1')
+    expect(pkg.files).toContain('LICENSE.md')
+  })
+
+  it('depends on the licence package — the badge is not optional', () => {
+    // An optional peer would make the gate opt-in, which is no gate at all.
+    expect(pkg.dependencies?.['@tour-kit/license']).toBe('workspace:*')
   })
 })

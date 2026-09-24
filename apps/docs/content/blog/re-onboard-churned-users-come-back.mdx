@@ -276,7 +276,7 @@ export function ChangelogTour({ lastActiveDate }: { lastActiveDate: Date }) {
 }
 ```
 
-The key detail: this tour has zero performance impact for users who don't need it. If `newFeatures` is empty, nothing renders. Tour Kit's core is under 8KB gzipped with zero runtime dependencies, so even when it does render, the cost is minimal. Feature adoption from interactive tours runs about 42% higher than from static release notes ([UserGuiding, 2026](https://userguiding.com/blog/user-onboarding-statistics)).
+The key detail: this tour has zero performance impact for users who don't need it. If `newFeatures` is empty, nothing renders. Tour Kit's core is under 23KB gzipped with zero runtime dependencies, so even when it does render, the cost is minimal. Feature adoption from interactive tours runs about 42% higher than from static release notes ([UserGuiding, 2026](https://userguiding.com/blog/user-onboarding-statistics)).
 
 ## Skip what they already know (adaptive tour logic)
 
@@ -398,7 +398,7 @@ Interactive tours deliver 50% higher activation compared to static tutorials, an
 
 Most product tour libraries assume first-run onboarding. Few have the conditional rendering and segmentation hooks you need for win-back flows.
 
-**Tour Kit** provides the primitives for this pattern: conditional `TourProvider` rendering based on user state, step filtering for adaptive tours, and an `announcements` package for changelog-driven flows. The core ships at under 8KB gzipped with zero runtime dependencies. React 18+ only, no visual builder, which means you need React developers to build the flows. [Full documentation at usertourkit.com](https://usertourkit.com/).
+**Tour Kit** provides the primitives for this pattern: conditional `TourProvider` rendering based on user state, step filtering for adaptive tours, and an `announcements` package for changelog-driven flows. The core ships at under 23KB gzipped with zero runtime dependencies. React 18+ only, no visual builder, which means you need React developers to build the flows. [Full documentation at usertourkit.com](https://usertourkit.com/).
 
 **Chameleon** offers multi-session onboarding with lifecycle awareness. It's a SaaS tool, not a library, so you get a visual builder but lose code-level control. Pricing starts around $279/month.
 

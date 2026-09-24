@@ -7,6 +7,18 @@
 - Fix the license story: the shipped LICENSE.md files said "proprietary and confidential — unauthorized copying, modification, distribution strictly prohibited" while the pricing page, FAQs and legal terms promised BSL 1.1 with MIT conversion on each version's Change Date. Every Pro package now ships the Business Source License 1.1 verbatim (mariadb.com/bsl11) with a stamped Change Date (publication date + 4 years) and Change License MIT, plus an Additional Use Grant covering production use up to the number of projects a license key covers. Copying, modification, redistribution and non-production use (development, evaluation, testing, CI, localhost) are granted by the license itself. The Change Date is re-stamped at publish time by `tooling/release/stamp-change-dates.mjs`. See `plan/license-bsl-fix.md`.
 - Updated dependencies
   - @tour-kit/license@1.4.1
+## 0.13.3
+
+### Patch Changes
+
+- Updated dependencies [f62631b]
+- Updated dependencies [e70e310]
+- Updated dependencies [9d1cba1]
+- Updated dependencies [978338b]
+- Updated dependencies [1a6e295]
+- Updated dependencies [3c13df3]
+  - @tour-kit/core@3.0.0
+  - @tour-kit/license@1.4.0
 
 ## 0.13.2
 

@@ -42,7 +42,7 @@ const COMPARISON_ROWS = [
   { feature: 'Serving to end users of a deployed app', free: false, pro: true },
   { feature: 'No "Unlicensed" badge in production', free: false, pro: true },
   { feature: 'Projects covered', free: 'Unlimited', pro: '1 / 5 / unlimited' },
-  { feature: 'MIT licence', free: 'Today', pro: 'On its Change Date' },
+  { feature: 'Converts to MIT on its Change Date', free: true, pro: true },
 ]
 
 // Verifiable social proof only. Source: npmjs.org last-month downloads for
@@ -61,10 +61,9 @@ export function Pricing() {
             <strong className="font-semibold text-fd-foreground">
               Free in development, a key in production.
             </strong>{' '}
-            Every Pro package is source-available under BSL&nbsp;1.1 — core, react and hints are MIT
-            already. Build, evaluate, test and run CI without paying anything. A key is for serving
-            it to end users of a deployed app. Every tier gets the whole library; they differ only
-            in how many projects one key covers.
+            Every package is source-available under BSL&nbsp;1.1, build, evaluate, test and run CI
+            without paying anything. A key is for serving it to end users of a deployed app. Every
+            tier gets the whole library; they differ only in how many projects one key covers.
           </p>
         </div>
 

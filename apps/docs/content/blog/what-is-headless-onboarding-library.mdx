@@ -27,7 +27,7 @@ This article defines what a headless onboarding library actually is, explains ho
 
 ## Short answer
 
-A headless onboarding library is a package that manages the state, step sequencing, persistence, and branching logic of product tours and onboarding flows without rendering any UI. You supply every visual element (tooltips, spotlights, modals, progress indicators) using your own components and design system. Tour Kit, OnboardJS, and partially Shepherd.js follow this pattern. As of April 2026, no styled product tour library ships under 15KB gzipped, while headless alternatives like Tour Kit's core package target under 8KB.
+A headless onboarding library is a package that manages the state, step sequencing, persistence, and branching logic of product tours and onboarding flows without rendering any UI. You supply every visual element (tooltips, spotlights, modals, progress indicators) using your own components and design system. Tour Kit, OnboardJS, and partially Shepherd.js follow this pattern. As of April 2026, no styled product tour library ships under 15KB gzipped, while headless alternatives like Tour Kit's core package target under 23KB.
 
 ## How headless onboarding works
 
@@ -83,7 +83,7 @@ Not every team needs headless. Styled libraries like React Joyride and Reactour 
   <tbody>
     <tr>
       <td>Bundle size (gzipped)</td>
-      <td>&lt;8KB core</td>
+      <td>&lt;23KB core</td>
       <td>15–37KB including styles</td>
     </tr>
     <tr>
@@ -168,7 +168,7 @@ Try building a 3-step tour with Tour Kit in a [live sandbox](https://usertourkit
 
 As of April 2026, three libraries occupy the headless onboarding space:
 
-**Tour Kit** is a 10-package React monorepo. Core logic, hints, checklists, analytics, announcements, surveys, and scheduling are separate packages. Install only what you need. MIT license for core packages, Pro license ($9.99 one-time) for extended packages. We built Tour Kit, so take this with appropriate skepticism.
+**Tour Kit** is a 10-package React monorepo. Core logic, hints, checklists, analytics, announcements, surveys, and scheduling are separate packages. Install only what you need. BSL 1.1: free while you build, a one-time key from $9.99 to ship. We built Tour Kit, so take this with appropriate skepticism.
 
 **OnboardJS** takes a framework-agnostic approach. Pure JavaScript engine, framework adapters on top. Good fit if you're running Vue alongside React.
 
@@ -202,7 +202,7 @@ Headless libraries have a structural advantage. They manage focus trapping, keyb
 
 ### What is the smallest headless onboarding library?
 
-Tour Kit's `@tourkit/core` package targets under 8KB gzipped with zero runtime dependencies. OnboardJS is similarly lightweight. By comparison, React Joyride ships at roughly 37KB gzipped, over 4x larger. Headless libraries achieve smaller bundles because they ship no CSS, no theme tokens, and no pre-built components.
+Tour Kit's `@tourkit/core` package targets under 23KB gzipped with zero runtime dependencies. OnboardJS is similarly lightweight. By comparison, React Joyride ships at roughly 37KB gzipped, over 4x larger. Headless libraries achieve smaller bundles because they ship no CSS, no theme tokens, and no pre-built components.
 
 {/* JSON-LD Schema */}
 export const jsonLd = {

@@ -31,7 +31,7 @@ This guide covers the six behavioral trigger patterns that matter, with working 
 
 A behavioral trigger is a condition tied to a user action (not a timer) that starts a product tour. When a user clicks a button, navigates to a specific route, reaches a feature milestone, or pauses on a page without completing an action, those behaviors become signals. The tour starts because the user demonstrated intent, not because 5 seconds elapsed.
 
-Tour Kit implements behavioral triggers through composable hooks that attach to standard DOM events: `onClick`, route changes via `useLocation`, `IntersectionObserver` for element visibility, and custom event dispatchers for cross-component coordination. The core package adds under 8KB gzipped to your bundle. Trigger logic itself costs near-zero because it piggybacks on events your app already handles.
+Tour Kit implements behavioral triggers through composable hooks that attach to standard DOM events: `onClick`, route changes via `useLocation`, `IntersectionObserver` for element visibility, and custom event dispatchers for cross-component coordination. The core package adds under 23KB gzipped to your bundle. Trigger logic itself costs near-zero because it piggybacks on events your app already handles.
 
 Unlike no-code tools like Chameleon or Userpilot where trigger configuration happens in a dashboard, a code-based approach gives you access to your full application state. You can trigger a tour when `user.plan === 'pro' && featureClicks < 2 && daysSinceSignup > 3`. Conditions like that are trivial in code but require workarounds in GUI builders.
 

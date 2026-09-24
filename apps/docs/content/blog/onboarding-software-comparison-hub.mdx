@@ -19,7 +19,7 @@ The onboarding software market hit $1.5 billion in 2023 and is projected to reac
 
 This page catalogs every meaningful option available in 2026, from enterprise digital adoption platforms that cost more than your first car to open-source React libraries you can install in 30 seconds. We tested tools across all three tiers, measured their performance impact, and documented the tradeoffs nobody else bothers to mention.
 
-**Quick install for Tour Kit (open-source, MIT):**
+**Quick install for Tour Kit (source-available, BUSL-1.1):**
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -279,7 +279,7 @@ Developer libraries are the fastest-growing corner of the onboarding market, dri
     </tr>
     <tr>
       <td>Tour Kit</td>
-      <td>&lt;8KB (core)</td>
+      <td>&lt;23KB (core)</td>
       <td>MIT (Pro: $9.99 one-time)</td>
       <td>React 18+</td>
       <td>Pre-launch</td>
@@ -325,13 +325,13 @@ Intro.js has been around since 2013 and remains popular for non-React projects. 
 
 ### Tour Kit
 
-Tour Kit (the tool we built) takes a different approach: headless architecture with composable packages. The core logic ships at under 8KB gzipped with zero runtime dependencies. You install only the packages you need. Tours, hints, checklists, analytics, announcements, surveys, and scheduling are all separate packages.
+Tour Kit (the tool we built) takes a different approach: headless architecture with composable packages. The core logic ships at under 23KB gzipped with zero runtime dependencies. You install only the packages you need. Tours, hints, checklists, analytics, announcements, surveys, and scheduling are all separate packages.
 
 The architecture is designed for React 18+ and 19 natively, with full TypeScript coverage and WCAG 2.1 AA accessibility built in. It works with any component library: shadcn/ui, Radix, Tailwind, or your own design system.
 
 **Honest limitations:** Tour Kit doesn't have a visual builder (you write JSX). The community is smaller than React Joyride's 603K weekly downloads. It's React-only, so if you need Vue or Angular support, look at Shepherd.js or Driver.js. And it's a younger project with less battle-testing at enterprise scale.
 
-**Pricing:** The core packages are MIT-licensed and free forever. Pro features (adoption tracking, advanced analytics, surveys, scheduling) cost $9.99 one-time. Not per month, not per MAU.
+**Pricing:** The core packages are BUSL-1.1-licensed and source-available (free in development, licence key in production). Pro features (adoption tracking, advanced analytics, surveys, scheduling) cost $9.99 one-time. Not per month, not per MAU.
 
 ```tsx
 // src/components/OnboardingTour.tsx
@@ -435,7 +435,7 @@ Performance is the comparison point that most directories ignore entirely. We me
     <tr>
       <td>Library</td>
       <td>Tour Kit (core)</td>
-      <td>&lt;8KB</td>
+      <td>&lt;23KB</td>
       <td>No (npm)</td>
       <td>Yes</td>
     </tr>
@@ -481,7 +481,7 @@ Licensing rarely makes the evaluation shortlist. It should. As of April 2026, on
     </tr>
     <tr>
       <td>Tour Kit (core)</td>
-      <td>MIT</td>
+      <td>BUSL-1.1</td>
       <td>Yes, freely</td>
       <td>No</td>
     </tr>
@@ -633,7 +633,7 @@ npm install @tourkit/core @tourkit/react
 
 ### What is the best onboarding software for startups?
 
-Tour Kit and Driver.js are the best onboarding options for startups in 2026. Tour Kit provides tours, checklists, hints, and analytics at under 8KB gzipped with MIT licensing. Driver.js is lighter at 3KB but lacks analytics. Both avoid the MAU pricing that makes mid-market SaaS tools expensive as you scale.
+Tour Kit and Driver.js are the best onboarding options for startups in 2026. Tour Kit provides tours, checklists, hints, and analytics at under 23KB gzipped with MIT licensing. Driver.js is lighter at 3KB but lacks analytics. Both avoid the MAU pricing that makes mid-market SaaS tools expensive as you scale.
 
 ### How much does onboarding software cost in 2026?
 

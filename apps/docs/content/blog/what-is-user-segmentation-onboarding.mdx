@@ -97,7 +97,7 @@ Segments that account for `prefers-reduced-motion`, screen reader usage, or cogn
 
 ## User segmentation in Tour Kit
 
-Tour Kit is a headless React library, so segmentation logic stays in your codebase rather than locked inside a vendor dashboard. You pass a different `tourId` to `TourProvider` based on segment, use `useTour()` to conditionally show or skip steps, and combine with feature flags from LaunchDarkly or Statsig for gradual per-segment rollouts. Tour Kit's core ships at under 8KB gzipped, so adding segment-conditional tours doesn't bloat your bundle.
+Tour Kit is a headless React library, so segmentation logic stays in your codebase rather than locked inside a vendor dashboard. You pass a different `tourId` to `TourProvider` based on segment, use `useTour()` to conditionally show or skip steps, and combine with feature flags from LaunchDarkly or Statsig for gradual per-segment rollouts. Tour Kit's core ships at under 23KB gzipped, so adding segment-conditional tours doesn't bloat your bundle.
 
 Tour Kit's `@tourkit/analytics` package fires events per tour step. Measure completion rates, drop-off points, and activation per segment using PostHog, Mixpanel, or Amplitude.
 

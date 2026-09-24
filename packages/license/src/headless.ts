@@ -37,3 +37,8 @@ export {
 // Trial (pure helpers — no React)
 export { getDaysLeft } from './lib/trial'
 export type { TrialConfig } from './lib/trial'
+
+// DOM gate (React-free) — what `@tour-kit/vue` and `@tour-kit/svelte` mount.
+export { startLicenseGate } from './lib/license-gate-dom'
+export type { LicenseGateOptions } from './lib/license-gate-dom'
+export { mountWatermark, warnUnlicensed } from './lib/watermark-dom'

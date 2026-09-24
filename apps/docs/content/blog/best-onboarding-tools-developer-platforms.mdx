@@ -59,11 +59,11 @@ We installed each library into a Vite 6 + React 19 + TypeScript 5.7 project, bui
 <tr>
 <td>Tour Kit</td>
 <td>Headless library</td>
-<td>&lt;8 KB core</td>
+<td>&lt;23 KB core</td>
 <td>Native</td>
 <td>✅</td>
 <td>✅</td>
-<td>Free (MIT) / $9.99 Pro</td>
+<td>Free in dev / $9.99 Pro</td>
 <td>Design system integration</td>
 </tr>
 <tr>
@@ -143,11 +143,11 @@ Bundle sizes as of April 2026 via bundlephobia and vendor documentation. SaaS pl
 
 ## 1. Tour Kit: best for teams with a design system
 
-Tour Kit is a headless onboarding library for React that gives you tour logic without prescribing any UI. The core ships at under 8 KB gzipped with zero runtime dependencies, providing hooks like `useTour()` and `useStep()` for positioning, state, keyboard navigation, and ARIA attributes. You render steps with your own components. If your developer platform uses shadcn/ui, Radix, or a custom design system, Tour Kit slots in instead of fighting it.
+Tour Kit is a headless onboarding library for React that gives you tour logic without prescribing any UI. The core ships at under 23 KB gzipped with zero runtime dependencies, providing hooks like `useTour()` and `useStep()` for positioning, state, keyboard navigation, and ARIA attributes. You render steps with your own components. If your developer platform uses shadcn/ui, Radix, or a custom design system, Tour Kit slots in instead of fighting it.
 
 ### Strengths
 
-- Smallest bundle in this list: core < 8 KB, react < 12 KB gzipped
+- Smallest bundle in this list: core < 23 KB, react < 12 KB gzipped
 - 10 composable packages: install only what you need (analytics, surveys, checklists, scheduling)
 - Native React 18 and 19 support with hooks-first API
 - WCAG 2.1 AA compliant: focus trapping, `aria-live` announcements, `prefers-reduced-motion` support
@@ -372,7 +372,7 @@ The decision comes down to three questions.
 
 **Do your developers own onboarding, or does a product team?** If developers own it, pick a library (Tour Kit, Driver.js, Shepherd.js). You'll write code, but you control rendering, bundle size, and accessibility. If product managers own it, pick a platform (Appcues, Userpilot, Chameleon).
 
-**How much does bundle size matter?** Developer tools already load heavy components. Monaco Editor is ~2 MB. Tour Kit at &lt;8 KB won't move the needle. Appcues at 200 KB+ might.
+**How much does bundle size matter?** Developer tools already load heavy components. Monaco Editor is ~2 MB. Tour Kit at &lt;23 KB won't move the needle. Appcues at 200 KB+ might.
 
 **Do you need onboarding to match your design system?** Headless tools (Tour Kit) render with your components. Opinionated libraries (React Joyride, Shepherd.js) need CSS overrides. SaaS platforms generate their own UI that never quite matches.
 
@@ -382,7 +382,7 @@ Smashing Magazine documented how platformOS won an award by offering [three para
 
 ### What is the best onboarding tool for developer tools in 2026?
 
-Tour Kit is the best fit for developer tool platforms that need code-level control and design system integration. Ships at under 8 KB gzipped with WCAG 2.1 AA compliance. For teams wanting a managed platform, Frigade offers a code-first SDK for developer-led companies.
+Tour Kit is the best fit for developer tool platforms that need code-level control and design system integration. Ships at under 23 KB gzipped with WCAG 2.1 AA compliance. For teams wanting a managed platform, Frigade offers a code-first SDK for developer-led companies.
 
 ### Do I need a SaaS platform or can I use an open-source library?
 
@@ -390,7 +390,7 @@ Open-source libraries work well when your engineering team owns onboarding and w
 
 ### How much do onboarding tools cost for developer platforms?
 
-Open-source options (Tour Kit, Shepherd.js, Driver.js) are MIT licensed and free. Tour Kit Pro is a one-time $9.99 payment. SaaS platforms start at $249-$300 per month, scaling with MAUs. For 5,000 MAUs, Appcues costs roughly $500-$800 per month.
+Source-available and open-source options: Tour Kit's core is BUSL-1.1-licensed and source-available (free in development), while Shepherd.js and Driver.js are MIT licensed and free. Tour Kit Pro is a one-time $9.99 payment. SaaS platforms start at $249-$300 per month, scaling with MAUs. For 5,000 MAUs, Appcues costs roughly $500-$800 per month.
 
 ### Are onboarding tools accessible for developers with disabilities?
 

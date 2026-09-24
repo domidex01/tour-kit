@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 8KB gzipped. Reactour is a lightweight presentational tour library with 3.9K GitHub stars and 114,000 weekly npm downloads. userTourKit fits React teams that want full UI control, WCAG 2.1 AA compliance, and room to grow beyond basic tours. Reactour is better when you need a quick, good-looking walkthrough on React 18 without much customization.
+userTourKit is a headless React library shipping tours, hints, checklists, announcements, analytics, and scheduling in a core bundle under 23KB gzipped. Reactour is a lightweight presentational tour library with 3.9K GitHub stars and 114,000 weekly npm downloads. userTourKit fits React teams that want full UI control, WCAG 2.1 AA compliance, and room to grow beyond basic tours. Reactour is better when you need a quick, good-looking walkthrough on React 18 without much customization.
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade.
+userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with a source-available core (BUSL-1.1, free in development) and $9.99 one-time Pro upgrade.
 
 ## What is Reactour?
 
@@ -34,7 +34,7 @@ For linear walkthroughs, both get the job done. For anything involving condition
 
 Reactour doesn't have hints. It does tours. That's the scope.
 
-userTourKit ships a separate `@tour-kit/hints` package (under 5KB gzipped) for persistent, non-sequential hotspots. Each hint has its own dismiss state and persists across page loads. The component renders a pulsing beacon on the target element, with a tooltip on hover or click.
+userTourKit ships a separate `@tour-kit/hints` package (under 6.5KB gzipped) for persistent, non-sequential hotspots. Each hint has its own dismiss state and persists across page loads. The component renders a pulsing beacon on the target element, with a tooltip on hover or click.
 
 Need "new feature" indicators or contextual tips outside a tour flow? userTourKit handles it. With Reactour, you'd build this yourself.
 
@@ -97,9 +97,9 @@ For any team where accessibility is a compliance requirement rather than a nice-
 
 Reactour's `@reactour/tour` package has an unpacked size of 98.5KB. That's the installed footprint before gzipping. The actual transfer size varies, but it's a full presentational component with its own rendering layer, mask system, and popover implementation.
 
-userTourKit's core ships under 8KB gzipped. The React binding adds under 12KB. Hints: under 5KB. Because userTourKit is headless, you aren't shipping UI code you'll override anyway. The core contains only logic (hooks, state management, position calculation, storage adapters) and your existing design system components handle the rendering.
+userTourKit's core ships under 23KB gzipped. The React binding adds under 12KB. Hints: under 6.5KB. Because userTourKit is headless, you aren't shipping UI code you'll override anyway. The core contains only logic (hooks, state management, position calculation, storage adapters) and your existing design system components handle the rendering.
 
-For context, 8KB gzipped for the core is smaller than most icon libraries. On a 3G mobile connection, that's roughly 100ms of additional load time versus several hundred for a larger bundle.
+For context, 23KB gzipped for the core is smaller than most icon libraries. On a 3G mobile connection, that's roughly 100ms of additional load time versus several hundred for a larger bundle.
 
 ### Framework support and TypeScript
 
@@ -115,9 +115,9 @@ And then there's React 19. As of March 2026, Reactour's GitHub issue #659 docume
 
 ### Licensing and pricing
 
-Both use MIT licenses for their core functionality. Reactour is 100% free, 100% MIT. No paid tier exists.
+Only Reactour is fully MIT here: it is 100% free with no paid tier. userTourKit's core is BUSL-1.1-licensed source-available (free in development, licence key in production).
 
-userTourKit's free tier (MIT) includes `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints`. Seven Pro packages cover the rest: adoption, analytics, announcements, checklists, media, scheduling, plus licensing. All for $9.99 one-time. No monthly fees, no MAU limits.
+userTourKit's source-available tier (BUSL-1.1) includes `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints`. Seven Pro packages cover the rest: adoption, analytics, announcements, checklists, media, scheduling, plus licensing. All for $9.99 one-time. No monthly fees, no MAU limits.
 
 If all you need is basic tours, Reactour costs nothing. But once you need analytics, checklists, or scheduling, userTourKit's $9.99 one-time fee beats building those features yourself. It also undercuts SaaS onboarding platforms at $300+/month by a wide margin.
 
@@ -125,7 +125,7 @@ If all you need is basic tours, Reactour costs nothing. But once you need analyt
 
 | Feature | userTourKit | Reactour |
 |---|---|---|
-| Product tours | ✅ Built-in (core, MIT) | ✅ Built-in (MIT) |
+| Product tours | ✅ Built-in (core, BUSL-1.1) | ✅ Built-in (MIT) |
 | Conditional branching | ✅ Async resolvers, cross-tour jumps | 🚫 Not available |
 | Route-aware tours | ✅ Next.js, React Router adapters | ⚙️ Manual via useTour hook |
 | Hints and hotspots | ✅ Built-in, under 5KB gzipped | 🚫 Not available |
@@ -140,11 +140,11 @@ If all you need is basic tours, Reactour costs nothing. But once you need analyt
 | Screen reader announcements | ✅ aria-live regions | 🚫 Not available |
 | Headless mode | ✅ Full headless + styled variants | 🚫 Presentational only |
 | Design system support | ✅ shadcn/ui native, Radix + Base UI | ⚙️ Style functions + CSS vars |
-| Core bundle (gzipped) | Under 8KB | ~98.5KB unpacked |
+| Core bundle (gzipped) | Under 23KB | ~98.5KB unpacked |
 | React 18 support | ✅ | ✅ |
 | React 19 support | ✅ | ⚠️ Issue #659 (duplicate React) |
 | TypeScript | ✅ Strict mode, full inference | ✅ Built-in types |
-| License | MIT (free tier) | MIT |
+| License | BUSL-1.1 (source-available) | MIT |
 | Pricing | Free + $9.99 one-time Pro | Free |
 | Active maintainers | Team | 1 (solo) |
 
@@ -254,7 +254,7 @@ We built userTourKit, so take the comparison above with appropriate skepticism. 
 ## Frequently asked questions
 
 **Is userTourKit free?**
-The core library, React components, and hints package are MIT-licensed and free. Seven Pro packages (analytics, checklists, announcements, adoption, media, scheduling, licensing) cost $9.99 as a one-time purchase. No subscriptions, no MAU limits.
+The core library, React components, and hints package are BUSL-1.1-licensed and source-available. Seven Pro packages (analytics, checklists, announcements, adoption, media, scheduling, licensing) cost $9.99 as a one-time purchase. No subscriptions, no MAU limits.
 
 **What is the difference between userTourKit and Reactour?**
 userTourKit uses a headless architecture that separates logic from UI, letting you render with your own components. Reactour is presentational, rendering its own UI with style override functions. userTourKit also covers hints, checklists, announcements, analytics, and scheduling. Reactour focuses on tours only.
@@ -266,7 +266,7 @@ Yes. The core concepts (step definitions, provider pattern, tour hook) map direc
 userTourKit supports React 18 and React 19 as peer dependencies. Reactour has a documented React 19 compatibility issue (GitHub #659) involving duplicate React instances.
 
 **What is the bundle size of userTourKit vs Reactour?**
-userTourKit's core is under 8KB gzipped, the React package under 12KB gzipped, and hints under 5KB gzipped. Reactour's `@reactour/tour` package has an unpacked size of 98.5KB, though the gzipped transfer size is smaller.
+userTourKit's core is under 23KB gzipped, the React package under 12KB gzipped, and hints under 6.5KB gzipped. Reactour's `@reactour/tour` package has an unpacked size of 98.5KB, though the gzipped transfer size is smaller.
 
 **Does Reactour support checklists or analytics?**
 No. Reactour is a tour-only library. Checklists, analytics, announcements, and scheduling aren't part of its scope. userTourKit offers all of these through Pro packages.

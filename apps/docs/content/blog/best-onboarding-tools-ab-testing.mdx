@@ -58,8 +58,8 @@ We installed each tool (where possible), read the docs, and checked community fe
 <td>Unlimited</td>
 <td>Yes</td>
 <td>✅ AA</td>
-<td>&lt;8KB gzipped</td>
-<td>Free (MIT)</td>
+<td>&lt;23KB gzipped</td>
+<td>Free in dev, $9.99 to ship</td>
 <td>Developer teams wanting code ownership</td>
 </tr>
 <tr>
@@ -121,7 +121,7 @@ We installed each tool (where possible), read the docs, and checked community fe
 
 ## 1. Tour Kit, best for accessible, type-safe onboarding experiments
 
-Tour Kit is a headless React library that gives you full programmatic control over onboarding flows, including A/B testing variants. The core package ships at under 8KB gzipped with zero runtime dependencies. Unlike every SaaS tool on this list, Tour Kit runs in your codebase: experiments are version-controlled, type-checked, and testable in CI.
+Tour Kit is a headless React library that gives you full programmatic control over onboarding flows, including A/B testing variants. The core package ships at under 23KB gzipped with zero runtime dependencies. Unlike every SaaS tool on this list, Tour Kit runs in your codebase: experiments are version-controlled, type-checked, and testable in CI.
 
 ### Strengths
 
@@ -312,11 +312,11 @@ Most onboarding A/B testing tools require at least 500 users per variant group f
 
 ### Can I A/B test product tours for free?
 
-Tour Kit (MIT license) and Firebase A/B Testing are both free. Tour Kit gives you full component-level control with React; Firebase uses Remote Config for variant assignment within the Google ecosystem. Statsig offers a generous freemium tier for server-side experiments. All other onboarding tools with A/B testing lock the feature behind paid plans starting at $349/month or higher.
+Tour Kit (BUSL-1.1 license, free in development) and Firebase A/B Testing are both free to start. Tour Kit gives you full component-level control with React; Firebase uses Remote Config for variant assignment within the Google ecosystem. Statsig offers a generous freemium tier for server-side experiments. All other onboarding tools with A/B testing lock the feature behind paid plans starting at $349/month or higher.
 
 ### Do onboarding A/B testing tools affect page performance?
 
-Every tool adds JavaScript to your bundle. Tour Kit's core ships at under 8KB gzipped. Firebase's SDK adds roughly 35KB, Statsig's SDK about 12KB, and SaaS platforms like Appcues and Pendo load 40-60KB of client-side scripts. None of the SaaS tools publicly disclose their performance impact, so we recommend measuring Largest Contentful Paint before and after installation ([web.dev](https://web.dev/articles/lcp)).
+Every tool adds JavaScript to your bundle. Tour Kit's core ships at under 23KB gzipped. Firebase's SDK adds roughly 35KB, Statsig's SDK about 12KB, and SaaS platforms like Appcues and Pendo load 40-60KB of client-side scripts. None of the SaaS tools publicly disclose their performance impact, so we recommend measuring Largest Contentful Paint before and after installation ([web.dev](https://web.dev/articles/lcp)).
 
 ### Are A/B tested onboarding flows accessible?
 

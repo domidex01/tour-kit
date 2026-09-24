@@ -95,7 +95,7 @@ An API (application programming interface) is a contract: a set of endpoints or 
     <tr>
       <td>Install size</td>
       <td>Zero (it's a specification)</td>
-      <td>Varies (Tour Kit core is under 8KB gzipped)</td>
+      <td>Varies (Tour Kit core is under 23KB gzipped)</td>
     </tr>
     <tr>
       <td>Example</td>
@@ -161,7 +161,7 @@ But not all onboarding SDKs are equal. The key questions when evaluating one:
 - **Persistence.** Where does it store progress? localStorage, cookies, your backend?
 - **Accessibility.** Does it handle focus management and ARIA, or is that on you?
 
-Tour Kit's approach is modular: 10 separate packages, each under 12KB gzipped, MIT-licensed core with optional Pro extensions. That said, it's React-only and has no visual builder. You need developers to set up tours in code. For teams without React experience, a SaaS tool like Appcues or Userpilot might be a faster path, even at $300+/month.
+Tour Kit's approach is modular: 17 separate packages, each under 12KB gzipped, BUSL-1.1-licensed core with optional Pro extensions. That said, it's React-only and has no visual builder. You need developers to set up tours in code. For teams without React experience, a SaaS tool like Appcues or Userpilot might be a faster path, even at $300+/month.
 
 ## FAQ
 
@@ -175,7 +175,7 @@ Not exactly. A product tour library typically handles one thing: guided step-by-
 
 ### Do onboarding SDKs affect page performance?
 
-Every JavaScript dependency adds weight. A monolithic SDK can add 50-100KB to your bundle. A modular SDK like Tour Kit tree-shakes to under 8KB gzipped for the core. Google recommends keeping total JavaScript under 300KB for good Core Web Vitals scores ([web.dev](https://web.dev/performance/optimizing-javascript/)).
+Every JavaScript dependency adds weight. A monolithic SDK can add 50-100KB to your bundle. A modular SDK like Tour Kit tree-shakes to under 23KB gzipped for the core. Google recommends keeping total JavaScript under 300KB for good Core Web Vitals scores ([web.dev](https://web.dev/performance/optimizing-javascript/)).
 
 ### Can I use an onboarding SDK with any frontend framework?
 

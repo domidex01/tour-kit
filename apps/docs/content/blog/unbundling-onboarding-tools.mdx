@@ -95,7 +95,7 @@ All-in-one onboarding platforms are losing market share because the trade-offs t
 
 As of April 2026, WalkMe's injected script adds 180-350KB to your page weight depending on which modules load. Pendo's agent script runs between 150-250KB. Google's Core Web Vitals update in late 2025 made these numbers directly visible in search rankings, and engineering teams are noticing.
 
-A composable approach changes the math entirely. Tour Kit's core package ships at under 8KB gzipped with zero runtime dependencies. You install only the packages you need (tours, hints, checklists, surveys) and tree-shaking removes the rest. Loading a 300KB platform script versus an 8KB library isn't a marginal difference. On mobile connections, it's the gap between a sub-100ms Interaction to Next Paint and a visible delay.
+A composable approach changes the math entirely. Tour Kit's core package ships at under 23KB gzipped with zero runtime dependencies. You install only the packages you need (tours, hints, checklists, surveys) and tree-shaking removes the rest. Loading a 300KB platform script versus an 23KB library isn't a marginal difference. On mobile connections, it's the gap between a sub-100ms Interaction to Next Paint and a visible delay.
 
 ### Force 2: vendor lock-in has a real exit cost
 
@@ -194,7 +194,7 @@ A practical composable onboarding stack in 2026 uses six layers, each handled by
     <tr>
       <td>Tour engine</td>
       <td>Tour Kit (or similar headless library)</td>
-      <td>Under 8KB, headless, works with your design system</td>
+      <td>Under 23KB, headless, works with your design system</td>
     </tr>
     <tr>
       <td>Analytics</td>
@@ -260,7 +260,7 @@ Initial setup takes roughly the same time, about 2-4 hours for a typical onboard
 
 ### How much can teams save by unbundling onboarding tools?
 
-All-in-one onboarding platforms cost between $15,000 and $140,000 per year at 10,000 MAU. A composable stack built on Tour Kit (free MIT core, $9.99 one-time Pro) plus existing analytics and feature flag tools reduces onboarding tooling costs by 90% or more. Savings compound as MAU grows because composable tools don't charge per user.
+All-in-one onboarding platforms cost between $15,000 and $140,000 per year at 10,000 MAU. A composable stack built on Tour Kit (free in development, $9.99 one-time to ship) plus existing analytics and feature flag tools reduces onboarding tooling costs by 90% or more. Savings compound as MAU grows because composable tools don't charge per user.
 
 ### Who should stick with an all-in-one onboarding platform?
 

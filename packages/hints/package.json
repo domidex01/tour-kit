@@ -1,9 +1,9 @@
 {
   "name": "@tour-kit/hints",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "React feature hints, hotspots & beacons — pulse-animated indicators with dismissal tracking, works with or without Tailwind.",
   "author": "Tour Kit Team",
-  "license": "MIT",
+  "license": "BUSL-1.1",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",
@@ -82,7 +82,7 @@
     "./styles.css": "./dist/styles/variables.css",
     "./package.json": "./package.json"
   },
-  "files": ["dist", "src/styles", "README.md", "CHANGELOG.md"],
+  "files": ["LICENSE.md", "dist", "src/styles", "README.md", "CHANGELOG.md"],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",

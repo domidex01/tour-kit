@@ -1,21 +1,30 @@
 ---
 title: "Can you use Tour Kit without the Pro license? (free vs Pro breakdown)"
 slug: "tour-kit-free-vs-pro"
-description: "See exactly what Tour Kit's free MIT packages include and when the $9.99 Pro license becomes worth it. Package-by-package comparison with code examples."
+description: "The old free-MIT-core versus paid-Pro split, since superseded: every package is now free in development, with a one-time key from $9.99 to serve it to end users. Package-by-package comparison with code examples."
 primary_keyword: "tour kit free vs pro"
-secondary_keywords: ["tour kit pricing breakdown", "tour kit open source free", "tour kit pro license", "tour kit MIT packages"]
+secondary_keywords: ["tour kit pricing breakdown", "tour kit open source free", "tour kit pro license", "tour kit source available license"]
 category: "Build vs Buy"
 schema_type: "TechArticle"
 spreadsheet_row: 149
 date: "2026-04-09"
-updated: "2026-04-09"
+updated: "2026-09-15"
 published: true
 ogImage: /og-images/tour-kit-free-vs-pro.png
 ---
 
 # Can you use Tour Kit without the Pro license?
 
-Yes. Tour Kit's three core packages are MIT-licensed and free forever. You can ship production product tours, multi-step onboarding flows, and persistent feature hints without paying anything or hitting a usage cap. The free tier isn't a trial. There's no time limit, no watermark, no gate on the core tour functionality.
+> **Update, 15 September 2026 — the free/Pro split described below no longer
+> exists.**
+> There is no free MIT core and paid Pro suite any more. Every package is free
+> while you build — development, evaluation, testing, CI and preview deploys, with
+> no feature gates — and serving Tour Kit to end users needs a one-time key:
+> **$9.99, $49.00 or $299.00** for 1, 5 or unlimited projects, under BSL 1.1.
+> The breakdown is left up as a record of the old split. See [pricing](/pricing)
+> for the current model.
+
+Yes. Tour Kit's three core packages are BUSL-1.1-licensed and source-available: free in development, evaluation, testing, and CI, with a licence key ($9.99 one-time, the same key as Pro) required in production. The free tier isn't a trial. There's no time limit, and development builds carry no watermark. In production without a key, the packages still render but layer a small unlicensed badge.
 
 We built Tour Kit, so take everything below with that context. Every claim maps to a specific package you can inspect on GitHub, and every number comes from bundlephobia or the source code.
 
@@ -25,7 +34,7 @@ npm install @tour-kit/core @tour-kit/react
 
 ## What is Tour Kit's free vs Pro model?
 
-Tour Kit uses an open-core licensing model where the foundational packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free, while nine extended packages (analytics, checklists, surveys, announcements, media, scheduling, adoption, AI, license validation) require a one-time $9.99 Pro license. Unlike SaaS onboarding tools that charge $129-$599 per month, Tour Kit's Pro is a single payment with no MAU limits, no seat limits, and no recurring fees. This follows the same pattern as AG Grid, MUI X, and Tailwind CSS, where the open-source core is production-ready and the paid tier adds specialized capabilities.
+Tour Kit uses a source-available licensing model where the foundational packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are BUSL-1.1-licensed: free for development and non-production use, with a licence key for production. Nine extended packages (analytics, checklists, surveys, announcements, media, scheduling, adoption, AI, license validation) require the same one-time $9.99 Pro license, which also covers production use of the core. Unlike SaaS onboarding tools that charge $129-$599 per month, Tour Kit's Pro is a single payment with no MAU limits, no seat limits, and no recurring fees.
 
 ## Why this breakdown matters for your team
 
@@ -35,7 +44,7 @@ As of April 2026, 78% of finance decision-makers report increased scrutiny of re
 
 ## What exactly ships in the free tier?
 
-Tour Kit's free tier includes three MIT-licensed npm packages totaling under 25KB gzipped. These aren't stripped-down demos. They contain the same position engine, accessibility layer, and component architecture that the Pro packages build on top of.
+Tour Kit's free tier includes three BUSL-1.1-licensed npm packages totaling under 25KB gzipped. These aren't stripped-down demos. They contain the same position engine, accessibility layer, and component architecture that the Pro packages build on top of.
 
 Here's the full breakdown:
 
@@ -51,19 +60,19 @@ Here's the full breakdown:
   <tbody>
     <tr>
       <td><code>@tour-kit/core</code></td>
-      <td>MIT</td>
-      <td>&lt;8KB</td>
+      <td>BUSL-1.1</td>
+      <td>&lt;23KB</td>
       <td>Hooks, position engine, focus management, keyboard nav, persistence, storage adapters, branching logic, RTL support</td>
     </tr>
     <tr>
       <td><code>@tour-kit/react</code></td>
-      <td>MIT</td>
+      <td>BUSL-1.1</td>
       <td>&lt;12KB</td>
       <td>Tour components, card system, overlay, navigation, progress, router adapters (Next.js, React Router), headless variants, multi-tour registry</td>
     </tr>
     <tr>
       <td><code>@tour-kit/hints</code></td>
-      <td>MIT</td>
+      <td>BUSL-1.1</td>
       <td>&lt;5KB</td>
       <td>Persistent hotspot beacons, hint tooltips, independent dismiss/hide state per hint</td>
     </tr>
@@ -103,7 +112,7 @@ export function OnboardingTour() {
 }
 ```
 
-That gives you element targeting, scroll-into-view, keyboard navigation (arrow keys, Escape, Enter), WCAG 2.1 AA focus management, and `prefers-reduced-motion` respect. No Pro license involved.
+That gives you element targeting, scroll-into-view, keyboard navigation (arrow keys, Escape, Enter), WCAG 2.1 AA focus management, and `prefers-reduced-motion` respect. No Pro license involved in development (production deployments need a licence key).
 
 Add `@tour-kit/hints` and you get persistent feature discovery beacons that live outside the tour flow. Think pulsing dots on new features that users can dismiss individually.
 
@@ -205,7 +214,7 @@ If none of those apply, if you just need tours and hints, the free tier is the r
 
 ## How Tour Kit's model compares to alternatives
 
-Tour Kit follows the open-core pattern used by AG Grid, MUI X, and Tailwind CSS. The core product is MIT and fully functional. Premium features extend it without limiting the base.
+Tour Kit's core is source-available and fully functional. Premium features extend it without limiting the base.
 
 <table>
   <thead>
@@ -219,7 +228,7 @@ Tour Kit follows the open-core pattern used by AG Grid, MUI X, and Tailwind CSS.
   <tbody>
     <tr>
       <td>Tour Kit</td>
-      <td>Core tours, hints, components (MIT)</td>
+      <td>Core tours, hints, components (BUSL-1.1)</td>
       <td>Analytics, checklists, surveys, announcements, media, scheduling, AI</td>
       <td>$9.99 one-time per project</td>
     </tr>
@@ -270,12 +279,13 @@ Appcues and Pendo are different products, to be fair. They include a visual buil
 
 ## The licensing details that matter
 
-The MIT license on Tour Kit's free packages means:
+The BUSL-1.1 licence on Tour Kit's source-available packages means:
 
-- Use them in commercial projects without attribution (though we appreciate it)
-- Modify the source code however you want
-- Bundle them in proprietary applications
+- Use them free in development, evaluation, testing, CI, and any non-production environment, no key needed
+- Copy, modify, and redistribute the source: the code is fully visible on GitHub
+- Ship to production with a licence key ($9.99 one-time, the same key as Pro)
 - No copyleft obligations (unlike Shepherd.js's AGPL, which requires you to open-source your entire application if you distribute it)
+- Every version converts to MIT on its Change Date, four years after release
 
 Pro packages use a proprietary license tied to a Polar.sh license key. One key covers one project (defined as a single deployable application). You get up to 5 domain activations per key (enough for production, staging, preview, and a couple of development environments). Localhost and `*.local` domains bypass activation entirely during development.
 
@@ -289,7 +299,7 @@ No MAU limit, no seat limit, no usage cap. $9.99 is the total cost. Updates and 
 
 **Assuming Free means limited.** Tour Kit's free tier includes the full position engine, every accessibility feature, all router adapters, headless mode, and the complete component library. It's not a demo. Some teams evaluate Pro thinking they need it for basic tours when Free already covers their use case entirely.
 
-**Ignoring the AGPL on alternatives.** Shepherd.js is "free" but uses the AGPL license, which requires you to open-source your entire application if you distribute it. Tour Kit's MIT license carries no such obligation. Free doesn't always mean the same thing across libraries.
+**Ignoring the AGPL on alternatives.** Shepherd.js is "free" but uses the AGPL license, which requires you to open-source your entire application if you distribute it. Tour Kit's BUSL-1.1 licence is not copyleft either, so it carries no such obligation. Free doesn't always mean the same thing across libraries.
 
 ## FAQ
 
@@ -297,13 +307,13 @@ No MAU limit, no seat limit, no usage cap. $9.99 is the total cost. Updates and 
 Tour Kit Free and Pro are additive, not replacements. Pro packages import from `@tour-kit/core`, the same core you're already using. Adding `@tour-kit/analytics` to an existing project is `npm install @tour-kit/analytics` plus a provider wrapper. No migration, no breaking changes.
 
 **Does the free tier have a watermark or usage limit?**
-No. The free packages are standard MIT open source with no restrictions. The watermark mechanism exists in the Pro packages for unlicensed usage of Pro features. It doesn't touch the free tier.
+In development, no: no watermark, no usage limit. In production without a licence key, the packages render normally but layer a small unlicensed badge. Add your key once and it's gone. There is never a crash or blank screen.
 
 **What happens if my Pro license expires?**
 It doesn't expire. The $9.99 is a one-time purchase, not a subscription. You keep access to every Pro package version released under that major version. When Tour Kit releases a new major version (v2, v3), you'd purchase a new license if you want to upgrade. But v1 Pro continues working indefinitely.
 
 **Can I use Tour Kit Free in a client project I'm building for someone else?**
-Yes. MIT allows this without restriction. The Pro license is per-project, so if the client needs Pro features, the license would be tied to their project domain.
+Yes. Development is free and unrestricted. The production deployment needs a licence key, and the Pro license is per-project, so the key would be tied to the client's project domain.
 
 **Is Tour Kit Free just a trial that gets worse over time?**
 No. The free packages are actively maintained alongside Pro. Security patches, React version support (React 18 and 19), and bug fixes ship to all packages equally. We have no incentive to degrade the free tier because it's the foundation Pro builds on.
@@ -323,7 +333,7 @@ Full documentation: [https://usertourkit.com/docs](https://usertourkit.com/docs)
   "@context": "https://schema.org",
   "@type": "TechArticle",
   "headline": "Can you use Tour Kit without the Pro license? (free vs Pro breakdown)",
-  "description": "See exactly what Tour Kit's free MIT packages include and when the $9.99 Pro license becomes worth it. Package-by-package comparison with code examples.",
+  "description": "See exactly what Tour Kit's free source-available packages include and when the $9.99 Pro license becomes worth it. Package-by-package comparison with code examples.",
   "author": {
     "@type": "Person",
     "name": "domidex01",
@@ -335,14 +345,14 @@ Full documentation: [https://usertourkit.com/docs](https://usertourkit.com/docs)
     "url": "https://usertourkit.com"
   },
   "datePublished": "2026-04-09",
-  "dateModified": "2026-04-09",
+  "dateModified": "2026-09-15",
   "image": "https://usertourkit.com/og-images/tour-kit-free-vs-pro.png",
   "url": "https://usertourkit.com/blog/tour-kit-free-vs-pro",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "https://usertourkit.com/blog/tour-kit-free-vs-pro"
   },
-  "keywords": ["tour kit free vs pro", "tour kit pricing breakdown", "tour kit open source free"],
+  "keywords": ["tour kit free vs pro", "tour kit pricing breakdown", "tour kit source available"],
   "proficiencyLevel": "Beginner",
   "dependencies": "React 18+, TypeScript 5+",
   "programmingLanguage": {
@@ -368,7 +378,7 @@ Full documentation: [https://usertourkit.com/docs](https://usertourkit.com/docs)
       "name": "Does the Tour Kit free tier have a watermark or usage limit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. The free packages (@tour-kit/core, @tour-kit/react, @tour-kit/hints) are standard MIT open source with no restrictions, no watermark, and no usage caps."
+        "text": "In development: no watermark, no usage caps. In production without a licence key the packages render normally with a small unlicensed badge; adding a key removes it."
       }
     },
     {
@@ -384,7 +394,7 @@ Full documentation: [https://usertourkit.com/docs](https://usertourkit.com/docs)
       "name": "Can I use Tour Kit Free in a client project?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. The MIT license allows unrestricted commercial use, including client projects. The Pro license is per-project, so if the client needs Pro features, the license would be tied to their project domain."
+        "text": "Yes. Development is free and unrestricted; the production deployment needs a licence key. The Pro license is per-project, so if the client needs Pro features, the license would be tied to their project domain."
       }
     },
     {

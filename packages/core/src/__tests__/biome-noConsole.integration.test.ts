@@ -59,7 +59,10 @@ describe('Biome noConsole rule + overrides (integration)', () => {
     expect(config).toMatch(/packages\/core\/src\/lib\/test-bridge\.ts/)
     expect(config).toMatch(/packages\/analytics\/src\/plugins\/console\.ts/)
     expect(config).toMatch(/packages\/license\/src\/components\/license-test-mode\.tsx/)
-    expect(config).toMatch(/packages\/license\/src\/components\/license-warning\.tsx/)
+    // The unlicensed warning moved to `lib/watermark-dom.ts` when the Vue and
+    // Svelte bindings needed it without React; the allowlist entry moved with
+    // it. `license-warning.tsx` is a binding over it now and calls no console.
+    expect(config).toMatch(/packages\/license\/src\/lib\/watermark-dom\.ts/)
     expect(config).toMatch(/packages\/license\/src\/components\/pro-gate\.tsx/)
     expect(config).toMatch(/packages\/license\/src\/lib\/domain\.ts/)
 

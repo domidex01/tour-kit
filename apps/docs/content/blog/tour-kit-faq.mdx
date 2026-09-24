@@ -27,7 +27,7 @@ Here are the questions developers ask most, organized by when they come up in th
 
 ## Short answer: what is Tour Kit?
 
-Tour Kit is an open-source, headless product tour library for React. It ships as 10 composable packages, so you install only what you need. The core package is under 8KB gzipped with zero runtime dependencies. It handles tour logic (step sequencing, element targeting, scroll handling, focus management) without rendering any UI. You bring your own components. Tour Kit works with shadcn/ui, Radix, Tailwind, or any design system because it doesn't ship styles to fight against.
+Tour Kit is an open-source, headless product tour library for React. It ships as 10 composable packages, so you install only what you need. The core package is under 23KB gzipped with zero runtime dependencies. It handles tour logic (step sequencing, element targeting, scroll handling, focus management) without rendering any UI. You bring your own components. Tour Kit works with shadcn/ui, Radix, Tailwind, or any design system because it doesn't ship styles to fight against.
 
 ## What questions do developers ask before installing?
 
@@ -55,7 +55,7 @@ The questions below come from GitHub issues across tour libraries, Reddit thread
     <tr>
       <td>Architecture</td>
       <td>Bundle size?</td>
-      <td>Core: &lt;8KB gzipped, zero dependencies</td>
+      <td>Core: &lt;23KB gzipped, zero dependencies</td>
     </tr>
     <tr>
       <td>Architecture</td>
@@ -65,7 +65,7 @@ The questions below come from GitHub issues across tour libraries, Reddit thread
     <tr>
       <td>Comparison</td>
       <td>vs React Joyride?</td>
-      <td>Headless vs opinionated, 8KB vs 498KB unpacked</td>
+      <td>Headless vs opinionated, 23KB vs 498KB unpacked</td>
     </tr>
     <tr>
       <td>Features</td>
@@ -127,7 +127,7 @@ LogRocket recommends this pattern explicitly: "Tour libraries should be loaded d
 
 ## How big is the Tour Kit bundle?
 
-Tour Kit's core package is under 8KB gzipped with zero runtime dependencies. The React package adds roughly 4KB. You install only the packages you need. Analytics, checklists, surveys, and other features are separate packages that tree-shake independently.
+Tour Kit's core package is under 23KB gzipped with zero runtime dependencies. The React package adds roughly 4KB. You install only the packages you need. Analytics, checklists, surveys, and other features are separate packages that tree-shake independently.
 
 For context, the bundle size spread across tour libraries is enormous:
 
@@ -147,7 +147,7 @@ For context, the bundle size spread across tour libraries is enormous:
     </tr>
     <tr>
       <td>Tour Kit (core)</td>
-      <td>&lt;8KB</td>
+      <td>&lt;23KB</td>
       <td>Zero</td>
     </tr>
     <tr>
@@ -264,7 +264,7 @@ React Joyride has 400,000+ weekly npm downloads and 5,100+ GitHub stars. It's th
     </tr>
     <tr>
       <td>Bundle size</td>
-      <td>&lt;8KB core, ~12KB with React</td>
+      <td>&lt;23KB core, ~23KB with React</td>
       <td>498KB unpacked</td>
     </tr>
     <tr>
@@ -294,7 +294,7 @@ React Joyride has 400,000+ weekly npm downloads and 5,100+ GitHub stars. It's th
     </tr>
     <tr>
       <td>License</td>
-      <td>MIT (free) + Pro ($9.99 one-time)</td>
+      <td>BUSL-1.1 (free in dev) + Pro ($9.99 one-time)</td>
       <td>MIT (free)</td>
     </tr>
     <tr>
@@ -318,7 +318,7 @@ Shepherd.js is a well-maintained, framework-agnostic tour library. Userorbit cal
 The key differences:
 
 - **React integration:** Tour Kit is React-native (hooks and providers). Shepherd has a React wrapper, but the core is vanilla JS. This matters for Server Components and concurrent features.
-- **Licensing:** Shepherd's core is MIT, but "a paid license is required for commercial use" of advanced features ([Usertour](https://www.usertour.io/blog/product-tour-joyride)). Tour Kit is MIT for core packages, $9.99 one-time for Pro.
+- **Licensing:** Shepherd's core is MIT, but "a paid license is required for commercial use" of advanced features ([Usertour](https://www.usertour.io/blog/product-tour-joyride)). Tour Kit is BUSL-1.1 for core packages (free in development, licence key in production), $9.99 one-time for Pro.
 - **Content model:** Shepherd uses HTML strings for custom step content. Tour Kit uses JSX, so you render React components directly inside steps.
 - **Accessibility:** Shepherd provides keyboard navigation and ARIA attributes. Tour Kit adds focus trapping and `prefers-reduced-motion`.
 
@@ -341,7 +341,7 @@ Tour Kit sits in the code-owned, developer-controlled camp. Use it when:
 
 ## What license does Tour Kit use?
 
-Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed. Free for commercial use, no restrictions. The extended packages (analytics, adoption, checklists, surveys, announcements, media, scheduling) require a Pro license at $9.99 one-time per project.
+Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are BUSL-1.1-licensed: free in development, evaluation, testing, and CI, with a licence key required in production. The extended packages (analytics, adoption, checklists, surveys, announcements, media, scheduling) require a Pro license at $9.99 one-time per project, which also covers production use of the core.
 
 For context, licensing varies widely across tour libraries:
 
@@ -356,8 +356,8 @@ For context, licensing varies widely across tour libraries:
   <tbody>
     <tr>
       <td>Tour Kit (core)</td>
-      <td>MIT</td>
-      <td>Free</td>
+      <td>BUSL-1.1</td>
+      <td>Free in dev, licence key in prod</td>
     </tr>
     <tr>
       <td>React Joyride</td>
@@ -456,7 +456,7 @@ If you're evaluating Tour Kit, here's the decision framework:
 **Choose Tour Kit if:**
 - You have a React 18+ app with a design system or Tailwind setup
 - You want tours that look exactly like the rest of your app
-- Bundle size matters (core is under 8KB gzipped)
+- Bundle size matters (core is under 23KB gzipped)
 - You want tour state in your own database
 - Your team is comfortable writing React components
 
@@ -480,7 +480,7 @@ npm install @tourkit/core @tourkit/react
 
 ### Is Tour Kit free?
 
-Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed and free for commercial use. Extended packages for analytics, checklists, surveys, and media require a Pro license at $9.99 one-time per project. No per-user or per-MAU pricing.
+Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are BUSL-1.1-licensed and source-available for commercial use. Extended packages for analytics, checklists, surveys, and media require a Pro license at $9.99 one-time per project. No per-user or per-MAU pricing.
 
 ### Does Tour Kit require React?
 
@@ -554,7 +554,7 @@ export const jsonLd = [
         "name": "Is Tour Kit free?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Tour Kit's core packages are MIT-licensed and free for commercial use. Extended packages for analytics, checklists, surveys, and media require a Pro license at $9.99 one-time per project."
+          "text": "Tour Kit's core packages are BUSL-1.1-licensed and source-available for commercial use. Extended packages for analytics, checklists, surveys, and media require a Pro license at $9.99 one-time per project."
         }
       },
       {

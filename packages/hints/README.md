@@ -251,6 +251,15 @@ import type {
 
 Full documentation: [https://usertourkit.com/docs/hints](https://usertourkit.com/docs/hints)
 
-## License
+## Licence
 
-MIT © Tour Kit Team
+[Business Source License 1.1](./LICENSE.md). Development, evaluation, testing,
+CI and any non-production environment are free and need no key. **Production
+use needs a licence key** — a one-time purchase from $9.99 at
+[usertourkit.com/pricing](https://usertourkit.com/pricing). Each version
+converts to MIT on its Change Date, four years after release.
+
+Versions up to and including 2.1.0 were published under MIT and stay MIT — an
+MIT grant cannot be withdrawn. This applies from 3.0.0 onward.
+
+© 2026 domidex01

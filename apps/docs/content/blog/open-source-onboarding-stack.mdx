@@ -106,7 +106,7 @@ With a code-first stack, tours are React components in your repo. Analytics flow
 
 SaaS onboarding tools inject third-party JavaScript. We [measured the Lighthouse impact](/blog/onboarding-tool-lighthouse-performance) of several popular tools and found they add 150-400KB to your bundle and 200-800ms to Time to Interactive. That's on every page load, not just pages with tours.
 
-An open-source stack lets you tree-shake aggressively. Tour Kit's core ships at under 8KB gzipped with zero runtime dependencies. You load the [guidance layer](/blog/tour-kit-8kb-zero-dependencies) only on pages that need it, using `React.lazy` and [code-splitting](/blog/lazy-loading-product-tours-react-lazy-suspense).
+An open-source stack lets you tree-shake aggressively. Tour Kit's core ships at under 23KB gzipped with zero runtime dependencies. You load the [guidance layer](/blog/tour-kit-8kb-zero-dependencies) only on pages that need it, using `React.lazy` and [code-splitting](/blog/lazy-loading-product-tours-react-lazy-suspense).
 
 ## The guidance layer: choosing a tour library
 
@@ -127,8 +127,8 @@ The guidance layer is the core of your onboarding stack. It handles product tour
   <tbody>
     <tr>
       <td>Tour Kit</td>
-      <td>MIT</td>
-      <td>&lt;8KB (core)</td>
+      <td>BUSL-1.1</td>
+      <td>&lt;23KB (core)</td>
       <td>✅</td>
       <td>✅</td>
       <td>✅ strict</td>
@@ -324,19 +324,19 @@ Here's the complete open-source onboarding stack we recommend. Every tool is MIT
       <td>Tours + Hints</td>
       <td>Tour Kit</td>
       <td>Shepherd.js, OnboardJS</td>
-      <td>MIT</td>
+      <td>BUSL-1.1</td>
     </tr>
     <tr>
       <td>Checklists</td>
       <td>Tour Kit Checklists</td>
       <td>Custom (hooks are ~200 LOC)</td>
-      <td>MIT</td>
+      <td>BUSL-1.1</td>
     </tr>
     <tr>
       <td>Announcements</td>
       <td>Tour Kit Announcements</td>
       <td>Custom modal/toast</td>
-      <td>MIT</td>
+      <td>BUSL-1.1</td>
     </tr>
     <tr>
       <td>Analytics</td>
@@ -360,7 +360,7 @@ Here's the complete open-source onboarding stack we recommend. Every tool is MIT
       <td>Media</td>
       <td>Tour Kit Media</td>
       <td>react-player</td>
-      <td>MIT</td>
+      <td>BUSL-1.1</td>
     </tr>
     <tr>
       <td>UI</td>
@@ -476,7 +476,7 @@ Assembling an open-source onboarding stack takes a day; maintaining it across qu
 
 **Version your tour definitions.** Tours are code, so they live in your repo, go through code review, and get tested in CI. We've covered [Playwright testing](/blog/e2e-testing-product-tours-playwright), [Vitest unit testing](/blog/unit-testing-tour-kit-components-vitest), and [CI/CD integration](/blog/test-product-tour-ci-cd).
 
-**Track your bundle budget.** Tour Kit publishes [bundle size targets](/blog/tour-kit-8kb-zero-dependencies): core under 8KB, react under 12KB, hints under 5KB gzipped. Monitor your total onboarding bundle with bundlephobia or your build tool's analysis output.
+**Track your bundle budget.** Tour Kit publishes [bundle size targets](/blog/tour-kit-8kb-zero-dependencies): core under 23KB, react under 12KB, hints under 6.5KB gzipped. Monitor your total onboarding bundle with bundlephobia or your build tool's analysis output.
 
 **Review tour analytics monthly.** A tour with a 30% completion rate is worse than no tour. Use the [analytics framework](/blog/product-tour-analytics-framework) to identify and fix underperforming flows.
 

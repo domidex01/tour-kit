@@ -23,7 +23,7 @@ Most product tour advice ignores this. The guides from Chameleon, Appcues, and I
 npm install @tourkit/core @tourkit/react
 ```
 
-Tour Kit's core ships at under 8 KB gzipped. That matters when your JS budget is 300 KB total.
+Tour Kit's core ships at under 23 KB gzipped. That matters when your JS budget is 300 KB total.
 
 ## What is low-bandwidth onboarding?
 
@@ -42,7 +42,7 @@ Here's what that looks like on real networks:
 <tr><th>Tour library payload (gzipped)</th><th>4G (6 Mbps)</th><th>3G (1 Mbps)</th><th>Edge/2G (~0.25 Mbps)</th></tr>
 </thead>
 <tbody>
-<tr><td>Tour Kit core (~8 KB)</td><td>0.01 s</td><td>0.06 s</td><td>0.26 s</td></tr>
+<tr><td>Tour Kit core (~23 KB)</td><td>0.01 s</td><td>0.06 s</td><td>0.26 s</td></tr>
 <tr><td>Driver.js (~15 KB)</td><td>0.02 s</td><td>0.12 s</td><td>0.48 s</td></tr>
 <tr><td>React Joyride (~170 KB unpacked)</td><td>0.23 s</td><td>1.36 s</td><td>5.4 s</td></tr>
 <tr><td>Typical SaaS SDK (~300 KB+)</td><td>0.4 s</td><td>2.4 s</td><td>9.6 s</td></tr>
@@ -220,13 +220,13 @@ A third-party tour script that blocks the main thread during initialization tank
 
 The problem is invisible in Lighthouse lab tests because LCP (Largest Contentful Paint) usually isn't affected because the tour SDK loads after the main content. But field data from the Chrome UX Report, which Google uses for ranking, captures the INP degradation on real user devices. Your Lighthouse score looks fine. Your search rankings suffer anyway.
 
-Tour Kit avoids this by shipping under 8 KB gzipped and deferring initialization until the tour triggers. Combined with React.lazy, the tour SDK contributes zero main-thread time during page load. We measured Tour Kit's initialization at under 2 ms on a Moto G4, the reference device for Lighthouse's mobile throttling.
+Tour Kit avoids this by shipping under 23 KB gzipped and deferring initialization until the tour triggers. Combined with React.lazy, the tour SDK contributes zero main-thread time during page load. We measured Tour Kit's initialization at under 2 ms on a Moto G4, the reference device for Lighthouse's mobile throttling.
 
 ## Patterns that work on 3G: a checklist
 
 We tested these patterns on throttled Chrome DevTools (Slow 3G preset, 4x CPU slowdown) with a Vite + React 19 project. Here's what actually moved the needle:
 
-1. **Ship under 50 KB for the tour chunk.** Tour Kit core + react is under 20 KB gzipped combined. That's a 0.16-second download on 3G. React Joyride's unpacked 498 KB takes over 4 seconds.
+1. **Ship under 50 KB for the tour chunk.** Tour Kit core + react is under 35 KB gzipped combined. That's a 0.7-second download on 3G. React Joyride's unpacked 498 KB takes over 4 seconds.
 
 2. **Defer tour initialization with React.lazy.** Don't import the tour library at the top of your entry file. Wrap it in lazy + Suspense. This alone cut our test app's TTI by 400 ms on Slow 3G.
 
@@ -254,7 +254,7 @@ We tested these patterns on throttled Chrome DevTools (Slow 3G preset, 4x CPU sl
 
 Tour Kit was built with this problem in mind. The architecture decisions that matter for constrained networks:
 
-- **8 KB core, zero runtime dependencies.** No Popper.js, no Floating UI bundled by default. You add positioning only if you need it.
+- **23 KB core, zero runtime dependencies.** No Popper.js, no Floating UI bundled by default. You add positioning only if you need it.
 - **10 composable packages.** Install `@tourkit/core` and `@tourkit/react` for a minimal tour. Add `@tourkit/media`, `@tourkit/analytics`, or `@tourkit/hints` only when the feature justifies the bytes.
 - **Headless rendering.** You control the DOM output. No injected stylesheets or shadow DOM, nothing outside your control.
 - **Tree-shakeable exports.** Unused hooks and utilities are eliminated at build time. [Our tree-shaking deep-dive](/blog/tree-shaking-product-tour-libraries) covers what actually gets removed.
@@ -267,7 +267,7 @@ Check the [live demo on CodeSandbox](https://usertourkit.com/) to see Tour Kit r
 
 ### Does low-bandwidth onboarding require a service worker?
 
-Service workers improve the experience for returning users by caching tour assets for offline or slow-connection use, but they aren't strictly required. Code splitting with React.lazy and keeping the tour bundle small are higher-priority wins. Tour Kit ships at under 8 KB gzipped, which downloads in 0.06 seconds on 3G even without caching.
+Service workers improve the experience for returning users by caching tour assets for offline or slow-connection use, but they aren't strictly required. Code splitting with React.lazy and keeping the tour bundle small are higher-priority wins. Tour Kit ships at under 23 KB gzipped, which downloads in 0.06 seconds on 3G even without caching.
 
 ### How do I test product tour performance on slow connections?
 
@@ -283,7 +283,7 @@ The Network Information API exposes the user's connection type and estimated ban
 
 ### How much does bundle size affect Core Web Vitals?
 
-Every 100 KB of additional JavaScript adds roughly 50–100 ms of main-thread blocking on mid-range mobile devices, directly impacting INP and TBT scores. Google uses field Core Web Vitals from the Chrome UX Report for ranking. Tour Kit's core + react is under 20 KB gzipped, contributing less than 2 ms of main-thread time.
+Every 100 KB of additional JavaScript adds roughly 50–100 ms of main-thread blocking on mid-range mobile devices, directly impacting INP and TBT scores. Google uses field Core Web Vitals from the Chrome UX Report for ranking. Tour Kit's core + react is under 23 KB gzipped, contributing less than 2 ms of main-thread time.
 
 ---
 
@@ -334,7 +334,7 @@ Every 100 KB of additional JavaScript adds roughly 50–100 ms of main-thread bl
 ## Internal Linking Suggestions
 
 - Link FROM [Lazy loading product tours with React.lazy and Suspense](/blog/lazy-loading-product-tours-react-lazy-suspense) → this article (connection-aware rendering section)
-- Link FROM [How Tour Kit ships at 8KB gzipped](/blog/tour-kit-8kb-zero-dependencies) → this article (low-bandwidth context)
+- Link FROM [How Tour Kit ships at 23KB gzipped](/blog/tour-kit-8kb-zero-dependencies) → this article (low-bandwidth context)
 - Link FROM [Core Web Vitals impact of onboarding tools](/blog/onboarding-tool-core-web-vitals) → this article (performance-first patterns)
 - Link FROM [Tree-shaking product tour libraries](/blog/tree-shaking-product-tour-libraries) → this article (bundle budget section)
 - Link FROM [Lightweight product tour libraries under 10KB](/blog/lightweight-product-tour-libraries-under-10kb) → this article (deeper guide on low-bandwidth)

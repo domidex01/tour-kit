@@ -19,7 +19,7 @@ A user clicks through three steps of your onboarding tour, gets pulled into a Sl
 
 Most React tour libraries treat persistence as an afterthought. You're left wiring up `localStorage.setItem` calls in event handlers, wrestling with SSR errors in Next.js, and hoping your key naming doesn't collide with another feature. Tour Kit handles this differently. Persistence is a first-class config option that works out of the box with localStorage, sessionStorage, cookies, or any custom adapter.
 
-Tour Kit is a headless React product tour library (core package under 8KB gzipped, 0 runtime dependencies). Its `@tour-kit/core` package includes a `usePersistence` hook and a `PersistenceConfig` type that manage step position, completion tracking, and "don't show again" state across sessions.
+Tour Kit is a headless React product tour library (core package under 23KB gzipped, 0 runtime dependencies). Its `@tour-kit/core` package includes a `usePersistence` hook and a `PersistenceConfig` type that manage step position, completion tracking, and "don't show again" state across sessions.
 
 By the end of this tutorial, you'll have a tour that remembers where users left off, skips completed tours on return visits, and handles SSR without errors.
 

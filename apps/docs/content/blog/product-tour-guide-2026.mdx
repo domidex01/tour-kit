@@ -123,7 +123,7 @@ React Joyride ships at approximately 30KB gzipped with its default styling. That
 
 Headless libraries separate tour logic from rendering. You get hooks for step state, positioning data, and lifecycle events, but you render the actual tooltips, overlays, and buttons yourself. More JSX to write. Full design system integration.
 
-This is the approach User Tour Kit takes. The core logic lives in `@tourkit/core` at under 8KB gzipped. The React bindings in `@tourkit/react` give you hooks like `useTour()` and `useStep()` that return state and callbacks, and you render them however you want.
+This is the approach User Tour Kit takes. The core logic lives in `@tourkit/core` at under 23KB gzipped. The React bindings in `@tourkit/react` give you hooks like `useTour()` and `useStep()` that return state and callbacks, and you render them however you want.
 
 ```tsx
 // src/components/FeatureTour.tsx
@@ -279,7 +279,7 @@ As of April 2026, React product tour libraries fall into three categories: opini
 <tr><th>Library</th><th>Approach</th><th>Bundle (gzip)</th><th>TypeScript</th><th>React 19</th><th>Best for</th></tr>
 </thead>
 <tbody>
-<tr><td>User Tour Kit</td><td>Headless, composable</td><td>Under 8KB core</td><td>Strict mode</td><td>Yes</td><td>Design system teams</td></tr>
+<tr><td>User Tour Kit</td><td>Headless, composable</td><td>Under 23KB core</td><td>Strict mode</td><td>Yes</td><td>Design system teams</td></tr>
 <tr><td>React Joyride</td><td>Opinionated</td><td>~30KB</td><td>Built-in (v3)</td><td>v3 only</td><td>Quick drop-in tours</td></tr>
 <tr><td>Shepherd.js</td><td>Framework-agnostic</td><td>~25KB</td><td>Built-in</td><td>Via wrapper</td><td>Multi-framework teams</td></tr>
 <tr><td>Driver.js</td><td>Vanilla JS</td><td>~5KB</td><td>Built-in</td><td>Manual</td><td>Lightweight highlights</td></tr>
@@ -374,7 +374,7 @@ Product tours must meet WCAG 2.1 Level AA. That means managing focus (move it to
 
 ### What's the best product tour library for React in 2026?
 
-As of April 2026, the main React tour libraries are React Joyride (~30KB, opinionated), Shepherd.js (~25KB, framework-agnostic), Driver.js (~5KB, lightweight), and User Tour Kit (under 8KB, headless). Which one fits depends on your stack: React Joyride for quick setup, Driver.js for minimal footprint, and User Tour Kit for design system integration. We built User Tour Kit, so verify our claims on [bundlephobia](https://bundlephobia.com) and [GitHub](https://github.com).
+As of April 2026, the main React tour libraries are React Joyride (~30KB, opinionated), Shepherd.js (~25KB, framework-agnostic), Driver.js (~5KB, lightweight), and User Tour Kit (under 23KB, headless). Which one fits depends on your stack: React Joyride for quick setup, Driver.js for minimal footprint, and User Tour Kit for design system integration. We built User Tour Kit, so verify our claims on [bundlephobia](https://bundlephobia.com) and [GitHub](https://github.com).
 
 ### Do product tours actually improve activation?
 
@@ -390,7 +390,7 @@ Yes, but product tours are client-side components that interact with the DOM, so
 
 ### How do product tours affect page performance?
 
-A tour library's impact depends on its bundle size and initialization cost. Opinionated libraries like React Joyride add ~30KB gzipped. Headless libraries like User Tour Kit add under 8KB. For pages already near the 170KB script budget where bounce rates spike, choose a library that tree-shakes well and supports lazy loading. Load the tour library only when it's needed, not on every page.
+A tour library's impact depends on its bundle size and initialization cost. Opinionated libraries like React Joyride add ~30KB gzipped. Headless libraries like User Tour Kit add under 23KB. For pages already near the 170KB script budget where bounce rates spike, choose a library that tree-shakes well and supports lazy loading. Load the tour library only when it's needed, not on every page.
 
 ---
 

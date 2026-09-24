@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;8KB core bundle for a $9.99 one-time Pro fee. Userflow is a no-code onboarding platform starting at $240/month with a visual flow builder and AI-powered tour generation. userTourKit suits React teams wanting code ownership and design-system-native UI; Userflow is better when product managers need to ship onboarding without developers.
+userTourKit is a headless React library offering tours, hints, checklists, announcements, analytics, and scheduling in a &lt;23KB core bundle for a $9.99 one-time Pro fee. Userflow is a no-code onboarding platform starting at $240/month with a visual flow builder and AI-powered tour generation. userTourKit suits React teams wanting code ownership and design-system-native UI; Userflow is better when product managers need to ship onboarding without developers.
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade.
+userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with a source-available core (BUSL-1.1, free in development) and $9.99 one-time Pro upgrade.
 
 ## What is Userflow?
 
@@ -30,7 +30,7 @@ The trade-off is real: every change requires a developer. But for teams already 
 
 ### Hints and hotspots
 
-Both tools support persistent hotspot indicators on UI elements. Userflow calls them "launchers" and "beacons," configurable through the visual builder. userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped) provides `HintHotspot` and `HintTooltip` components with independent dismiss state per hint and persistence across page loads via storage adapters. Hints are non-sequential, so each one manages its own lifecycle rather than following a linear flow. The key difference: userTourKit hints render as actual React components in your tree, while Userflow injects its own DOM overlay.
+Both tools support persistent hotspot indicators on UI elements. Userflow calls them "launchers" and "beacons," configurable through the visual builder. userTourKit's `@tour-kit/hints` package (&lt;6.5KB gzipped) provides `HintHotspot` and `HintTooltip` components with independent dismiss state per hint and persistence across page loads via storage adapters. Hints are non-sequential, so each one manages its own lifecycle rather than following a linear flow. The key difference: userTourKit hints render as actual React components in your tree, while Userflow injects its own DOM overlay.
 
 ### Checklists and onboarding flows
 
@@ -86,7 +86,7 @@ For teams in regulated industries, or anyone who cares about inclusive design, t
 
 Userflow loads a ~15KB JavaScript stub, which then asynchronously fetches the full SDK and all onboarding content from Userflow's CDN. The total runtime payload is undisclosed. This creates a hard dependency on Userflow's servers for core user experience, something security-conscious organizations flag regularly.
 
-userTourKit's `@tour-kit/core` ships at &lt;8KB gzipped. `@tour-kit/react` adds &lt;12KB. `@tour-kit/hints` adds &lt;5KB. Everything tree-shakes, everything bundles with your app, and nothing phones home. On a slow 3G connection, the difference between loading content from your own bundle versus waiting for a third-party CDN fetch is the difference between onboarding that works and onboarding that doesn't.
+userTourKit's `@tour-kit/core` ships at &lt;23KB gzipped. `@tour-kit/react` adds &lt;12KB. `@tour-kit/hints` adds &lt;6.5KB. Everything tree-shakes, everything bundles with your app, and nothing phones home. On a slow 3G connection, the difference between loading content from your own bundle versus waiting for a third-party CDN fetch is the difference between onboarding that works and onboarding that doesn't.
 
 ### Framework support and TypeScript
 
@@ -100,7 +100,7 @@ Userflow charges $240/month (Startup, 3,000 MAUs) or $680/month (Pro, 10,000 MAU
 
 At 50,000 MAUs, annual costs reach $12,480-$15,840 depending on plan. Multiple G2 reviewers flagged pricing as their primary complaint: *"Maybe the price for the pro plan ;-)"* was a recurring theme.
 
-userTourKit's core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free. Pro packages cost $9.99 one-time. No MAU limits. No per-seat charges. No recurring fees.
+userTourKit's core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are BUSL-1.1-licensed and source-available. Pro packages cost $9.99 one-time. No MAU limits. No per-seat charges. No recurring fees.
 
 Three-year TCO at 10,000 MAUs: Userflow Pro runs $24,480. userTourKit runs $9.99. The math isn't close.
 
@@ -108,8 +108,8 @@ Three-year TCO at 10,000 MAUs: Userflow Pro runs $24,480. userTourKit runs $9.99
 
 | Feature | userTourKit | Userflow |
 |---|---|---|
-| Product tours | ✅ Built-in (core, MIT) | ✅ Visual builder |
-| Hints/hotspots | ✅ Built-in (&lt;5KB, MIT) | ✅ Launchers/beacons |
+| Product tours | ✅ Built-in (core, BUSL-1.1) | ✅ Visual builder |
+| Hints/hotspots | ✅ Built-in (&lt;5KB, BUSL-1.1) | ✅ Launchers/beacons |
 | Checklists | ✅ Pro ($9.99 one-time) | ✅ Built-in |
 | Announcements | ✅ Pro (5 variants) | ✅ Basic |
 | Surveys/NPS | 🚫 Not in scope | ✅ Built-in (limited on Startup) |
@@ -125,10 +125,10 @@ Three-year TCO at 10,000 MAUs: Userflow Pro runs $24,480. userTourKit runs $9.99
 | Visual builder | 🚫 Code-only | ✅ Kanban canvas |
 | Design system fit | ✅ Native shadcn/Radix/Base UI | ⚙️ Custom CSS (Pro only) |
 | TypeScript | ✅ Full type inference | ⚠️ SDK types only |
-| Core bundle (gzipped) | &lt;8KB | ~15KB stub + CDN |
+| Core bundle (gzipped) | &lt;23KB | ~15KB stub + CDN |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 Not documented |
 | Self-hosted | ✅ Fully self-contained | 🚫 CDN-dependent |
-| Open source | ✅ MIT (free tier) | 🚫 Proprietary |
+| Source-available | ✅ BUSL-1.1 | 🚫 Proprietary |
 | Mobile SDK | 🚫 Web only | 🚫 Web only |
 | CRM integrations | 🚫 Bring your own | ✅ HubSpot, Salesforce (Pro) |
 | Pricing | Free + $9.99 one-time Pro | $240-$680+/mo recurring |
@@ -145,7 +145,7 @@ Userflow also makes more sense when you need native CRM integrations (HubSpot, S
 
 userTourKit fits better when your onboarding needs to look and feel like the rest of your app. If you're building with shadcn/ui and Tailwind (or Radix, or Base UI), userTourKit's components render inside your React tree and inherit your design tokens. There's no fighting a third-party overlay to match your visual language.
 
-It's also the right call when performance budgets are strict (&lt;8KB core versus an undisclosed CDN payload), when WCAG 2.1 AA compliance matters (Lighthouse 100), or when content must render without depending on a third-party CDN. And the $9.99 one-time price speaks for itself at any MAU scale.
+It's also the right call when performance budgets are strict (&lt;23KB core versus an undisclosed CDN payload), when WCAG 2.1 AA compliance matters (Lighthouse 100), or when content must render without depending on a third-party CDN. And the $9.99 one-time price speaks for itself at any MAU scale.
 
 userTourKit won't work if you don't have React developers. It won't work if you need a visual builder. And it doesn't support mobile. Those are real constraints.
 
@@ -204,7 +204,7 @@ userTourKit is newer and has a smaller community footprint. Fewer Stack Overflow
 ## Frequently asked questions
 
 **Is userTourKit free?**
-The core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are MIT-licensed and free with no usage limits. Pro packages (analytics, announcements, checklists, media, scheduling) cost $9.99 one-time. No MAU fees. No per-seat charges.
+The core packages (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`) are BUSL-1.1-licensed and source-available with no usage limits. Pro packages (analytics, announcements, checklists, media, scheduling) cost $9.99 one-time. No MAU fees. No per-seat charges.
 
 **What is the difference between userTourKit and Userflow?**
 userTourKit is a headless React library where onboarding UI renders inside your component tree and config lives in your codebase. Userflow is a SaaS platform with a visual builder where content loads from Userflow's CDN at runtime. The architectural difference: userTourKit is code you own, Userflow is a service you rent.
@@ -216,19 +216,19 @@ Yes, but it requires manual conversion since Userflow doesn't export flows in a 
 userTourKit supports React 18 and React 19 as peer dependencies. Router adapters exist for Next.js App Router (`useNextAppRouter`), Next.js Pages Router (`useNextPagesRouter`), and React Router v6+ (`useReactRouter`).
 
 **What is the bundle size of userTourKit vs Userflow?**
-userTourKit's core is &lt;8KB gzipped, React components add &lt;12KB, hints add &lt;5KB. Userflow loads a ~15KB stub that fetches the full SDK from its CDN asynchronously. Userflow doesn't disclose the total runtime payload size.
+userTourKit's core is &lt;23KB gzipped, React components add &lt;12KB, hints add &lt;6.5KB. Userflow loads a ~15KB stub that fetches the full SDK from its CDN asynchronously. Userflow doesn't disclose the total runtime payload size.
 
 **Does Userflow support WCAG accessibility?**
 Userflow doesn't document WCAG compliance to any specific level. userTourKit ships WCAG 2.1 AA compliant by default with focus trapping, screen reader announcements, keyboard navigation, and Lighthouse Accessibility score of 100.
 
 **Is Userflow open source?**
-No. Userflow is proprietary commercial software acquired by Beamer in February 2024 for approximately $60M. userTourKit's free tier is MIT-licensed. Pro packages use a proprietary license.
+No. Userflow is proprietary commercial software acquired by Beamer in February 2024 for approximately $60M. userTourKit's free tier is BUSL-1.1-licensed. Pro packages use a proprietary license.
 
 **Which is better for enterprise use?**
 Userflow offers enterprise plans with custom pricing and SSO. userTourKit doesn't offer enterprise support SLAs. For enterprises that need vendor support contracts, Userflow is the safer bet. For enterprises that want to own the code and avoid vendor dependency, userTourKit gives you full control.
 
 ## Final verdict
 
-Userflow is an excellent product for product-manager-led teams that prioritize speed of creation over design fidelity. Its 4.9/5 G2 rating is deserved. But at $240-$680+/month with MAU overages, basic analytics, and a proprietary DOM overlay, it's a recurring cost that compounds with growth. userTourKit costs $9.99 once, ships at &lt;8KB, renders inside your React tree, and hits WCAG 2.1 AA out of the box. For developer-led teams building React apps, the value proposition is straightforward.
+Userflow is an excellent product for product-manager-led teams that prioritize speed of creation over design fidelity. Its 4.9/5 G2 rating is deserved. But at $240-$680+/month with MAU overages, basic analytics, and a proprietary DOM overlay, it's a recurring cost that compounds with growth. userTourKit costs $9.99 once, ships at &lt;23KB, renders inside your React tree, and hits WCAG 2.1 AA out of the box. For developer-led teams building React apps, the value proposition is straightforward.
 
 We built userTourKit, so take this comparison with appropriate skepticism. Try both. Decide based on who's building your onboarding and what they need to control.

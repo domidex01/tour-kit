@@ -491,7 +491,7 @@ paths.forEach((path) => {
 
 ## Performance considerations
 
-XState v5 tree-shakes well. If you use `setup()` and `createMachine()` without the interpreter, the core logic is around 7KB gzipped. Adding `@xstate/react` brings the total to approximately 10KB. Combined with Tour Kit's core (under 8KB) and React bindings (under 12KB), the complete stack is under 30KB gzipped for a fully state-machine-driven tour system.
+XState v5 tree-shakes well. If you use `setup()` and `createMachine()` without the interpreter, the core logic is around 7KB gzipped. Adding `@xstate/react` brings the total to approximately 10KB. Combined with Tour Kit's core (under 23KB) and React bindings (under 12KB), the complete stack is under 30KB gzipped for a fully state-machine-driven tour system.
 
 If that budget feels tight, remember that XState is only needed for tours that actually use state machine features. A simple 3-step linear tour doesn't need XState. Tour Kit's built-in `useTour()` hook handles linear flows at zero extra cost. Reserve XState for the complex onboarding flows where the pattern earns its keep.
 

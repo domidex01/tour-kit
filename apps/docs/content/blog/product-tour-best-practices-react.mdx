@@ -532,7 +532,7 @@ Choosing a tour library is the first architectural decision. The React ecosystem
   <tbody>
     <tr>
       <td>User Tour Kit</td>
-      <td>&lt;8KB core + &lt;12KB react</td>
+      <td>&lt;23KB core + &lt;23KB react</td>
       <td>Headless, composable</td>
       <td>Yes</td>
       <td>Full</td>
@@ -599,7 +599,7 @@ Three steps or fewer is the target for individual tours, based on Chameleon's da
 
 ### Does a product tour library affect React performance?
 
-Yes, but the impact depends on architecture. Opinionated libraries like React Joyride ship at ~37KB gzipped. Headless libraries like Tour Kit ship under 8KB gzipped and support lazy-loading. The bigger concern is the positioning engine: use libraries that batch DOM reads with `requestAnimationFrame`, not ones that trigger layout thrashing on scroll.
+Yes, but the impact depends on architecture. Opinionated libraries like React Joyride ship at ~37KB gzipped. Headless libraries like Tour Kit ship under 23KB gzipped and support lazy-loading. The bigger concern is the positioning engine: use libraries that batch DOM reads with `requestAnimationFrame`, not ones that trigger layout thrashing on scroll.
 
 ### How do I make React product tours accessible?
 
@@ -607,7 +607,7 @@ Three requirements: focus trapping within each tour step using `aria-modal="true
 
 ### Should I use a product tour library or build tours from scratch?
 
-Use a library unless your requirements are genuinely simple (a single tooltip pointing at one element). The positioning math, scroll handling, resize observation, focus management, and cross-browser quirks represent hundreds of hours of edge-case work. Tour Kit exists specifically so React teams don't rebuild these patterns. The open-source core is MIT-licensed and ships at under 8KB gzipped.
+Use a library unless your requirements are genuinely simple (a single tooltip pointing at one element). The positioning math, scroll handling, resize observation, focus management, and cross-browser quirks represent hundreds of hours of edge-case work. Tour Kit exists specifically so React teams don't rebuild these patterns. The source-available core is BUSL-1.1-licensed and ships at under 23KB gzipped.
 
 ### How do I handle product tours with React Server Components?
 
@@ -615,7 +615,7 @@ Tour providers and step components must be Client Components (`'use client'`). T
 
 ### What is the best product tour library for React in 2026?
 
-As of April 2026, the answer depends on your constraints. Tour Kit fits teams with custom design systems and TypeScript codebases because it's headless, composable, and ships at under 8KB. React Joyride is better for quick prototypes where you want pre-built UI. Driver.js wins on raw bundle size at ~5KB but lacks React-specific hooks. We built Tour Kit, so evaluate all options independently. See our [full comparison](/blog/best-product-tour-tools-react).
+As of April 2026, the answer depends on your constraints. Tour Kit fits teams with custom design systems and TypeScript codebases because it's headless, composable, and ships at under 23KB. React Joyride is better for quick prototypes where you want pre-built UI. Driver.js wins on raw bundle size at ~5KB but lacks React-specific hooks. We built Tour Kit, so evaluate all options independently. See our [full comparison](/blog/best-product-tour-tools-react).
 
 {/* JSON-LD Schema */}
 <script type="application/ld+json">{JSON.stringify({
@@ -696,7 +696,7 @@ As of April 2026, the answer depends on your constraints. Tour Kit fits teams wi
       "name": "Does a product tour library affect React performance?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, but the impact depends on architecture. Opinionated libraries like React Joyride ship at ~37KB gzipped. Headless libraries like Tour Kit ship the core at under 8KB gzipped and support lazy-loading. The real performance concern is the positioning engine."
+        "text": "Yes, but the impact depends on architecture. Opinionated libraries like React Joyride ship at ~37KB gzipped. Headless libraries like Tour Kit ship the core at under 23KB gzipped and support lazy-loading. The real performance concern is the positioning engine."
       }
     },
     {

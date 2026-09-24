@@ -18,7 +18,7 @@ lastUpdated: "2026-04-08"
 
 Most product tour libraries ship as a single npm package. React Joyride is one bundle. Shepherd.js is one bundle. Driver.js is one bundle. You install the whole thing whether you need tooltips, analytics, scheduling, or surveys. If you only want step sequencing and a tooltip, you still pay for everything else in your bundle.
 
-Tour Kit takes a different approach. It ships 10 separate packages, each published independently, each tree-shakeable, each with its own TypeScript declarations. A basic tour pulls in `@tour-kit/core` (under 8KB gzipped) and `@tour-kit/react`. Need in-app surveys? Add `@tour-kit/surveys`. Need analytics? Add `@tour-kit/analytics` with a PostHog or Mixpanel plugin. You don't pay for what you don't use.
+Tour Kit takes a different approach. It ships 10 separate packages, each published independently, each tree-shakeable, each with its own TypeScript declarations. A basic tour pulls in `@tour-kit/core` (under 23KB gzipped) and `@tour-kit/react`. Need in-app surveys? Add `@tour-kit/surveys`. Need analytics? Add `@tour-kit/analytics` with a PostHog or Mixpanel plugin. You don't pay for what you don't use.
 
 This article is a building-in-public walkthrough of how that architecture works, why certain boundaries exist where they do, and what went wrong along the way. I built Tour Kit as a solo developer, so take the architectural opinions with that context.
 
@@ -34,7 +34,7 @@ A composable library architecture is a design pattern where a software library i
 
 Monolithic product tour libraries force every user to download code for features they never touch. When we measured React Joyride's impact on a production Next.js app, it added 37KB gzipped to the client bundle, including tooltips, callbacks, and event handling for features most projects never enable. Users who complete an onboarding tour are 2.5x more likely to convert to paid (Appcues 2024 Benchmark Report), but that conversion gain disappears if the tour library itself degrades page load.
 
-Tour Kit's core package targets under 8KB gzipped. The React rendering layer adds another 12KB. Checklists, surveys, announcements, analytics, media embeds, and scheduling are features that maybe 20% of users actually need. Forcing the other 80% to download that code felt wrong.
+Tour Kit's core package targets under 23KB gzipped. The React rendering layer adds another 12KB. Checklists, surveys, announcements, analytics, media embeds, and scheduling are features that maybe 20% of users actually need. Forcing the other 80% to download that code felt wrong.
 
 The split also forces cleaner abstractions. When `@tour-kit/analytics` can't reach into `@tour-kit/core`'s internals, the public API has to be good enough. Package boundaries are honesty tests for your interfaces.
 
@@ -184,7 +184,7 @@ Drawing package boundaries is the single hardest design decision in a composable
 
 The boundaries reflect different extension patterns:
 
-- **Core + React + Hints** are the foundation. MIT licensed. Every Tour Kit user installs at least core + react. Hints is separate because not every tour needs persistent hotspots.
+- **Core + React + Hints** are the foundation. BUSL-1.1 licensed (free in development). Every Tour Kit user installs at least core + react. Hints is separate because not every tour needs persistent hotspots.
 - **Analytics** uses a plugin architecture. Five built-in plugins (PostHog, Mixpanel, Amplitude, Google Analytics, console) ship as separate entry points within the package. You import only the plugin you use.
 - **Announcements and Surveys** both share a queue system pattern (priority-based scheduling, frequency rules, dismissal tracking) but target different UI intents. Announcements have 5 display variants (modal, slideout, banner, toast, spotlight). Surveys have 4 question types (rating, text, select, boolean) with NPS/CSAT/CES scoring.
 - **Scheduling** is a pure logic package with zero UI components. It exports timezone-aware date evaluation, business hours checking, blackout periods, and recurring patterns. Both announcements and surveys can optionally use it.
@@ -241,7 +241,7 @@ These are patterns we hit during Tour Kit's development that wasted time. Avoid 
 
 **Forgetting that package boundaries are public API.** Once published to npm, your package names and import paths are contracts. Renaming `@tour-kit/media` to `@tour-kit/embeds` would break every consumer.
 
-**Skipping bundle size budgets.** Without explicit limits (core < 8KB, react < 12KB gzipped), package sizes creep upward with every feature addition. We enforce these as CI checks that fail the build.
+**Skipping bundle size budgets.** Without explicit limits (core < 23KB, react < 12KB gzipped), package sizes creep upward with every feature addition. We enforce these as CI checks that fail the build.
 
 ## Applying this pattern to your own library
 
@@ -250,7 +250,7 @@ If you're building a React library and considering a composable split, here are 
 1. **Start with one package.** Split only when you have concrete evidence that users want subsets. Tour Kit was a single package for its first three months.
 2. **Put logic in core, UI in wrappers.** The headless pattern forces clean interfaces. If your hook API is ugly, your component API will be too.
 3. **Use tsup + Turborepo + pnpm workspaces.** This stack handles ESM/CJS dual output, incremental builds, and workspace linking with minimal configuration. As of April 2026, Turborepo 2.7 supports [composable configuration](https://turborepo.dev/docs/guides/publishing-libraries) for sharing task definitions across packages.
-4. **Set bundle size budgets and enforce them.** Tour Kit's quality gates (core < 8KB, react < 12KB, hints < 5KB gzipped) are CI checks, not aspirations. If a PR exceeds the budget, it fails.
+4. **Set bundle size budgets and enforce them.** Tour Kit's quality gates (core < 23KB, react < 12KB, hints < 6.5KB gzipped) are CI checks, not aspirations. If a PR exceeds the budget, it fails.
 5. **Accept the duplication tax.** Some shared code belongs in each package rather than in a shared utility. The alternative is a dependency web that's harder to reason about.
 
 ```bash
@@ -273,7 +273,7 @@ Tour Kit uses pnpm workspaces for package management, Turborepo for dependency-a
 
 ### Is Tour Kit's architecture suitable for small projects?
 
-Tour Kit's composable architecture benefits projects of any size because you only install what you need. A minimal setup (`@tourkit/core` + `@tourkit/react`, under 20KB gzipped combined) is smaller than most single-package tour libraries. The 10-package split means you never pay a bundle size penalty for features you don't use.
+Tour Kit's composable architecture benefits projects of any size because you only install what you need. A minimal setup (`@tourkit/core` + `@tourkit/react`, under 23KB gzipped combined) is smaller than most single-package tour libraries. The 10-package split means you never pay a bundle size penalty for features you don't use.
 
 ### How does Tour Kit handle accessibility across multiple packages?
 

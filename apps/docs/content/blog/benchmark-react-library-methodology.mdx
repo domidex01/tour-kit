@@ -224,9 +224,9 @@ We run benchmarks in GitHub Actions for CI consistency and verify locally on a M
 
 **Measuring the wrong thing.** One library looked 40% slower until we realized our test page had a layout shift triggering extra re-renders unrelated to the tour library. Isolate the variable you're testing.
 
-**Ignoring tree-shaking.** A library reporting 8KB on bundlephobia might actually contribute 15KB to your production bundle if it doesn't tree-shake well with your specific bundler configuration. Measure your actual build output, not the published package size.
+**Ignoring tree-shaking.** A library reporting 23KB on bundlephobia might actually contribute 15KB to your production bundle if it doesn't tree-shake well with your specific bundler configuration. Measure your actual build output, not the published package size.
 
-**Skipping accessibility.** This one bit us early. A library can score perfectly on bundle and runtime axes while shipping inaccessible overlays that trap focus incorrectly. Tour Kit's core is under 8KB gzipped, but that size advantage would be meaningless without proper ARIA and focus management.
+**Skipping accessibility.** This one bit us early. A library can score perfectly on bundle and runtime axes while shipping inaccessible overlays that trap focus incorrectly. Tour Kit's core is under 23KB gzipped, but that size advantage would be meaningless without proper ARIA and focus management.
 
 ## Tools we use (and why)
 

@@ -8,11 +8,11 @@ lastUpdated: "2026-03-31"
 
 ## The bottom line
 
-userTourKit is a headless React library offering tours, hints, checklists, announcements, and five more packages in a &lt;8KB core bundle for a $9.99 one-time fee. Appcues is a no-code onboarding platform starting at $750/month. userTourKit suits React teams wanting code ownership and tiny bundles. Appcues is better when non-technical PMs need to build tours without developers.
+userTourKit is a headless React library offering tours, hints, checklists, announcements, and five more packages in a &lt;23KB core bundle for a $9.99 one-time fee. Appcues is a no-code onboarding platform starting at $750/month. userTourKit suits React teams wanting code ownership and tiny bundles. Appcues is better when non-technical PMs need to build tours without developers.
 
 ## What is userTourKit?
 
-userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with an MIT-licensed free tier and $9.99 one-time Pro upgrade.
+userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with a source-available core (BUSL-1.1, free in development) and $9.99 one-time Pro upgrade.
 
 ## What is Appcues?
 
@@ -32,7 +32,7 @@ The `useTour()` hook gives you `start`, `next`, `prev`, `skip`, `goTo`, and `res
 
 Both tools support persistent hotspots. Appcues calls them "Pins" and renders them as pulsating beacons attached to elements. They're configured through the visual builder.
 
-userTourKit's `@tour-kit/hints` package (&lt;5KB gzipped, MIT licensed) provides `HintsProvider`, `HintHotspot`, `HintTooltip` components. Each hint has independent dismissal state persisted through storage adapters. The `useHint()` hook returns `isVisible`, `isDismissed`, `show`, `hide`, `dismiss` for programmatic control.
+userTourKit's `@tour-kit/hints` package (&lt;6.5KB gzipped, BUSL-1.1 licensed) provides `HintsProvider`, `HintHotspot`, `HintTooltip` components. Each hint has independent dismissal state persisted through storage adapters. The `useHint()` hook returns `isVisible`, `isDismissed`, `show`, `hide`, `dismiss` for programmatic control.
 
 Hints aren't sequential like tour steps. They suit feature discovery better than guided walkthroughs, which is why they ship as a separate package rather than bolted onto the tour engine.
 
@@ -94,7 +94,7 @@ Lighthouse accessibility score: 100.
 
 Appcues doesn't publish its bundle size. Their loading is multi-phase: bootstrap script from CDN (Fastly), full SDK fetch, API calls to check active flows, then flow content. Default installation is synchronous and render-blocking. An async option exists but needs a callback queue wrapper. Because the payload is account-specific, Bundlephobia can't measure it.
 
-userTourKit's core is &lt;8KB gzipped. React adds &lt;12KB. Hints, &lt;5KB. All three packages are tree-shakeable and code-split alongside the rest of your application bundle, which means you pay zero performance tax for features your users don't trigger. No CDN dependency, no render blocking. `LazyTour` from `@tour-kit/react/lazy` handles deferred loading when you want to push that cost even further down the line.
+userTourKit's core is &lt;23KB gzipped. React adds &lt;12KB. Hints, &lt;6.5KB. All three packages are tree-shakeable and code-split alongside the rest of your application bundle, which means you pay zero performance tax for features your users don't trigger. No CDN dependency, no render blocking. `LazyTour` from `@tour-kit/react/lazy` handles deferred loading when you want to push that cost even further down the line.
 
 ### Framework support and TypeScript
 
@@ -112,14 +112,14 @@ Vendr purchase intelligence shows negotiated contracts between $42,000 and $84,0
 
 A G2 reviewer put it bluntly: "They've gotten insanely expensive. I love the features... But nobody should have to pay $500+/month for this stuff."
 
-userTourKit's free tier (MIT) includes core, React bindings, and hints. The $9.99 one-time Pro license adds analytics, announcements, checklists, adoption tracking, media embedding, and scheduling. Three-year total cost of ownership at 10,000 MAUs: Appcues runs $90,000 to $120,000+. userTourKit is $9.99.
+userTourKit is source-available under BUSL-1.1 and free while you build — core, React bindings, hints, analytics, announcements, checklists, adoption tracking, media embedding and scheduling. A $9.99 one-time licence covers serving them to end users. Three-year total cost of ownership at 10,000 MAUs: Appcues runs $90,000 to $120,000+. userTourKit is $9.99.
 
 ## Side-by-side comparison table
 
 | Feature | userTourKit | Appcues |
 |---|---|---|
-| Product tours | ✅ Built-in (core, MIT) | ✅ WYSIWYG builder |
-| Hints/hotspots | ✅ Built-in (&lt;5KB, MIT) | ✅ Pins |
+| Product tours | ✅ Built-in (core, BUSL-1.1) | ✅ WYSIWYG builder |
+| Hints/hotspots | ✅ Built-in (&lt;5KB, BUSL-1.1) | ✅ Pins |
 | Onboarding checklists | ✅ Pro ($9.99 one-time) | ⚠️ Grow plan only ($750+/mo) |
 | Announcements | ✅ Pro ($9.99 one-time) | ✅ Built-in |
 | Analytics | ✅ Pro (plugin-based) | ✅ Basic (advanced on Grow) |
@@ -132,7 +132,7 @@ userTourKit's free tier (MIT) includes core, React bindings, and hints. The $9.9
 | No-code builder | 🚫 Code-only | ✅ Chrome extension |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 Not documented |
 | Headless/BYO UI | ✅ Full headless (UnifiedSlot) | 🚫 Opinionated DOM injection |
-| Core bundle (gzipped) | &lt;8KB | Opaque (multi-phase CDN) |
+| Core bundle (gzipped) | &lt;23KB | Opaque (multi-phase CDN) |
 | React 18 + 19 | ✅ Native hooks | 🚫 Global singleton |
 | TypeScript | ✅ Strict mode, full inference | ⚙️ Basic declarations |
 | SSR/Next.js | ✅ App Router compatible | 🚫 Client-only |
@@ -141,7 +141,7 @@ userTourKit's free tier (MIT) includes core, React bindings, and hints. The $9.9
 | Mobile SDK | 🚫 Web only | ✅ Premium add-on ($8K-$12K/yr) |
 | Multi-channel (email/push) | 🚫 Not available | ✅ Workflows (Grow+) |
 | Integrations | ⚙️ Plugin API, build your own | ✅ 20+ pre-built |
-| License | MIT (free tier) | Proprietary SaaS |
+| License | BUSL-1.1 (source-available) | Proprietary SaaS |
 | Pricing | Free + $9.99 one-time Pro | $750/mo+ (MAU-based) |
 
 Data verified March 2026. Sources: official documentation, npm, GitHub, Appcues pricing page, Vendr.
@@ -237,7 +237,7 @@ We built userTourKit, so take these comparisons with appropriate skepticism. But
 ## Frequently asked questions
 
 **Is userTourKit free?**
-The core package, React bindings, and hints are MIT licensed and free forever. The Pro upgrade ($9.99, one-time payment) adds analytics, announcements, checklists, adoption tracking, media embedding, and scheduling. No MAU limits. No recurring fees.
+The core package, React bindings, and hints are BUSL-1.1 licensed and source-available (free in development, licence key in production). The Pro upgrade ($9.99, one-time payment) adds analytics, announcements, checklists, adoption tracking, media embedding, and scheduling. No MAU limits. No recurring fees.
 
 **What is the difference between userTourKit and Appcues?**
 userTourKit is a code-first React component library. Appcues is a no-code SaaS platform with a visual builder. userTourKit renders inside your React tree using your design tokens; Appcues injects external DOM elements and iframes over your application. userTourKit costs $9.99 once, Appcues starts at $750/month.
@@ -249,13 +249,13 @@ Yes. Export your Appcues flow definitions, then recreate them as userTourKit ste
 userTourKit supports React 18 and 19 with native hooks. The `useNextAppRouter()` adapter provides route-aware tours for Next.js App Router. SSR and SSG work with the included `createNoopStorage()` adapter. Full TypeScript strict mode support.
 
 **What is the bundle size of userTourKit vs Appcues?**
-userTourKit's core is &lt;8KB gzipped, the React package is &lt;12KB, and hints is &lt;5KB. Appcues doesn't publish its bundle size. Their multi-phase CDN loading (bootstrap, SDK, API calls, flow content) makes the total payload opaque and unmeasurable with standard tools like Bundlephobia.
+userTourKit's core is &lt;23KB gzipped, the React package is &lt;12KB, and hints is &lt;6.5KB. Appcues doesn't publish its bundle size. Their multi-phase CDN loading (bootstrap, SDK, API calls, flow content) makes the total payload opaque and unmeasurable with standard tools like Bundlephobia.
 
 **Does Appcues support checklists and analytics?**
 Checklists, advanced analytics, NPS surveys, A/B testing, custom CSS, and most integrations require Appcues' Grow plan at $750+/month. The previous Essentials tier had these features gated as well.
 
 **Is Appcues open source?**
-No. Appcues is a proprietary SaaS product. Your onboarding flows are stored in Appcues' cloud infrastructure. userTourKit's free tier packages are MIT licensed, and the source code is publicly available.
+No. Appcues is a proprietary SaaS product. Your onboarding flows are stored in Appcues' cloud infrastructure. userTourKit's source-available tier packages are BUSL-1.1 licensed, and the source code is publicly available.
 
 **Which is better for enterprise: userTourKit or Appcues?**
 Appcues has stronger enterprise features today: SOC 2, SSO/SAML, EU hosting (launched early 2026), plus a managed infrastructure SLA. userTourKit doesn't offer enterprise support tiers or compliance certifications. If your procurement process requires these, Appcues is the safer bet.

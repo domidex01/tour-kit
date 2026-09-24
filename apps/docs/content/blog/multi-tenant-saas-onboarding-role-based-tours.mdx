@@ -391,7 +391,7 @@ All tour step tooltips should use `role="dialog"` and `aria-label` describing th
 
 A few libraries support conditional step rendering. Here's how they compare for multi-tenant use cases:
 
-**Tour Kit** provides the `when` prop that receives arbitrary context, tenant-scoped storage adapters, and analytics callbacks with full context passthrough. It's headless, so your tooltips use your design system. Core bundle is under 8KB gzipped. Limitation: requires React 18+ and a developer to implement (no visual builder). We built Tour Kit, so take this recommendation with appropriate skepticism.
+**Tour Kit** provides the `when` prop that receives arbitrary context, tenant-scoped storage adapters, and analytics callbacks with full context passthrough. It's headless, so your tooltips use your design system. Core bundle is under 23KB gzipped. Limitation: requires React 18+ and a developer to implement (no visual builder). We built Tour Kit, so take this recommendation with appropriate skepticism.
 
 **React Joyride** supports `disableBeacon` and custom callback logic for conditional steps, but doesn't have a built-in context system. You'd wire the role/tenant logic yourself through the callback prop. Ships at ~37KB gzipped.
 
