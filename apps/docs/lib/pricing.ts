@@ -6,7 +6,8 @@
  * the Polar products, otherwise the page advertises a price the checkout does
  * not honor.
  *
- * The model: every @tour-kit/* package is source-available under BSL 1.1. Free
+ * The model: every Tour Kit Pro package is source-available under BSL 1.1 (the
+ * free packages — core, react, hints — are MIT today). Free
  * for development, evaluation, testing and CI; a key to serve it to end users
  * of a deployed application. Tiers differ only in how many projects one key
  * covers — a "project" is a registrable domain, so `app.foo.com` and

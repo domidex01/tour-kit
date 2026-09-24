@@ -10,9 +10,9 @@ Covered by the root [`LICENSE`](./LICENSE) file:
 - `@tour-kit/react` — `packages/react`
 - `@tour-kit/hints` — `packages/hints`
 
-## Commercial packages (Proprietary)
+## Commercial packages (source-available, BSL 1.1)
 
-The following packages are proprietary commercial software and require a paid license to use, modify, or distribute. Each package's `LICENSE.md` file is the authoritative terms for that package:
+The following packages are source-available under the [Business Source License 1.1](https://mariadb.com/bsl11/). Copying, modification, redistribution, and non-production use are granted by the license itself; production use requires a paid license key. Each published version converts to the MIT license on its Change Date (publication date + 4 years, stamped at release). Each package's `LICENSE.md` file is the authoritative terms for that package:
 
 - `@tour-kit/adoption` — [`packages/adoption/LICENSE.md`](./packages/adoption/LICENSE.md)
 - `@tour-kit/ai` — [`packages/ai/LICENSE.md`](./packages/ai/LICENSE.md)

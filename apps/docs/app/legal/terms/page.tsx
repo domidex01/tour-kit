@@ -50,19 +50,21 @@ export default function TermsPage() {
             By using the site or installing the packages, you agree to these terms.
           </p>
 
-          <h2>The open-source packages</h2>
+          <h2>The open-source and source-available packages</h2>
           <p>
-            Every <code>@tour-kit/*</code> package is released under the{' '}
+            The free packages (<code>@tour-kit/core</code>, <code>@tour-kit/react</code>,{' '}
+            <code>@tour-kit/hints</code>) are released under the MIT licence. Every Tour Kit Pro
+            package is released under the{' '}
             <a
-              href="https://github.com/domidex01/tour-kit/blob/main/LICENSE.md"
+              href="https://github.com/domidex01/tour-kit/blob/main/packages/license/LICENSE.md"
               target="_blank"
               rel="noopener noreferrer"
             >
               Business Source License 1.1
             </a>
-            . You may copy, modify, redistribute and make any non-production use of them without
-            charge — development, evaluation, testing and continuous integration are all covered by
-            the Additional Use Grant. Serving Tour Kit to end users of a deployed application
+            . You may copy, modify, redistribute and make any non-production use of the Pro packages
+            without charge — development, evaluation, testing and continuous integration are all
+            granted by the licence itself. Serving Tour Kit to end users of a deployed application
             requires a licence key. Each published version converts to the MIT licence on its Change
             Date. Nothing on this page narrows the rights granted by that licence.
           </p>

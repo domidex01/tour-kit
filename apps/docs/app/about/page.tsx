@@ -264,8 +264,9 @@ export default function AboutPage() {
 
           <h2>How it's licensed</h2>
           <p>
-            Every <code>@tour-kit/*</code> package is source-available under the Business Source
-            License 1.1. Development, evaluation, testing and CI are free and have no feature gates
+            Every Tour Kit Pro package is source-available under the Business Source License 1.1
+            (core, react and hints are MIT). Development, evaluation, testing and CI are free and
+            have no feature gates
             — you get the whole library, tours through to AI chat. Serving it to end users of a
             deployed application needs a one-time licence key: $9.99 for one project, $49.00 for
             five, $299.00 for unlimited. Each published version converts to the MIT licence on its
