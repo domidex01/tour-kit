@@ -1,3 +1,4 @@
+import { act, render, waitFor } from '@testing-library/react'
 /**
  * Issue #154 — the react seam, pinned.
  *
@@ -16,8 +17,7 @@
  *    step hook in the engine's order. A regression here is invisible to
  *    core's own provider tests, which exercise core's component directly.
  */
-import { useTour, type Tour } from '@tour-kit/core'
-import { act, render, waitFor } from '@testing-library/react'
+import { type Tour, useTour } from '@tour-kit/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { TourProvider } from '../components/provider/licensed-providers'
 import { Tour as DeclarativeTour } from '../components/tour/tour'
@@ -70,14 +70,17 @@ describe('step lifecycle hooks through @tour-kit/react (#154)', () => {
         <Probe />
       </TourProvider>
     )
-    const tour = () => api!
+    // No `!` in this file: a throwing accessor satisfies the lint rule and
+    // fails louder than a null deref if the probe ever stops mounting.
+    const tour = () => {
+      if (!api) throw new Error('Probe did not mount')
+      return api
+    }
 
     await act(async () => {
       await tour().start('hooked')
     })
-    await waitFor(() =>
-      expect(order).toEqual(['onBeforeShow:s1', 'onEnter:s1', 'onShow:s1'])
-    )
+    await waitFor(() => expect(order).toEqual(['onBeforeShow:s1', 'onEnter:s1', 'onShow:s1']))
     order.length = 0
 
     await act(async () => {
@@ -103,8 +106,15 @@ describe('step lifecycle hooks through @tour-kit/react (#154)', () => {
   it('forwards hook props declared on <TourStep> into the running steps', async () => {
     document.body.innerHTML = '<div id="t1">one</div><div id="t2">two</div>'
     const mockRect: DOMRect = {
-      top: 100, left: 100, bottom: 150, right: 200, width: 100, height: 50,
-      x: 100, y: 100, toJSON: () => ({}),
+      top: 100,
+      left: 100,
+      bottom: 150,
+      right: 200,
+      width: 100,
+      height: 50,
+      x: 100,
+      y: 100,
+      toJSON: () => ({}),
     }
     for (const el of document.querySelectorAll('#t1, #t2')) {
       vi.spyOn(el, 'getBoundingClientRect').mockReturnValue(mockRect)
@@ -114,7 +124,13 @@ describe('step lifecycle hooks through @tour-kit/react (#154)', () => {
     const { on } = recorder(order)
     render(
       <DeclarativeTour id="declared" autoStart>
-        <TourStep id="d1" target="#t1" content="A" onBeforeShow={on('d1').onBeforeShow} onEnter={on('d1').onEnter} />
+        <TourStep
+          id="d1"
+          target="#t1"
+          content="A"
+          onBeforeShow={on('d1').onBeforeShow}
+          onEnter={on('d1').onEnter}
+        />
         <TourStep id="d2" target="#t2" content="B" />
       </DeclarativeTour>
     )
