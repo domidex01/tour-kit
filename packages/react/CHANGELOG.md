@@ -1,5 +1,14 @@
 # @tour-kit/react
 
+## 2.1.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @tour-kit/analytics@0.13.1
+  - @tour-kit/license@1.4.1
+  - @tour-kit/media@0.13.6
+
 ## 2.1.0
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # no-tailwind-test
 
+## 0.0.24
+
+### Patch Changes
+
+- @tour-kit/hints@2.1.1
+- @tour-kit/react@2.1.1
+
 ## 0.0.23
 
 ### Patch Changes

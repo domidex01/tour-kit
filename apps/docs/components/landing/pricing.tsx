@@ -61,10 +61,10 @@ export function Pricing() {
             <strong className="font-semibold text-fd-foreground">
               Free in development, a key in production.
             </strong>{' '}
-            Every Pro package is source-available under BSL&nbsp;1.1 — core, react and hints are
-            MIT already. Build, evaluate, test and run CI
-            without paying anything. A key is for serving it to end users of a deployed app. Every
-            tier gets the whole library; they differ only in how many projects one key covers.
+            Every Pro package is source-available under BSL&nbsp;1.1 — core, react and hints are MIT
+            already. Build, evaluate, test and run CI without paying anything. A key is for serving
+            it to end users of a deployed app. Every tier gets the whole library; they differ only
+            in how many projects one key covers.
           </p>
         </div>
 
