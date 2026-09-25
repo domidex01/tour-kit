@@ -246,6 +246,26 @@ export async function validateLicenseKey(
     return createPreviewBypassState(now)
   }
 
+  // 1c. Server environments (SSR, edge, background jobs) have no window, so
+  //     `domain` is null: no cache can be read or written and no activation
+  //     can ever be claimed, so validation can only land in the error state.
+  //     The network call is pure waste — one issuer request per boot. A
+  //     single forgotten SSR deployment burned 14,883 Polar validations this
+  //     way. Return the same state without calling the issuer.
+  if (!domain) {
+    return {
+      status: 'error',
+      tier: 'free',
+      activations: 0,
+      maxActivations: 0,
+      domain: null,
+      expiresAt: null,
+      validatedAt: now,
+      serverValidatedAt: null,
+      renderKey: undefined,
+    }
+  }
+
   // 2. Cache check (bound to current key — switching licenseKey invalidates)
   if (domain) {
     const cached = readCache(domain, normalizedKey)
@@ -342,7 +362,7 @@ export async function validateLicenseKey(
       }
     }
 
-    // 6. Guard: if still no activation (SSR with no prior activation), return error
+    // 6. Guard: the issuer returned no activation and none could be claimed
     if (!activationLabel) {
       return {
         status: 'error',

@@ -217,6 +217,20 @@ describe('validateLicenseKey', () => {
     expect(result.status).toBe('valid')
   })
 
+  it('returns error without calling the issuer when no domain is available (SSR)', async () => {
+    // No window on the server: no cache, no activation — the issuer call can
+    // only ever land in the error state, so it must not be made at all.
+    vi.stubGlobal('window', undefined)
+    const result = await validateLicenseKey('TK-XXXX', 'org_test_456')
+    expect(mockFetch).not.toHaveBeenCalled()
+    expect(result).toMatchObject({
+      status: 'error',
+      tier: 'free',
+      domain: null,
+      renderKey: undefined,
+    })
+  })
+
   it('calls validate then auto-activates on cache miss', async () => {
     mockFetch
       .mockResolvedValueOnce(mockFetchResponse(VALID_VALIDATE_RESPONSE_NO_ACTIVATION))
