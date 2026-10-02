@@ -2,7 +2,7 @@ import { TrackedCtaLink } from '@/components/analytics/tracked-cta-link'
 import { ArrowRight } from 'lucide-react'
 
 /**
- * The eight Pro packages a free-package docs page can cross-sell to. Matches
+ * The eight extended packages a core-package docs page can point to. Matches
  * the `proCrossSell` frontmatter enum in `source.config.ts`.
  */
 export type ProPackage =
@@ -68,20 +68,15 @@ const CROSS_SELL: Record<ProPackage, CrossSell> = {
 }
 
 interface ProCalloutProps {
-  /** Which Pro package to cross-sell. Driven by the `proCrossSell` frontmatter. */
+  /** Which extended package to point to. Driven by the `proCrossSell` frontmatter. */
   package: ProPackage
 }
 
 /**
- * Inline Pro cross-sell rendered mid-article on free-package docs pages (driven
- * by the `proCrossSell` frontmatter field; see `app/docs/_page-logic.tsx`).
- *
- * The biggest conversion lever for Tour Kit Pro is *adoption*: the production
- * badge only sells the one-time licence once a reader actually ships a
- * Pro package. Free-package docs are the largest engaged surface, so this routes
- * those readers toward the relevant Pro package. Keeps the same free-first voice
- * as the blog/home/docs CTAs — Pro packages run unlicensed in development; the
- * licence removes the production badge when you ship, from $9.99.
+ * Inline "next package" callout rendered mid-article on core-package docs pages
+ * (driven by the `proCrossSell` frontmatter field; see `app/docs/_page-logic.tsx`).
+ * The name predates the MIT relicense, when these were the paid packages; every
+ * package is free now, so this only routes readers to the relevant one.
  *
  * Compact (`not-prose`, left of an end-of-page band) so it reads as part of the
  * article, not an interstitial. Distinct from `DocsCta` (the end-of-page footer
@@ -92,20 +87,19 @@ export function ProCallout({ package: pkg }: ProCalloutProps) {
 
   return (
     <aside
-      aria-label={`Pro package: ${cross.name}`}
+      aria-label={`Related package: ${cross.name}`}
       className="not-prose my-8 rounded-xl border border-[var(--color-fd-primary)]/30 bg-gradient-to-br from-[var(--color-fd-primary)]/5 to-transparent p-5 dark:from-[var(--color-fd-primary)]/10"
     >
       <div className="flex items-center gap-2">
         <span className="inline-flex items-center rounded-full bg-[var(--tk-cta)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--tk-cta-ink)]">
-          Pro
+          Next step
         </span>
         <code className="text-[12px] text-fd-muted-foreground">{cross.name}</code>
       </div>
       <p className="mt-2.5 font-semibold leading-snug text-fd-foreground">{cross.title}</p>
       <p className="mt-1 text-[14px] leading-relaxed text-fd-muted-foreground">{cross.body}</p>
       <p className="mt-1.5 text-[13px] leading-relaxed text-fd-muted-foreground">
-        Works unlicensed in development, a one-time licence from $9.99 removes the production badge
-        when you ship.
+        MIT-licensed like the rest of Tour Kit, free in production.
       </p>
       <TrackedCtaLink
         href={`/docs/${pkg}`}

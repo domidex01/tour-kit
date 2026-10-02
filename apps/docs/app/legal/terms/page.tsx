@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 const TITLE = 'Terms of Service'
 const DESCRIPTION =
-  "Terms governing use of usertourkit.com, the userTourKit Pro license, and the project's open-source components."
+  'Terms governing use of usertourkit.com and how the MIT-licensed userTourKit packages are licensed.'
 
 export const metadata: Metadata = {
   title: `${TITLE}, userTourKit`,
@@ -45,88 +45,44 @@ export default function TermsPage() {
         <article className="prose prose-neutral dark:prose-invert max-w-none">
           <h2>Summary</h2>
           <p>
-            These terms cover three things: how you may use this website (usertourkit.com), how the
-            open-source userTourKit packages are licensed, and how the optional Pro license works.
-            By using the site or installing the packages, you agree to these terms.
+            These terms cover how you may use this website (usertourkit.com) and how the open-source
+            userTourKit packages are licensed. By using the site or installing the packages, you
+            agree to these terms.
           </p>
 
           <h2>The open-source packages</h2>
           <p>
             Every <code>@tour-kit/*</code> package is released under the{' '}
             <a
-              href="https://github.com/domidex01/tour-kit/blob/main/LICENSE.md"
+              href="https://github.com/domidex01/tour-kit/blob/main/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
             >
-              Business Source License 1.1
+              MIT licence
             </a>
-            . You may copy, modify, redistribute and make any non-production use of them without
-            charge — development, evaluation, testing and continuous integration are all covered by
-            the Additional Use Grant. Serving Tour Kit to end users of a deployed application
-            requires a licence key. Each published version converts to the MIT licence on its Change
-            Date. Nothing on this page narrows the rights granted by that licence.
+            . You may use, copy, modify, merge, publish, distribute, sublicense and sell copies of
+            them, including in production, without a licence key and without charge. Versions
+            published before October 2026 keep the licence they were released under. Nothing on this
+            page narrows the rights granted by the MIT licence.
           </p>
 
-          <h2>The production licence</h2>
-          <ul>
-            <li>
-              <strong>What you get</strong>: a one-time, non-recurring licence to use every
-              userTourKit package in production, on the number of projects stated on the{' '}
-              <Link href="/pricing">pricing page</Link>. A project is a registrable domain, so{' '}
-              <code>foo.com</code> and <code>app.foo.com</code> are one project, not two.
-            </li>
-            <li>
-              <strong>What activation does</strong>: license keys validate against our license
-              server when the package initializes. Source code is visible to your build; the key
-              gates runtime use.
-            </li>
-            <li>
-              <strong>Scope</strong>: a licence is for one purchaser (you, or the legal entity that
-              purchased it). You may not resell or repackage Tour Kit into a competing onboarding
-              product.
-            </li>
-            <li>
-              <strong>Refunds</strong>: 14-day refund window from purchase, no questions asked.
-              Email a refund request with your order ID via{' '}
-              <a
-                href="https://github.com/domidex01/tour-kit/issues/new"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                GitHub Issues
-              </a>{' '}
-              (private email also fine — see the <Link href="/about">about page</Link> for contact).
-              Refunds process through Polar.
-            </li>
-            <li>
-              <strong>Termination</strong>: we may revoke a licence for material breach (resale,
-              licence-key sharing at scale, charge-backs after delivery). Non-production use stays
-              granted by the licence itself and is unaffected, as are versions that have passed
-              their Change Date.
-            </li>
-          </ul>
-
-          <h2>Payments and merchant of record</h2>
+          <h2>Licence keys purchased before October 2026</h2>
           <p>
-            Pro purchases are processed by{' '}
+            We no longer sell licence keys. A key bought earlier keeps working on the versions it
+            was bought for and is not revoked. Purchases made before that date remain governed by
+            the terms in effect when you bought. Those purchases were processed by{' '}
             <a href="https://polar.sh/" target="_blank" rel="noopener noreferrer">
               Polar.sh
-            </a>
-            , who acts as merchant of record. Polar handles tax, invoicing, and refund execution.
-            Payment card data is collected and stored by Polar and{' '}
-            <a href="https://stripe.com/" target="_blank" rel="noopener noreferrer">
-              Stripe
-            </a>
-            ; we never see it.
+            </a>{' '}
+            as merchant of record, and your receipts and invoices are available from the{' '}
+            <Link href="/account">past purchases</Link> page.
           </p>
 
           <h2>Acceptable use of the website</h2>
           <p>You agree not to:</p>
           <ul>
             <li>Scrape the site at a rate that meaningfully impacts availability for others.</li>
-            <li>
-              Attempt to bypass authentication, license validation, or rate-limiting mechanisms.
-            </li>
+            <li>Attempt to bypass authentication or rate-limiting mechanisms.</li>
             <li>Republish documentation as your own work without attribution.</li>
             <li>
               Train an AI model on the content of this site without honoring the rules in{' '}
@@ -136,12 +92,9 @@ export default function TermsPage() {
 
           <h2>No warranty</h2>
           <p>
-            The site, the open-source packages, and the Pro license are provided{' '}
-            <strong>&ldquo;as is&rdquo;</strong> without warranty of any kind, express or implied.
-            We do not warrant uninterrupted availability, fitness for a particular purpose, or
-            absence of bugs. To the maximum extent permitted by law, our aggregate liability for any
-            claim related to the Pro license is limited to the amount you paid in the 12 months
-            preceding the claim.
+            The site and the open-source packages are provided <strong>&ldquo;as is&rdquo;</strong>{' '}
+            without warranty of any kind, express or implied. We do not warrant uninterrupted
+            availability, fitness for a particular purpose, or absence of bugs.
           </p>
 
           <h2>Changes to these terms</h2>
@@ -160,9 +113,10 @@ export default function TermsPage() {
 
           <h2>Governing law</h2>
           <p>
-            Disputes regarding these terms or a Pro purchase are governed by the law of the
-            jurisdiction where Polar.sh, as merchant of record, is incorporated, except where local
-            consumer protection law of your residence applies and is more favorable to you.
+            Disputes regarding a purchase made before October 2026 are governed by the terms in
+            effect when you bought. Disputes regarding these terms are governed by the law of the
+            jurisdiction where the maintainer resides, except where local consumer protection law of
+            your residence applies and is more favorable to you.
           </p>
 
           <h2>Contact</h2>

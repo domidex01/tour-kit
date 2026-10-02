@@ -14,19 +14,19 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Should we just build our own?',
-    a: 'A production-grade tour engine (positioning, focus trap, keyboard nav, router integration, WCAG 2.1 AA) is 2–4 weeks of senior engineering time. At market rates that is $6,400–$24,000. userTourKit is $0 while you build it and a one-time $9.99 when you ship it. Ship the product, not the widget.',
+    a: 'A production-grade tour engine (positioning, focus trap, keyboard nav, router integration, WCAG 2.1 AA) is 2–4 weeks of senior engineering time. At market rates that is $6,400–$24,000. userTourKit is $0, in production too, under the MIT licence. Ship the product, not the widget.',
   },
   {
-    q: 'What does a licence actually cover? Any seats, MAU, or usage caps?',
-    a: 'One licence covers every package; the tiers differ only in how many production projects a key activates: 1, 5, or unlimited. Lifetime updates. No per-seat, no MAU limits, no renewal invoice. Same model as Tailwind UI. In development and on localhost, everything runs without a key.',
+    q: 'Is it really free? Any seats, MAU, or usage caps?',
+    a: 'Yes. Every package is MIT-licensed: free for any use, including commercial production, on as many projects as you like. No licence key, no per-seat fee, no MAU limit, no renewal invoice.',
   },
   {
     q: 'We already pay Appcues, Userpilot, or Pendo. Why switch?',
-    a: 'Three reasons. (1) Cost: a one-time line item from $9.99 versus $3,000–$48,000 per year. (2) Design: your components and tokens, not their iframe overlay fighting your CSS. (3) Control: tours live in your bundle, authenticated by your auth, logged by your logging. No vendor raising prices on you next quarter.',
+    a: 'Three reasons. (1) Cost: $0 under the MIT licence versus $3,000–$48,000 per year. (2) Design: your components and tokens, not their iframe overlay fighting your CSS. (3) Control: tours live in your bundle, authenticated by your auth, logged by your logging. No vendor raising prices on you next quarter.',
   },
   {
     q: 'Can PMs and non-engineers create tours without filing a ticket?',
-    a: 'Honestly, ask yourself how often that actually happens today. Most SaaS tour editors still need engineering to fix CSS, wire up dynamic targets, or handle SPA routing. With userTourKit, steps are just config: pair with a feature flag or a CMS-driven JSON feed and PMs can edit the copy without touching code. Or wire it to the (Pro) AI assistant and they can generate flows from a prompt.',
+    a: 'Honestly, ask yourself how often that actually happens today. Most SaaS tour editors still need engineering to fix CSS, wire up dynamic targets, or handle SPA routing. With userTourKit, steps are just config: pair with a feature flag or a CMS-driven JSON feed and PMs can edit the copy without touching code. Or wire it to the AI assistant package and they can generate flows from a prompt.',
   },
   {
     q: 'How does it handle progress, completion, and returning users?',
@@ -38,7 +38,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Does it phone home or track my users?',
-    a: "No. The library ships zero telemetry, no analytics pings, no license check beacons during user sessions (activation happens once per domain and caches for 72 hours). Pro analytics are opt-in and route through your own PostHog, Mixpanel, Amplitude, or GA4. Your users' data never touches our infrastructure.",
+    a: "No. The library ships zero telemetry, no analytics pings and no licence check. The analytics package is opt-in and routes through your own PostHog, Mixpanel, Amplitude, or GA4. Your users' data never touches our infrastructure.",
   },
   {
     q: 'How painful is migrating from React Joyride or Shepherd?',
@@ -46,7 +46,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'What happens if the maintainer disappears?',
-    a: 'BSL 1.1 grants you the right to copy, modify and redistribute the source today. The code is in your node_modules and on GitHub: fork it, freeze it, patch it, your call. Each published version also converts to the MIT licence on its Change Date. Unlike a SaaS where your tours vanish the day an invoice bounces, the worst case here is "no new features." You keep shipping.',
+    a: 'The MIT licence grants you the right to copy, modify and redistribute the source. The code is in your node_modules and on GitHub: fork it, freeze it, patch it, your call. Unlike a SaaS where your tours vanish the day an invoice bounces, the worst case here is "no new features." You keep shipping.',
   },
 ]
 

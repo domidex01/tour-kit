@@ -30,7 +30,7 @@ const EDITORIAL_FAQS = [
   {
     question: 'Does userTourKit accept paid placement or affiliate links?',
     answer:
-      'No. We do not accept money, gifts, or sponsorships in exchange for coverage in comparisons, tutorials, or blog posts. We do not use affiliate tracking on outbound links. Tools are recommended on technical merit only. The single commercial relationship, our own Pro license, is labeled inline whenever it is relevant.',
+      'No. We do not accept money, gifts, or sponsorships in exchange for coverage in comparisons, tutorials, or blog posts. We do not use affiliate tracking on outbound links. Tools are recommended on technical merit only. Our own interest is labeled: we build userTourKit, and say so whenever we compare it.',
   },
   {
     question: 'How does userTourKit handle AI-assisted content?',
@@ -201,9 +201,9 @@ export default function EditorialPolicyPage() {
               links to third-party tools or stores.
             </li>
             <li>
-              <strong>Commercial relationship: ourselves.</strong> userTourKit sells a commercial
-              Pro license. When a comparison mentions our own Pro packages (adoption, analytics,
-              checklists, etc.), we label them as such so readers can weigh the bias.
+              <strong>Our own interest.</strong> We build userTourKit, and a hosted Tour Kit Cloud
+              is in development. When a comparison includes our own packages, we say so, so readers
+              can weigh the bias.
             </li>
             <li>
               <strong>No anonymous sources.</strong> Every claim is attributed to a public artifact

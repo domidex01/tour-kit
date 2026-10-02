@@ -14,7 +14,7 @@ import Link from 'next/link'
 
 const TITLE = 'About userTourKit'
 const DESCRIPTION =
-  'userTourKit is a source-available headless product tour library for React, built by Dominique Degottex (domidex01). Free in development; a one-time licence from $9.99 to ship.'
+  'userTourKit is an MIT-licensed headless product tour library for React, built by Dominique Degottex (domidex01). Free for any use, including production.'
 
 const author = AUTHORS.domidex
 const AUTHOR_BIO =
@@ -24,7 +24,7 @@ const ABOUT_FAQS = [
   {
     question: 'What is userTourKit?',
     answer:
-      'userTourKit is a source-available, headless React product tour library under BSL 1.1. Seventeen packages, tours, React bindings, hints, analytics, checklists, adoption, announcements, media, scheduling, surveys, AI chat, free for development, evaluation, testing and CI. A production deployment needs a one-time licence key, from $9.99.',
+      'userTourKit is a headless React product tour library under the MIT licence. Sixteen packages, tours, React bindings, hints, analytics, checklists, adoption, announcements, media, scheduling, surveys, AI chat, all free for any use, including production. There is no licence key and no badge.',
   },
   {
     question: 'Who maintains userTourKit?',
@@ -39,12 +39,12 @@ const ABOUT_FAQS = [
   {
     question: 'What happens if the maintainer disappears?',
     answer:
-      'Three structural answers. (1) BSL 1.1 grants the right to copy, modify and redistribute today, so any team can fork the version they have and keep building with no kill switch. (2) The licence is perpetual, the version you bought activates forever with no recurring fee. (3) Every published version converts to the MIT licence on its Change Date, and source, CI, benchmarks and docs all live in one public monorepo, so builds are reproducible from a clean checkout.',
+      'Your app keeps working. (1) The MIT licence grants the right to copy, modify and redistribute, so any team can fork the version they have and keep building. (2) Nothing in the library calls home, so there is no server whose shutdown could break your app. (3) Source, CI, benchmarks and docs all live in one public monorepo, so builds are reproducible from a clean checkout.',
   },
   {
     question: 'How do I report a bug or request a feature in userTourKit?',
     answer:
-      'Open an issue at github.com/domidex01/tour-kit/issues with the page URL and the specific claim or expected behavior. For Pro license support, include your order ID. Editorial corrections are acknowledged within 7 days and substantive fixes ship within 30 days when possible.',
+      'Open an issue at github.com/domidex01/tour-kit/issues with the page URL and the specific claim or expected behavior. Editorial corrections are acknowledged within 7 days and substantive fixes ship within 30 days when possible.',
   },
 ]
 
@@ -264,12 +264,10 @@ export default function AboutPage() {
 
           <h2>How it's licensed</h2>
           <p>
-            Every <code>@tour-kit/*</code> package is source-available under the Business Source
-            License 1.1. Development, evaluation, testing and CI are free and have no feature gates
-            — you get the whole library, tours through to AI chat. Serving it to end users of a
-            deployed application needs a one-time licence key: $9.99 for one project, $49.00 for
-            five, $299.00 for unlimited. Each published version converts to the MIT licence on its
-            Change Date. See <Link href="/pricing">pricing</Link>.
+            Every <code>@tour-kit/*</code> package is released under the MIT licence: the whole
+            library, tours through to AI chat, free for any use, including production. There is no
+            licence key, no badge and no feature gate. Paid features will come from Tour Kit Cloud,
+            a hosted dashboard in development. See <Link href="/pricing">pricing</Link>.
           </p>
 
           <h2>What if the maintainer disappears tomorrow?</h2>
@@ -279,16 +277,13 @@ export default function AboutPage() {
           </p>
           <ul>
             <li>
-              <strong>The source is forkable today.</strong> BSL 1.1 grants you the right to copy,
-              modify and redistribute — if maintenance ever stops, any team can fork the version
-              they have and keep building. And every published version converts to the MIT licence
-              on its Change Date, on a schedule written into the licence file, so the code you
-              shipped becomes fully permissive whatever happens to us.
+              <strong>The source is forkable today.</strong> The MIT licence grants you the right to
+              copy, modify and redistribute. If maintenance ever stops, any team can fork the
+              version they have and keep building.
             </li>
             <li>
-              <strong>The licence is perpetual.</strong> A one-time licence activates the version
-              you bought, forever. There is no recurring fee and no auto-expiry — your build keeps
-              working on the schedule you control, not ours.
+              <strong>Nothing calls home.</strong> There is no licence server and no activation
+              check, so there is nothing that could be switched off under your app.
             </li>
             <li>
               <strong>Everything is in the open.</strong> Source, CI, benchmarks, and the docs site
@@ -326,7 +321,7 @@ export default function AboutPage() {
             >
               GitHub Issues
             </a>
-            . For Pro license support, include your order ID.
+            .
           </p>
         </article>
 
