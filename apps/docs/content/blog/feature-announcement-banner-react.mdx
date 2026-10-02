@@ -318,7 +318,7 @@ You can also add per-announcement callbacks in the config:
 
 Provider-level callbacks fire for every announcement. Config-level callbacks fire only for that specific announcement. Use both when you need global tracking plus per-banner side effects like redirects or feature flag toggles.
 
-[Try a live banner demo on StackBlitz](https://tourkit.dev/docs/examples) to see frequency rules and analytics in action.
+[Try a live banner demo on StackBlitz](https://usertourkit.com/docs/examples) to see frequency rules and analytics in action.
 
 ## Common issues and troubleshooting
 
@@ -345,7 +345,7 @@ You've got a working announcement banner with persistence, frequency control, an
 - Try other variants. `@tour-kit/announcements` supports 5 display types (banner, modal, slideout, toast, spotlight) using the same provider. Change `variant: 'banner'` to `variant: 'modal'` and swap the component.
 - Add audience targeting. Pass `audience` conditions and `userContext` to the provider to show banners only to specific user segments.
 - Connect scheduling. Install `@tour-kit/scheduling` as a peer dependency to time-bound your banners to specific date ranges.
-- Read the [full API reference](https://tourkit.dev/docs/packages/announcements) for all 17 exported components, 3 hooks, and 4 core utilities.
+- Read the [full API reference](https://usertourkit.com/docs/packages/announcements) for all 17 exported components, 3 hooks, and 4 core utilities.
 
 One honest caveat: Tour Kit requires React 18+ and TypeScript knowledge. There's no drag-and-drop visual builder. If your product team needs to create announcements without touching code, you'll need a SaaS tool or a CMS-backed config layer on top of Tour Kit. For engineering teams that want full control over rendering and behavior, that tradeoff buys you zero vendor lock-in and a sub-4KB bundle addition.
 
@@ -386,24 +386,24 @@ Yes. Use the `HeadlessBanner` component with a render prop to get full control o
   "author": {
     "@type": "Person",
     "name": "Tour Kit Team",
-    "url": "https://tourkit.dev"
+    "url": "https://usertourkit.com"
   },
   "publisher": {
     "@type": "Organization",
     "name": "Tour Kit",
-    "url": "https://tourkit.dev",
+    "url": "https://usertourkit.com",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://tourkit.dev/logo.png"
+      "url": "https://usertourkit.com/logo.png"
     }
   },
   "datePublished": "2026-04-07",
   "dateModified": "2026-04-07",
-  "image": "https://tourkit.dev/og-images/feature-announcement-banner-react.png",
-  "url": "https://tourkit.dev/blog/feature-announcement-banner-react",
+  "image": "https://usertourkit.com/og-images/feature-announcement-banner-react.png",
+  "url": "https://usertourkit.com/blog/feature-announcement-banner-react",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://tourkit.dev/blog/feature-announcement-banner-react"
+    "@id": "https://usertourkit.com/blog/feature-announcement-banner-react"
   },
   "keywords": ["feature announcement banner react", "in-app announcement component", "feature release banner", "react banner component"],
   "proficiencyLevel": "Beginner",
@@ -418,9 +418,9 @@ Yes. Use the `HeadlessBanner` component with a render prop to get full control o
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://tourkit.dev" },
-    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://tourkit.dev/blog" },
-    { "@type": "ListItem", "position": 3, "name": "How to create a feature announcement banner in React", "item": "https://tourkit.dev/blog/feature-announcement-banner-react" }
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://usertourkit.com" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://usertourkit.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "How to create a feature announcement banner in React", "item": "https://usertourkit.com/blog/feature-announcement-banner-react" }
   ]
 }) }} />
 

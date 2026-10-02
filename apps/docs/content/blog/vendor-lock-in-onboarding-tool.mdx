@@ -21,7 +21,7 @@ You want to leave. But your 47 onboarding flows exist as proprietary JSON blobs 
 
 This is vendor lock-in applied to onboarding tools, and it follows a pattern so consistent across Appcues, Pendo, Userpilot, and WalkMe that you could write the playbook before reading their docs.
 
-Full disclosure: I built [Tour Kit](https://tourkit.dev), an npm-installed onboarding library. We tested migration paths from three SaaS platforms while designing Tour Kit's architecture, and the patterns we found shaped everything from our data model to our analytics plugin system. I have an obvious incentive to argue against SaaS lock-in. Every claim below is sourced, and I'll be honest about where SaaS platforms genuinely do something better.
+Full disclosure: I built [Tour Kit](https://usertourkit.com), an npm-installed onboarding library. We tested migration paths from three SaaS platforms while designing Tour Kit's architecture, and the patterns we found shaped everything from our data model to our analytics plugin system. I have an obvious incentive to argue against SaaS lock-in. Every claim below is sourced, and I'll be honest about where SaaS platforms genuinely do something better.
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -162,7 +162,7 @@ For teams with frontend capability, here's the migration-proof approach:
 
 4. **Budget for the migration you'll eventually need.** As of 2026, 35% of enterprises have already replaced at least one SaaS tool with a custom build, and 78% plan to build more this year ([Retool 2026 Build vs Buy Report](https://www.businesswire.com/news/home/20260217548274/en/)). The migration isn't hypothetical. Plan the engineering time now.
 
-Check out [Tour Kit's documentation](https://tourkit.dev/docs) and the [live demo on StackBlitz](https://tourkit.dev/docs/examples) to see what code-owned onboarding looks like in practice.
+Check out [Tour Kit's documentation](https://usertourkit.com/docs) and the [live demo on StackBlitz](https://usertourkit.com/docs/examples) to see what code-owned onboarding looks like in practice.
 
 ## FAQ
 
@@ -197,8 +197,8 @@ The EU Data Act, effective September 2025, mandates data portability for cloud s
 - Link TO [migrate-pendo-to-react](/blog/migrate-pendo-to-react) (practical next step)
 
 **Distribution checklist:**
-- Dev.to (canonical to tourkit.dev)
-- Hashnode (canonical to tourkit.dev)
+- Dev.to (canonical to usertourkit.com)
+- Hashnode (canonical to usertourkit.com)
 - Reddit r/reactjs, r/SaaS, r/startups
 - Hacker News (opinion piece format fits HN well)
 - Indie Hackers
@@ -212,24 +212,24 @@ export const jsonLd = {
   "author": {
     "@type": "Person",
     "name": "domidex01",
-    "url": "https://tourkit.dev"
+    "url": "https://usertourkit.com"
   },
   "publisher": {
     "@type": "Organization",
     "name": "Tour Kit",
-    "url": "https://tourkit.dev",
+    "url": "https://usertourkit.com",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://tourkit.dev/logo.png"
+      "url": "https://usertourkit.com/logo.png"
     }
   },
   "datePublished": "2026-04-09",
   "dateModified": "2026-04-09",
-  "image": "https://tourkit.dev/og-images/vendor-lock-in-onboarding-tool.png",
-  "url": "https://tourkit.dev/blog/vendor-lock-in-onboarding-tool",
+  "image": "https://usertourkit.com/og-images/vendor-lock-in-onboarding-tool.png",
+  "url": "https://usertourkit.com/blog/vendor-lock-in-onboarding-tool",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://tourkit.dev/blog/vendor-lock-in-onboarding-tool"
+    "@id": "https://usertourkit.com/blog/vendor-lock-in-onboarding-tool"
   },
   "keywords": ["vendor lock-in onboarding tool", "onboarding tool migration risk", "saas lock-in product tour"],
   "proficiencyLevel": "Intermediate",

@@ -17,7 +17,7 @@ ogImage: /og-images/custom-hooks-api-design-react.png
 
 Most "React hooks best practices" articles tell you to extract repeated logic into custom hooks. That's fine advice for app code. But it skips the harder question: how do you design hook APIs that hundreds of different teams will consume, each with their own design system, state manager, and accessibility requirements?
 
-I built [Tour Kit](https://tourkit.dev), a headless product tour library split across 10 composable packages. The entire architecture runs on custom hooks. Along the way I made some decisions that worked, reversed some that didn't, and discovered patterns that no tutorial covers because they only surface when you're a library author rather than an app developer.
+I built [Tour Kit](https://usertourkit.com), a headless product tour library split across 10 composable packages. The entire architecture runs on custom hooks. Along the way I made some decisions that worked, reversed some that didn't, and discovered patterns that no tutorial covers because they only surface when you're a library author rather than an app developer.
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -252,19 +252,19 @@ Headless hook architecture ships logic without UI, so bundles are smaller. Hooks
   "publisher": {
     "@type": "Organization",
     "name": "Tour Kit",
-    "url": "https://tourkit.dev",
+    "url": "https://usertourkit.com",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://tourkit.dev/logo.png"
+      "url": "https://usertourkit.com/logo.png"
     }
   },
   "datePublished": "2026-04-08",
   "dateModified": "2026-04-08",
-  "image": "https://tourkit.dev/og-images/custom-hooks-api-design-react.png",
-  "url": "https://tourkit.dev/blog/custom-hooks-api-design-react",
+  "image": "https://usertourkit.com/og-images/custom-hooks-api-design-react.png",
+  "url": "https://usertourkit.com/blog/custom-hooks-api-design-react",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://tourkit.dev/blog/custom-hooks-api-design-react"
+    "@id": "https://usertourkit.com/blog/custom-hooks-api-design-react"
   },
   "keywords": ["custom hooks api design react", "react hook api design", "composable hooks pattern", "headless hook architecture"],
   "proficiencyLevel": "Intermediate",
@@ -285,19 +285,19 @@ Headless hook architecture ships logic without UI, so bundles are smaller. Hooks
       "@type": "ListItem",
       "position": 1,
       "name": "Home",
-      "item": "https://tourkit.dev"
+      "item": "https://usertourkit.com"
     },
     {
       "@type": "ListItem",
       "position": 2,
       "name": "Blog",
-      "item": "https://tourkit.dev/blog"
+      "item": "https://usertourkit.com/blog"
     },
     {
       "@type": "ListItem",
       "position": 3,
       "name": "Custom hooks API design in React: lessons from building Tour Kit",
-      "item": "https://tourkit.dev/blog/custom-hooks-api-design-react"
+      "item": "https://usertourkit.com/blog/custom-hooks-api-design-react"
     }
   ]
 })}
@@ -361,7 +361,7 @@ Headless hook architecture ships logic without UI, so bundles are smaller. Hooks
 */}
 
 {/* Distribution checklist:
-- Dev.to (full article with canonical URL to tourkit.dev)
+- Dev.to (full article with canonical URL to usertourkit.com)
 - Hashnode (full article with canonical URL)
 - Reddit r/reactjs ("Lessons from designing hook APIs for a 10-package library")
 - Hacker News ("Show HN: What I learned designing hook APIs for a headless React library")
