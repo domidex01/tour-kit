@@ -10,7 +10,6 @@ import {
 import { Bell, MessageSquare } from 'lucide-react'
 
 import { DemoSurface, MockRow } from './demo-surface'
-import { MaybeLicensed } from './maybe-licensed'
 
 /**
  * The real @tour-kit/announcements components, triggered on demand.
@@ -87,14 +86,12 @@ function DemoTriggers() {
 
 export function AnnouncementDemo() {
   return (
-    <MaybeLicensed>
-      <AnnouncementsProvider announcements={DEMO_ANNOUNCEMENTS} storage={null}>
-        <DemoSurface url="acme.app/dashboard" contentClassName="py-10">
-          <DemoTriggers />
-        </DemoSurface>
-        <AnnouncementModal id="capability-demo-modal" useConfig />
-        <AnnouncementToast id="capability-demo-toast" useConfig />
-      </AnnouncementsProvider>
-    </MaybeLicensed>
+    <AnnouncementsProvider announcements={DEMO_ANNOUNCEMENTS} storage={null}>
+      <DemoSurface url="acme.app/dashboard" contentClassName="py-10">
+        <DemoTriggers />
+      </DemoSurface>
+      <AnnouncementModal id="capability-demo-modal" useConfig />
+      <AnnouncementToast id="capability-demo-toast" useConfig />
+    </AnnouncementsProvider>
   )
 }

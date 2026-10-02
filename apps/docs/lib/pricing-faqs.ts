@@ -11,31 +11,26 @@ export const PRICING_FAQS: PricingFaq[] = [
   {
     question: 'How much does the userTourKit React product tour library cost?',
     answer:
-      'Everything is free while you build. Development, evaluation, testing, CI and preview deploys cost nothing and have no feature gates, you get every package. Serving Tour Kit to end users of a deployed application needs a one-time licence key: $9.99 for one project, $49.00 for five, $299.00 for unlimited. No subscription, no per-seat fee, no upgrade fee.',
+      'Nothing. Every userTourKit package is MIT-licensed: tours, hints, checklists, announcements, surveys, analytics, scheduling, media, the AI assistant and the Vue and Svelte bindings. Use it in development and in production, commercially, on as many projects as you like. There is no licence key, no badge and no feature gate.',
   },
   {
-    question: 'Is the userTourKit Pro license a subscription?',
+    question: 'Why is there an "Unlicensed" badge on my site?',
     answer:
-      'No. Every tier is a one-time purchase, you pay once and the key activates the version you bought, forever. On top of that, each published version converts to the MIT licence on its Change Date, so the code you shipped cannot be taken away from you.',
+      'Your app runs an older version. Core, react and hints 3.0.x, and the extended packages released before October 2026, were published under commercial terms and showed that badge in production without a key. Update your @tour-kit packages to their latest versions and the badge is gone. No key and no code change needed.',
   },
   {
-    question: 'How many sites can I activate with one Pro license?',
+    question: 'I bought a licence key. What happens now?',
     answer:
-      'It depends on the tier: Starter covers one production project, Business covers five, and Premium is unlimited. Localhost, preview environments, and staging URLs are unrestricted on every tier. Each production activation is permanent, there is no monthly check-in or auto-deactivation.',
+      'You do not need it any more: the latest versions are MIT and never check a key. Your key keeps working on the older versions it was bought for, and nothing is revoked. Receipts and invoices stay available from your account page, and you can write to hello@usertourkit.com about anything else.',
   },
   {
-    question: 'Who handles checkout and tax for Pro purchases?',
+    question: 'What is Tour Kit Cloud?',
     answer:
-      'Checkout runs through Polar.sh as the merchant of record. They accept card, Apple Pay, Google Pay, and Link, and they calculate and remit VAT/sales tax automatically based on your billing country. Receipts and license keys arrive by email within minutes.',
+      'A hosted dashboard for Tour Kit, in development. The library stays MIT and complete without it. Join the waitlist on this page to hear when it opens.',
   },
   {
     question: 'What happens to my React onboarding flows if userTourKit is discontinued?',
     answer:
-      'Three structural answers. (1) BSL 1.1 lets you copy, modify and redistribute the source today, you can fork the version you have and keep building on it. (2) The licence is perpetual, so the version you bought keeps working with no kill switch. (3) Each published version converts to the MIT licence on its Change Date, on a schedule stated in the licence file, so the code you shipped becomes fully permissive whatever happens to us. All source lives in a public monorepo at github.com/domidex01/tour-kit.',
-  },
-  {
-    question: 'Do you offer refunds on the Pro license?',
-    answer:
-      "Yes. Polar.sh handles a 14-day no-questions-asked refund window from the purchase date. Refunds revoke the license key. After 14 days, refunds are case-by-case for genuine defects we can't fix in a reasonable window.",
+      'They keep working. The MIT licence lets you copy, modify and redistribute the source, so you can fork the version you have and keep building on it. Nothing in the library calls home, so there is no server whose shutdown could break your app. All source lives in a public monorepo at github.com/domidex01/tour-kit.',
   },
 ]

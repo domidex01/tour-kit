@@ -9,7 +9,7 @@ import type { Metadata } from 'next'
 
 const PRICING_TITLE = 'Pricing, userTourKit'
 const PRICING_DESCRIPTION =
-  'One-time pricing for userTourKit: $9.99, $49.00 or $299.00 for 1, 5 or unlimited projects. Free in development under BSL 1.1, a licence key in production. No subscriptions, and every version converts to MIT on its Change Date.'
+  'userTourKit is free and MIT-licensed: every package, in development and in production, with no licence key and no badge. Tour Kit Cloud, a hosted dashboard, is in development.'
 const PRICING_OG_IMAGE = `/api/og?title=${encodeURIComponent('Pricing')}&category=PRICING`
 const SITE_URL = 'https://usertourkit.com'
 
@@ -21,9 +21,9 @@ export const metadata: Metadata = {
     'usertourkit pricing',
     'react tour library pricing',
     'product tour library cost',
-    'open source vs commercial tour library',
+    'free product tour library',
+    'mit react tour library',
     'react onboarding pricing',
-    'tour kit pro license',
   ],
   alternates: { canonical: '/pricing' },
   openGraph: {
@@ -75,13 +75,11 @@ export default function PricingPage() {
       <ProductJsonLd />
       <FAQJsonLd items={PRICING_FAQS} />
       <main id="main-content" className="flex flex-1 flex-col">
-        <PageHero eyebrow="Pricing" heading="Simple, one-time pricing">
-          <strong>Free in development, a licence key in production.</strong> Every Tour Kit package
-          is source-available under the Business Source License 1.1: use it without charge for
-          development, evaluation, testing and CI, on localhost and in preview environments. Serving
-          it to end users of a deployed application needs a key. Each published version converts to
-          the MIT licence on its Change Date, so nothing you install can be taken away. Every tier
-          gets the whole library, they differ only in how many projects one key covers.
+        <PageHero eyebrow="Pricing" heading="Free, and MIT-licensed">
+          <strong>Every Tour Kit package is free, in development and in production.</strong> The
+          whole library ships under the MIT licence: use it commercially, on as many projects as you
+          like, with no licence key, no badge and no feature gates. Paid features will come from
+          Tour Kit Cloud, a hosted dashboard that is in development.
         </PageHero>
 
         {/* Gap/hero-body 3880:1536 — a flat 32px between the band and the chips. */}

@@ -3,8 +3,6 @@
 import { Scale } from 'lucide-react'
 import Link from 'next/link'
 
-import { STARTER_PRICE, formatPrice } from '@/lib/pricing'
-
 /**
  * Homepage hero strip stating the licence model, linking to /pricing.
  *
@@ -21,11 +19,7 @@ export function HeroLicenceNote() {
     >
       <Scale className="h-4 w-4 shrink-0 text-[var(--color-fd-primary)]" aria-hidden="true" />
       <span className="text-[13px] font-semibold text-fd-foreground">
-        Free in development,{' '}
-        <span className="text-[var(--color-fd-primary)]">
-          from {formatPrice(STARTER_PRICE)} one-time
-        </span>{' '}
-        when you ship
+        MIT licensed, <span className="text-[var(--color-fd-primary)]">free in production too</span>
       </span>
     </Link>
   )

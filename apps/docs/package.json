@@ -26,7 +26,6 @@
     "@tour-kit/checklists": "workspace:*",
     "@tour-kit/core": "workspace:*",
     "@tour-kit/hints": "workspace:*",
-    "@tour-kit/license": "workspace:*",
     "@tour-kit/react": "workspace:*",
     "@tour-kit/surveys": "workspace:*",
     "class-variance-authority": "^0.7.1",
