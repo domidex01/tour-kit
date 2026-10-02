@@ -22,7 +22,7 @@ rejected it. Opt in via `<TourProvider diagnose>` and read the result with
 
 The most-asked support question on this repo is *"my tour did not fire and I
 have no idea why."* Before the diagnostic engine you had to grep through
-audience filters, route adapters, persistence stores, and license keys to
+audience filters, route adapters, persistence stores, and schedules to
 guess. Now the provider runs all seven built-in gates plus any extension gates
 you registered, and the report names the first one that said no.
 
@@ -99,24 +99,24 @@ Evaluated in this exact order — the contract is observable and tests pin it:
 
 ## Extension gates
 
-License, scheduling, or any custom gate plugs in via `diagnosticGates`. The
+Scheduling, a paid-plan check in your own app, or any custom gate plugs in via `diagnosticGates`. The
 contract is `DiagnosticGate` — `@tour-kit/core` does not import the package
 implementing it.
 
 ```tsx
 import type { DiagnosticGate } from '@tour-kit/core'
 
-const licenseGate: DiagnosticGate = {
-  id: 'license',
+const planGate: DiagnosticGate = {
+  id: 'plan',
   evaluate: async (ctx) => {
-    const ok = await checkLicense(ctx.userContext)
+    const ok = await userHasPaidPlan(ctx.userContext)
     return ok
-      ? { ok: true, gate: 'license' }
-      : { ok: false, gate: 'license', code: 'LICENSE_INVALID', message: 'License invalid', detail: {} }
+      ? { ok: true, gate: 'plan' }
+      : { ok: false, gate: 'plan', code: 'PLAN_REQUIRED', message: 'Paid plan required', detail: {} }
   },
 }
 
-<TourProvider tours={tours} diagnose diagnosticGates={[licenseGate]}>
+<TourProvider tours={tours} diagnose diagnosticGates={[planGate]}>
   ...
 </TourProvider>
 ```

@@ -191,31 +191,12 @@ decides whether `activate()` does anything. Restoring focus when the tour ends
 is your component's cleanup — the same contract as the React hook.
 </Callout>
 
-## Licensing
+## Licence
 
-`@tour-kit/vue` ships under BUSL-1.1. Development, evaluation, testing, CI and
-any non-production environment are free and need no key. Production needs one.
-Without a key the binding still works in full and layers a small badge in the
-corner on non-development hosts. See [Licensing](/docs/licensing) for the full
-setup.
-
-```vue
-<TourProvider
-  :tours="tours"
-  :license="{ licenseKey: import.meta.env.VITE_TOUR_KIT_LICENSE_KEY }"
->
-  <RouterView />
-</TourProvider>
-```
-
-<Callout type="info">
-**The key is reactive here.** A key fetched from an API or hydrated out of a
-store after mount still takes the badge down — the binding watches `licenseKey`
-and restarts the gate when it changes. This differs from
-[`@tour-kit/svelte`](/docs/svelte), where options are read once. On a
-development host the key is never sent anywhere, so local work never consumes an
-activation slot.
-</Callout>
+`@tour-kit/vue` is MIT-licensed: free for any use, including production, with no
+key and no badge. The `license` option is deprecated and ignored; 1.0.x accepted
+it, and it stays only so existing code still compiles. See
+[License: MIT](/docs/licensing).
 
 ## SSR and Nuxt
 

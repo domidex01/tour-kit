@@ -150,9 +150,6 @@ function PreviewButton() {
 | `viewCount` threshold                               | Yes                | **No**                  |
 | `isDismissed` flag                                  | Yes (no-op)        | **No** (re-shows)       |
 | `audience` (segment + array shapes)                 | Yes                | **No**                  |
-| `<LicenseGate require="pro">` (soft wrapper)        | Yes                | **Yes**                 |
-
-The license wrapper is a soft gate — under an invalid or missing license it renders children AND overlays a watermark. `forceShow` does not strip the watermark; admin previews on unlicensed builds will show the unlicensed UX.
 
 ### Telemetry: analytics events are stamped `trigger="forced"`
 

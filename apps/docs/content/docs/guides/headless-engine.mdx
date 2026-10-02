@@ -30,11 +30,11 @@ installing React.
 | `@tour-kit/checklists/engine` | The reducer, the task dependency graph, progress, persistence |
 | `@tour-kit/announcements/engine` | The queue, frequency rules, audience, scheduling, persistence |
 | `@tour-kit/surveys/engine` | The queue, the six fatigue gates, audience, scheduling, NPS/CSAT/CES scoring |
-| `@tour-kit/analytics/engine` | The tracker and the five plugins, without the licence gate |
+| `@tour-kit/analytics/engine` | The tracker and the five plugins |
 | `@tour-kit/scheduling/engine` | Schedule evaluation — the functions and constants, no hooks |
 
-Each excludes its package's React surface. The components, hooks, context and
-licence gate stay on the main entry, which is why a consumer who imports only
+Each excludes its package's React surface. The components, hooks and context
+stay on the main entry, which is why a consumer who imports only
 the subpath ships none of them.
 
 ## What `@tour-kit/core/engine` exports
