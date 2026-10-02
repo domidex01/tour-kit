@@ -8,12 +8,16 @@ category: "Thought Leadership"
 schema_type: "TechArticle"
 spreadsheet_row: 230
 date: "2026-04-11"
-updated: "2026-04-11"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/how-i-built-10-package-react-library-solo-developer.png
 ---
 
 # How I built a 10-package React library as a solo developer
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a paid licence.
 
 On December 22, 2025, I created a Git repo called `tour-kit`. Three and a half months later, it's 12 packages, 31,000 lines of TypeScript, and 141 commits. I built every line alone.
 
@@ -140,7 +144,7 @@ The [GitHub Open Source Survey](https://opensourcesurvey.org/) found that 93% of
 
 Tour Kit is publishing to npm soon. Core packages are ready. Docs cover all 12 packages. Tests run green.
 
-But "ready to publish" and "ready for users" are different things. I'm still working through the launch checklist: license validation through [Polar.sh](https://polar.sh/), example apps for Vite and Next.js, and a pricing page that doesn't feel like SaaS theater. (If you're curious about the pricing decision, I [wrote about that separately](/blog/tour-kit-pricing-decision-building-in-public).)
+But "ready to publish" and "ready for users" are different things. I'm still working through the launch checklist: example apps for Vite and Next.js, and a pricing page that doesn't feel like SaaS theater. (If you're curious about the pricing decision, I [wrote about that separately](/blog/tour-kit-pricing-decision-building-in-public).)
 
 Building a 12-package React library solo in 3.5 months taught me one clear thing: the architecture decisions you make in week one compound for months. The core/react split, the headless approach, the bundle budgets. Those early choices made every subsequent package easier to build. The late choices (building surveys before anyone asked, AI-generated code without code review, no docs until month 2) cost real time.
 

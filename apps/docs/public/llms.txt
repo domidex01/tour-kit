@@ -1,4 +1,4 @@
-# userTourKit v1.0.7 — Generated 2026-09-08T08:51:32Z
+# userTourKit v3.0.1 — Generated 2026-10-02T03:37:18Z
 
 # userTourKit
 
@@ -208,7 +208,7 @@
 ## Scheduling
 
 - [@tour-kit/scheduling](https://usertourkit.com/docs/scheduling): Time-based scheduling for controlling when tours, announcements, and content appear — business hours, dates, and timezones
-- [Components](https://usertourkit.com/docs/scheduling/components): ScheduleGate component for the @tour-kit/scheduling package — pro license enforcement wrapper for scheduled content
+- [Components](https://usertourkit.com/docs/scheduling/components): ScheduleGate, the deprecated pass-through component in @tour-kit/scheduling. Use useSchedule or isScheduleActive to gate UI on a schedule.
 - [Scheduling Hooks](https://usertourkit.com/docs/scheduling/hooks): React hooks for reactive schedule evaluation: check active state, get next window, and detect user timezone automatically
 - [useSchedule](https://usertourkit.com/docs/scheduling/hooks/use-schedule): useSchedule hook: evaluate whether a schedule is currently active with automatic refresh and timezone-aware calculations
 - [useScheduleStatus](https://usertourkit.com/docs/scheduling/hooks/use-schedule-status): useScheduleStatus hook: get detailed schedule information including next active window, time remaining, and status reason
@@ -247,6 +247,7 @@
 - [Base UI Support](https://usertourkit.com/docs/guides/base-ui): Switch from Radix UI to Base UI for tour components using the UnifiedSlot abstraction and UILibraryContext provider
 - [Branching Tours](https://usertourkit.com/docs/guides/branching): Create personalized tour paths with conditional branching, user choice flows, and dynamic step insertion based on state
 - [Checklists with Tours](https://usertourkit.com/docs/guides/checklists-tours): Link checklists to tours for guided onboarding — auto-complete tasks on tour finish and track user progress together
+- [The headless engine](https://usertourkit.com/docs/guides/headless-engine): Every Tour Kit package ships a React-free `/engine` subpath — the state machines, persistence and DOM behaviours with no `react` in the runtime or the type chain. Use it from Vue, Svelte, vanilla JS, Node, or a `<script>` tag.
 - [Hidden Steps](https://usertourkit.com/docs/guides/hidden-steps): Run branching logic, trait forks, and completion gates without mounting any UI by marking a step as hidden.
 - [Internationalization (i18n)](https://usertourkit.com/docs/guides/i18n): Translate every string in Tour Kit with LocaleProvider, useT(), and the {{var | fallback}} interpolation grammar.
 - [Imperative control](https://usertourkit.com/docs/guides/imperative-control): Control tours from sibling subtrees with useTourActions, and bypass announcement gates with forceShow for admin previews.
@@ -283,7 +284,6 @@
 - [@tour-kit/checklists API](https://usertourkit.com/docs/api/checklists): API reference for @tour-kit/checklists: Checklist, ChecklistTask, useChecklist, useTask, and progress utilities
 - [@tour-kit/core API](https://usertourkit.com/docs/api/core): API reference for @tour-kit/core: useTour, useStep, useFocusTrap, createTour, createStep, and all utility exports
 - [@tour-kit/hints API](https://usertourkit.com/docs/api/hints): API reference for @tour-kit/hints: Hint, HintHotspot, HintTooltip, useHints, useHint, and headless hint primitives
-- [@tour-kit/license API](https://usertourkit.com/docs/api/license): API reference for @tour-kit/license: LicenseProvider, LicenseGate, ProGate, useLicense, useIsPro, useLicenseGate, validateLicenseKey, and related types
 - [@tour-kit/media API](https://usertourkit.com/docs/api/media): API reference for @tour-kit/media: YouTubeEmbed, VimeoEmbed, LoomEmbed, GifPlayer, LottiePlayer, and TourMedia
 - [@tour-kit/react API](https://usertourkit.com/docs/api/react): API reference for @tour-kit/react: Tour, TourCard, TourStep, headless components, router adapters, and style hooks
 - [@tour-kit/scheduling API](https://usertourkit.com/docs/api/scheduling): API reference for @tour-kit/scheduling: useSchedule, evaluateSchedule, timezone utilities, and preset configurations
@@ -305,14 +305,14 @@
 
 ## Licensing
 
-- [Licensing](https://usertourkit.com/docs/licensing): Set up userTourKit Pro licensing with Polar.sh — installation, configuration, and CI/CD
-- [Trial countdown & test mode](https://usertourkit.com/docs/licensing/trial): Client-derived trial state, the <TrialBadge> surface, and how to simulate license failure on real domains.
+- [License: MIT](https://usertourkit.com/docs/licensing): Every userTourKit package is MIT-licensed and free for any use, including production. How to remove the "Unlicensed" badge that older versions show.
 
 ## Migration
 
 - [Migrate from driver.js](https://usertourkit.com/docs/migration/driver): Use `npx tour-kit-migrate --from driver` to rewrite a driver.js codebase to Tour Kit in seconds. Covers the function-call pattern (`driver({...}).drive()`).
 - [Migrate from react-joyride](https://usertourkit.com/docs/migration/joyride): Use `npx tour-kit-migrate --from joyride` to rewrite a react-joyride codebase to Tour Kit in seconds. Covers both the legacy `<Joyride>` JSX form and the modern `useJoyride()` hook form.
 - [Migrate from shepherd.js](https://usertourkit.com/docs/migration/shepherd): Use `npx tour-kit-migrate --from shepherd` to rewrite a shepherd.js codebase to Tour Kit in seconds. Covers the class-chain pattern (`new Shepherd.Tour` + `.addStep(...)` + `.start()`).
+- [Upgrade to 3.x](https://usertourkit.com/docs/migration/v3): Moving `@tour-kit/core`, `@tour-kit/react` and `@tour-kit/hints` from 2.x to 3.x. Install 3.1 or later: it is MIT, with no licence key and no production badge. The API is source-compatible.
 
 ## Surveys
 
@@ -347,6 +347,10 @@
 - [calculateCSAT](https://usertourkit.com/docs/surveys/utilities/calculate-csat): Calculate Customer Satisfaction Score as the percentage of responses at or above a configurable threshold value
 - [calculateNPS](https://usertourkit.com/docs/surveys/utilities/calculate-nps): Calculate Net Promoter Score from an array of 0–10 ratings, returning score, promoter/passive/detractor counts, and percentages
 
+## Svelte
+
+- [@tour-kit/svelte](https://usertourkit.com/docs/svelte): Headless product tours for Svelte 5, built on the framework-agnostic Tour Kit engine — `provideTourKit`, `getTour`, a spotlight bridge, a `focusTrap` action, and a SvelteKit router adapter. No React anywhere in the dependency or type chain.
+
 ## Testing library
 
 - [Testing Library](https://usertourkit.com/docs/testing-library): Tour Kit's test helpers for Vitest, Jest, and React Testing Library.
@@ -362,6 +366,10 @@
 - [Feature Announcements](https://usertourkit.com/docs/use-cases/feature-announcements): Announce new features to existing React app users with Tour Kit. Use announcements, hints, and spotlight variants without shipping a sprint.
 - [SaaS Onboarding](https://usertourkit.com/docs/use-cases/saas-onboarding): Ship a headless first-run onboarding tour in a React SaaS app. Use Tour Kit hooks, checklists, and analytics to get new users to their activation event.
 
+## Vue
+
+- [@tour-kit/vue](https://usertourkit.com/docs/vue): Headless product tours for Vue 3, built on the framework-agnostic Tour Kit engine — `provideTourKit`, `useTour`, the spotlight and focus-trap composables, and a `vue-router` adapter. No React anywhere in the dependency or type chain.
+
 ## Pillar Articles (Blog)
 
 - [Headless onboarding: what it means, why it matters, and how to start](https://usertourkit.com/blog/headless-onboarding-explained): What headless onboarding is, why it beats styled tour libraries for design system teams, and how to implement it with code examples.
@@ -376,7 +384,7 @@
 
 ## Comparisons
 
-- [userTourKit vs Appcues](https://usertourkit.com/compare/tour-kit-vs-appcues): Compare userTourKit vs Appcues for product onboarding. $99 one-time vs $300+/month. See features, pricing, and developer experience side-by-side in 2026.
+- [userTourKit vs Appcues](https://usertourkit.com/compare/tour-kit-vs-appcues): Compare userTourKit vs Appcues for product onboarding. Free under MIT vs $300+/month. See features, pricing, and developer experience side-by-side in 2026.
 - [userTourKit vs Chameleon](https://usertourkit.com/compare/tour-kit-vs-chameleon): Compare userTourKit vs Chameleon for product onboarding. See features, pricing, and developer experience side-by-side in 2026.
 - [userTourKit vs Driver.js](https://usertourkit.com/compare/tour-kit-vs-driver-js): Compare userTourKit vs Driver.js for product tours. See features, bundle size, React integration, and accessibility side-by-side in 2026.
 - [userTourKit vs Intro.js](https://usertourkit.com/compare/tour-kit-vs-intro-js): Compare userTourKit vs Intro.js for product tours and onboarding. See features, bundle size, licensing, and accessibility side-by-side in 2026.

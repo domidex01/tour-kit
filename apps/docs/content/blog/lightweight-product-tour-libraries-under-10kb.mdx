@@ -8,12 +8,16 @@ category: "Listicle"
 schema_type: "TechArticle"
 spreadsheet_row: 35
 date: "2026-04-07"
-updated: "2026-04-07"
+updated: "2026-10-02"
 ogImage: /og-images/lightweight-product-tour-libraries-under-10kb.png
 published: true
 ---
 
 # 5 best lightweight product tour libraries under 10KB (2026)
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 Every kilobyte of JavaScript you ship delays Interaction to Next Paint. Google's Core Web Vitals research shows that [pages loading 40KB+ of JS see measurably higher bounce rates on mobile](https://web.dev/articles/vitals). React Joyride ships around 50KB minified. Shepherd.js clocks in at 30KB plus Floating UI. For a feature that runs once per user, those numbers are hard to justify.
 
@@ -44,11 +48,11 @@ We weighted these equally because the "lightest" library isn't useful if it crea
 <tr><th>Library</th><th>Gzipped size</th><th>Dependencies</th><th>React 19</th><th>TypeScript</th><th>License</th><th>Accessibility</th><th>Best for</th></tr>
 </thead>
 <tbody>
-<tr><td>Tour Kit (core)</td><td>&lt;23 KB</td><td>0</td><td>Yes</td><td>Strict</td><td>BUSL-1.1</td><td>WCAG 2.1 AA</td><td>Design system teams</td></tr>
+<tr><td>Tour Kit (core)</td><td>&lt;23 KB</td><td>0</td><td>Yes</td><td>Strict</td><td>MIT</td><td>WCAG 2.1 AA</td><td>Design system teams</td></tr>
 <tr><td>Driver.js</td><td>&#126;5 KB</td><td>0</td><td>Via hooks</td><td>Built-in</td><td>MIT</td><td>Minimal</td><td>Simple highlights</td></tr>
 <tr><td>Intro.js</td><td>&#126;4-5 KB</td><td>0</td><td>Via wrapper</td><td>DefinitelyTyped</td><td>AGPL-3.0</td><td>Keyboard nav</td><td>Non-commercial</td></tr>
 <tr><td>Onborda</td><td>&#126;8 KB</td><td>Framer Motion</td><td>Yes</td><td>Built-in</td><td>MIT</td><td>Not documented</td><td>Next.js App Router</td></tr>
-<tr><td>OnboardJS</td><td>&#126;8-10 KB</td><td>0</td><td>Yes</td><td>Built-in</td><td>BUSL-1.1</td><td>Not documented</td><td>Flow orchestration</td></tr>
+<tr><td>OnboardJS</td><td>&#126;8-10 KB</td><td>0</td><td>Yes</td><td>Built-in</td><td>MIT</td><td>Not documented</td><td>Flow orchestration</td></tr>
 </tbody>
 </table>
 
@@ -72,11 +76,10 @@ The headless architecture provides tour logic (step sequencing, positioning, sta
 - Younger project with a smaller community than React Joyride or Shepherd.js. Stack Overflow threads and third-party tutorials are sparse
 - No visual builder. You write tour definitions in code, which means you need React developers to create and modify tours
 - No mobile SDK or React Native support
-- Pro packages (adoption, analytics, announcements, checklists, media, scheduling, surveys) require a $9.99 one-time license
 
 ### Pricing
 
-MIT core and React packages are free forever. Pro tier is $9.99 one-time with no per-seat fees, no monthly bill, no usage caps.
+Free and MIT-licensed, including in production. Every package is included, with no per-seat fees, no monthly bill and no usage caps.
 
 **Best for:** React teams with an existing design system who want full control over tour rendering and care about bundle budgets.
 

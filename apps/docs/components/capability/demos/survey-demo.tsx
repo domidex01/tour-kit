@@ -14,7 +14,6 @@ import { RotateCcw } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { DemoSurface } from './demo-surface'
-import { MaybeLicensed } from './maybe-licensed'
 
 /**
  * The real @tour-kit/surveys NPS flow running inline. Demo-only provider
@@ -189,18 +188,16 @@ function DemoSurveyCard() {
 
 export function SurveyDemo() {
   return (
-    <MaybeLicensed>
-      <SurveysProvider
-        surveys={[DEMO_SURVEY]}
-        storage={null}
-        globalCooldownDays={0}
-        samplingRate={1}
-        maxPerSession={99}
-      >
-        <DemoSurface url="acme.app/dashboard" contentClassName="bg-fd-muted/20 py-10">
-          <DemoSurveyCard />
-        </DemoSurface>
-      </SurveysProvider>
-    </MaybeLicensed>
+    <SurveysProvider
+      surveys={[DEMO_SURVEY]}
+      storage={null}
+      globalCooldownDays={0}
+      samplingRate={1}
+      maxPerSession={99}
+    >
+      <DemoSurface url="acme.app/dashboard" contentClassName="bg-fd-muted/20 py-10">
+        <DemoSurveyCard />
+      </DemoSurface>
+    </SurveysProvider>
   )
 }

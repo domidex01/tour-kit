@@ -13,20 +13,20 @@ interface CapabilityHeroProps {
   headingAccent: string
   /** One sentence naming the package and the outcome. */
   subhead: string
-  /** Primary CTA — install/Studio for free pages, try-in-dev for Pro. */
+  /** Primary CTA — install/Studio or "Get started". */
   primaryLabel: string
   primaryHref: string
-  /** Secondary CTA — "Read the docs →" (free) or "See pricing" (Pro). */
+  /** Secondary CTA — "Read the docs →" or "See pricing". */
   secondaryLabel: string
   secondaryHref: string
   /**
-   * Free pages: the `pnpm add @tour-kit/<pkg>` mono block (home pattern).
-   * Pro pages omit it and show the reassurance line instead.
+   * The `pnpm add @tour-kit/<pkg>` mono block (home pattern). Pages that omit
+   * it show the reassurance line instead.
    */
   installCmd?: string
   /**
-   * Pro pages: "Runs free in dev — one-time from $9.99 when you ship." under the
-   * buttons. The licensing model means activation precedes purchase.
+   * A one-line reassurance under the buttons, e.g. "MIT-licensed. Free in
+   * production, no key."
    */
   reassurance?: string
   /** Facts line under the CTAs ("< 10KB gzipped · TypeScript strict…"). */

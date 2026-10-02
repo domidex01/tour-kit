@@ -47,21 +47,19 @@ bypasses localhost, so no keys are needed in dev.
 Peel the onion in `app/providers.tsx`:
 
 ```
-LicenseProvider
-└── AnalyticsProvider (console plugin)
-    └── HintsProvider
-        └── AnnouncementsProvider
-            └── ChecklistProvider
-                └── AdoptionProvider
-                    └── SurveysProvider
-                        └── AiChatProvider
+AnalyticsProvider (console plugin)
+└── HintsProvider
+    └── AnnouncementsProvider
+        └── ChecklistProvider
+            └── AdoptionProvider
+                └── SurveysProvider
+                    └── AiChatProvider
 ```
 
 ## Package map
 
 | Package | File | What it does here |
 | --- | --- | --- |
-| `@tour-kit/license` | `app/providers.tsx`, `app/dashboard/settings/page.tsx` | Wraps the app; Settings → Billing gates Pro controls behind `<LicenseGate>`. |
 | `@tour-kit/analytics` | `app/providers.tsx` | `consolePlugin` streams every event (tour/hint/announcement/checklist/adoption) to the browser console. |
 | `@tour-kit/react` | `components/tour-kit/onboarding-tour.tsx` | 5-step dashboard tour using `<Tour autoStart>` + `<TourStep>`. `onComplete` fires the CSAT survey. |
 | `@tour-kit/hints` | `components/tour-kit/hints.tsx` | `DarkModeHint` on `#dark-mode-toggle`; `ExportHint` on `#export-btn`. |

@@ -1,15 +1,19 @@
 import { EmailPortalForm } from '@/components/account/email-portal-form'
 import { Footer } from '@/components/landing/footer'
 import { baseOptions } from '@/lib/layout.shared'
-import { POLAR_PORTAL_URL } from '@/lib/polar-config'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import { ArrowUpRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-const ACCOUNT_TITLE = 'Manage your license, userTourKit'
+// Polar-hosted customer portal. Kept after the MIT relicense so past buyers can
+// still reach receipts and invoices; set NEXT_PUBLIC_POLAR_PORTAL_URL to the
+// org's portal, e.g. https://polar.sh/<org-slug>/portal.
+const POLAR_PORTAL_URL = process.env.NEXT_PUBLIC_POLAR_PORTAL_URL ?? 'https://polar.sh/login'
+
+const ACCOUNT_TITLE = 'Past purchases, userTourKit'
 const ACCOUNT_DESCRIPTION =
-  'Manage your userTourKit Pro license, view activated domains, download invoices, and update your subscription.'
+  'Bought a userTourKit licence key? Tour Kit is MIT now and you no longer need it. Get your receipts and invoices here.'
 
 export const metadata: Metadata = {
   title: ACCOUNT_TITLE,
@@ -34,11 +38,11 @@ export default function AccountPage() {
               Account
             </p>
             <h1 className="mb-4 text-3xl font-bold tracking-[-0.02em] text-fd-foreground sm:text-4xl">
-              Manage your license
+              Past purchases
             </h1>
             <p className="mx-auto max-w-xl text-[16px] leading-[1.6] text-fd-muted-foreground">
-              Enter the email you used to purchase Tour Kit. We&apos;ll email you a secure link to
-              view your keys, manage activated domains, and download invoices.
+              Tour Kit is MIT now, so you no longer need a licence key. If you bought one, enter the
+              email you used and we&apos;ll send you a secure link to your receipts and invoices.
             </p>
 
             <EmailPortalForm />
@@ -57,26 +61,22 @@ export default function AccountPage() {
             </div>
           </div>
 
-          <div className="mx-auto mt-20 grid max-w-[960px] gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mx-auto mt-20 grid max-w-[720px] gap-6 sm:grid-cols-2">
             <Feature
-              title="License keys"
-              body="View the keys tied to your account and see which domains each key has activated."
+              title="Your existing key"
+              body="It keeps working on the versions it was bought for, and nothing is revoked. Update to the latest versions and no key is checked at all."
             />
             <Feature
-              title="Activation slots"
-              body="Free up slots by deactivating domains you no longer use. Each license allows up to 5 activations."
-            />
-            <Feature
-              title="Invoices & billing"
-              body="Download receipts, update your payment method, or manage your subscription directly in the portal."
+              title="Receipts and invoices"
+              body="Download them from the portal, or from the Polar order email you received at purchase."
             />
           </div>
 
           <div className="mx-auto mt-16 max-w-[720px] rounded-lg border border-fd-border bg-fd-card px-6 py-5 text-[14px] leading-[1.6] text-fd-muted-foreground">
-            <p className="mb-2 font-semibold text-fd-foreground">Can&apos;t find your license?</p>
+            <p className="mb-2 font-semibold text-fd-foreground">Questions about a purchase?</p>
             <p>
-              Check your inbox for your Polar order confirmation, it contains your license key and a
-              direct link to the portal. If you still need help, email{' '}
+              Your Polar order confirmation has a direct link to the portal. For anything else,
+              email{' '}
               <a
                 href="mailto:support@usertourkit.com"
                 className="text-fd-foreground underline decoration-dotted underline-offset-4 hover:decoration-solid"

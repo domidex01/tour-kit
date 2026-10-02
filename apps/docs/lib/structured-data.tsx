@@ -1,4 +1,3 @@
-import { TIERS } from '@/lib/pricing'
 import type { ReactNode } from 'react'
 
 const SITE_URL = 'https://usertourkit.com'
@@ -273,23 +272,21 @@ export function ProductJsonLd(): ReactNode {
     '@type': 'SoftwareApplication',
     name: 'userTourKit',
     description:
-      'Source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling. Free in development; a one-time licence key for production.',
+      'MIT-licensed headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling. Free for any use, including production.',
     brand: { '@type': 'Brand', name: 'userTourKit' },
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Any',
     url: SITE_URL,
     image: `${SITE_URL}/images/tour-kit-og.png`,
-    // Derived from TIERS so the markup Google reads can never drift from the
-    // rendered page — a mismatch earns a rich-results penalty.
-    offers: TIERS.map((tier) => ({
+    // Must match the rendered /pricing page: a mismatch earns a rich-results
+    // penalty. The library is free under MIT, so there is one zero-price offer.
+    offers: {
       '@type': 'Offer',
-      name: `userTourKit ${tier.name}`,
-      price: tier.price.toFixed(2),
+      price: '0',
       priceCurrency: 'USD',
-      description: `${tier.blurb} One-time purchase, no recurring fees. Free for development, evaluation, testing and CI under BSL 1.1.`,
       availability: 'https://schema.org/InStock',
       url: `${SITE_URL}/pricing`,
-    })),
+    },
     publisher: { '@id': `${SITE_URL}/#organization` },
   }
 
@@ -347,7 +344,7 @@ export function SoftwareSourceCodeJsonLd({
     programmingLanguage,
     ...(runtimePlatform && { runtimePlatform }),
     codeRepository: 'https://github.com/domidex01/tour-kit',
-    license: 'https://github.com/domidex01/tour-kit/blob/main/LICENSE.md',
+    license: 'https://github.com/domidex01/tour-kit/blob/main/LICENSE',
   }
 
   return (

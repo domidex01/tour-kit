@@ -3,16 +3,20 @@ title: "userTourKit vs Intro.js: which tour library should you choose in 2026?"
 description: "Compare userTourKit vs Intro.js for product tours. See features, bundle size, licensing, accessibility, and React support side-by-side in 2026."
 competitor: "Intro.js"
 competitorSlug: "intro-js"
-lastUpdated: "2026-03-31"
+lastUpdated: "2026-10-02"
 ---
 
 ## The bottom line
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 userTourKit is a headless React library with tours, hints, checklists, announcements, analytics, and scheduling in a &lt;23KB core bundle under an MIT license. Intro.js is a framework-agnostic tour library with ~23,900 GitHub stars, AGPL-3.0 licensing, and an 8-month release gap since v8.3.2. userTourKit fits React teams needing design system integration and WCAG compliance. Intro.js is better for vanilla JavaScript sites where the data-attribute setup pattern makes sense.
 
 ## What is userTourKit?
 
-userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, with a source-available core (BUSL-1.1, free in development) and $9.99 one-time Pro upgrade.
+userTourKit is an open-source headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling, MIT-licensed and free, including in production.
 
 ## What is Intro.js?
 
@@ -36,31 +40,31 @@ userTourKit's `@tour-kit/hints` package (&lt;6.5KB gzipped) provides non-sequent
 
 Intro.js doesn't have checklists. If you need "complete your profile, invite a teammate, create a project" flows, you're building them yourself. No shared state with the tour. No shared analytics. No shared completion tracking.
 
-userTourKit's `@tour-kit/checklists` package (Pro, $9.99) provides task dependencies with circular dependency detection. Three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked tasks. Everything shares core state with the tour system.
+userTourKit's `@tour-kit/checklists` package provides task dependencies with circular dependency detection. Three completion types: manual, event-based, or custom check function. Progress calculation accounts for locked tasks. Everything shares core state with the tour system.
 
 ### Announcements and banners
 
 Intro.js is a tour library. No announcements, modals, banners, toasts, or slideouts.
 
-userTourKit's `@tour-kit/announcements` package (Pro) ships five display variants: modal, toast, banner, slideout, and spotlight. Frequency rules control display: once ever, once per session, N times total, or every 7 days. A priority queue manages concurrent announcements. All of it feeds into the same analytics pipeline as tours and checklists.
+userTourKit's `@tour-kit/announcements` package ships five display variants: modal, toast, banner, slideout, and spotlight. Frequency rules control display: once ever, once per session, N times total, or every 7 days. A priority queue manages concurrent announcements. All of it feeds into the same analytics pipeline as tours and checklists.
 
 ### Analytics and tracking
 
 Intro.js provides callback events (`oncomplete`, `onexit`, `onbeforechange`). From there, you write the forwarding logic yourself. Every team does this differently. There's no standard event schema, no built-in plugin system, and GitHub issue [#956](https://github.com/usablica/intro.js/issues/956) documents `oncomplete` not firing reliably.
 
-userTourKit's `@tour-kit/analytics` package (Pro) provides five built-in plugins: PostHog, Mixpanel, Amplitude, GA4, and a console logger. A custom plugin is three lines. Events follow a consistent schema across tours, hints, checklists, and announcements. Wire it up once.
+userTourKit's `@tour-kit/analytics` package provides five built-in plugins: PostHog, Mixpanel, Amplitude, GA4, and a console logger. A custom plugin is three lines. Events follow a consistent schema across tours, hints, checklists, and announcements. Wire it up once.
 
 ### Scheduling and targeting
 
 Intro.js has no scheduling. No business hours, no timezone support, no date ranges, no recurring patterns.
 
-userTourKit's `@tour-kit/scheduling` package (Pro) handles IANA timezone support, recurring patterns (daily/weekly/monthly/yearly), blackout windows, and business hours presets. The `useSchedule()` hook returns `isActive`, `nextActivation`, and a reason for inactivity. `ScheduleGate` conditionally renders children only when the schedule is active.
+userTourKit's `@tour-kit/scheduling` package handles IANA timezone support, recurring patterns (daily/weekly/monthly/yearly), blackout windows, and business hours presets. The `useSchedule()` hook returns `isActive`, `nextActivation`, and a reason for inactivity. `ScheduleGate` conditionally renders children only when the schedule is active.
 
 ### Adoption tracking
 
 Intro.js is a tour-only library. It doesn't track feature adoption, usage patterns, or provide nudging. If you need adoption tracking alongside Intro.js, you'd build it from scratch or integrate a separate product analytics tool.
 
-userTourKit's `@tour-kit/adoption` package ($9.99 Pro) tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
+userTourKit's `@tour-kit/adoption` package tracks feature usage against configurable adoption criteria. The adoption calculator compares actual usage count vs required threshold, time since first use vs adoption window, and recency of use vs churn threshold. A nudge scheduler respects cooldown periods and fires on time-based, usage-based, or event-based triggers. Components like `IfNotAdopted` conditionally render badges or prompts for users who haven't adopted a feature. `AdoptionDashboard` gives admins a visual overview of adoption metrics across features.
 
 userTourKit's adoption tracking is code-first -- there's no visual dashboard you can hand to a PM without developer involvement. But the data is there for any team willing to wire it into their existing admin tooling.
 
@@ -68,7 +72,7 @@ userTourKit's adoption tracking is code-first -- there's no visual dashboard you
 
 Intro.js doesn't include media components. You can insert HTML (including iframe embeds) into step content strings, but there's no media auto-detection, no accessibility fallbacks for reduced motion, and no built-in support for platforms like Loom or Wistia. You'd hand-roll each embed.
 
-userTourKit's `@tour-kit/media` package ($9.99 Pro) embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
+userTourKit's `@tour-kit/media` package embeds video and media directly in tour steps and announcements. Pass a URL and the component auto-detects the platform: YouTube, Vimeo, Loom, Wistia, native video (.mp4/.webm), GIF, and Lottie animations. YouTube embeds use `youtube-nocookie.com` for GDPR compliance. The component respects `prefers-reduced-motion` by falling back to a poster image. A headless `MediaHeadless` render prop variant gives full control over the player UI.
 
 ### Accessibility and WCAG compliance
 
@@ -102,7 +106,7 @@ Google has banned AGPL-licensed code from internal systems entirely. Legal teams
 
 Intro.js commercial licenses cost $9.99 (1 project), $49.99 (5 projects), or $299.99 (unlimited). All one-time payments.
 
-userTourKit is BSL 1.1. No AGPL. No copyleft. Every package is free while you build, and $9.99 as a one-time purchase to ship. No monthly fees, no MAU limits.
+userTourKit is MIT. No AGPL. No copyleft. Every package is free, including in production. No licence key, no monthly fees, no MAU limits.
 
 If you're building anything commercial, the licensing difference alone drives many teams away from Intro.js. GitHub issue [#573](https://github.com/usablica/intro.js/issues/573) captures the confusion around the license change from MIT to AGPL.
 
@@ -110,14 +114,14 @@ If you're building anything commercial, the licensing difference alone drives ma
 
 | Feature | userTourKit | Intro.js v8.3.2 |
 |---|---|---|
-| Product tours | ✅ Built-in (core, BUSL-1.1) | ✅ Built-in (AGPL) |
-| Hints/hotspots | ✅ Built-in (&lt;5KB, BUSL-1.1) | ✅ Built-in (viewport bugs reported) |
-| Onboarding checklists | ✅ Pro ($9.99 one-time) | 🚫 Not available |
-| Announcements | ✅ Pro (5 variants) | 🚫 Not available |
-| Analytics | ✅ Pro (5 built-in plugins) | ⚙️ Manual callback forwarding |
-| Scheduling | ✅ Pro (timezone, recurring) | 🚫 Not available |
-| Adoption tracking | ✅ Pro (usage + nudges) | 🚫 Not available |
-| Media embedding | ✅ Pro (7 platforms) | 🚫 Not available |
+| Product tours | ✅ Built-in (core, MIT) | ✅ Built-in (AGPL) |
+| Hints/hotspots | ✅ Built-in (&lt;5KB, MIT) | ✅ Built-in (viewport bugs reported) |
+| Onboarding checklists | ✅ Free (MIT) | 🚫 Not available |
+| Announcements | ✅ 5 variants | 🚫 Not available |
+| Analytics | ✅ 5 built-in plugins | ⚙️ Manual callback forwarding |
+| Scheduling | ✅ Timezone, recurring | 🚫 Not available |
+| Adoption tracking | ✅ Usage + nudges | 🚫 Not available |
+| Media embedding | ✅ 7 platforms | 🚫 Not available |
 | Conditional branching | ✅ Async resolvers, cross-tour | 🚫 Not available |
 | WCAG 2.1 AA | ✅ Default, Lighthouse 100 | 🚫 Key issue closed as "wontfix" |
 | Headless mode | ✅ Full headless architecture | 🚫 Library-owned DOM/CSS |
@@ -126,7 +130,7 @@ If you're building anything commercial, the licensing difference alone drives ma
 | React support | 18, 19 (first-party) | ⚙️ Wrapper unmaintained 3+ years |
 | TypeScript | Strict mode, generics | ⚙️ Community @types (DefinitelyTyped) |
 | SSR / Server Components | ✅ Supported | 🚫 Requires document/window |
-| License | BUSL-1.1 + $9.99 Pro | AGPL-3.0 + $9.99–$299.99 commercial |
+| License | MIT | AGPL-3.0 + $9.99–$299.99 commercial |
 | Maintainer model | Team | Bus factor of 1 |
 | Vanilla JS support | 🚫 React only | ✅ First-class |
 
@@ -144,7 +148,7 @@ For Angular or Vue projects, Intro.js's DOM-first approach creates less friction
 
 userTourKit fits better when you're building with React and need more than a basic sequential tour. If you're hitting any of these walls, userTourKit solves them architecturally.
 
-The AGPL license is a dealbreaker for your legal team. userTourKit's BUSL-1.1 licence has no copyleft restrictions. You need WCAG 2.1 AA compliance, but Intro.js explicitly rejected accessibility improvements (issue [#426](https://github.com/usablica/intro.js/issues/426)). Your design system uses shadcn/ui or Tailwind, and Intro.js injects its own styled DOM that requires `!important` overrides.
+The AGPL license is a dealbreaker for your legal team. userTourKit's MIT license has no copyleft restrictions. You need WCAG 2.1 AA compliance, but Intro.js explicitly rejected accessibility improvements (issue [#426](https://github.com/usablica/intro.js/issues/426)). Your design system uses shadcn/ui or Tailwind, and Intro.js injects its own styled DOM that requires `!important` overrides.
 
 Or you need onboarding beyond tours: checklists, announcements, analytics, scheduling. You're upgrading to React 19 or using Server Components. You want TypeScript with real type inference.
 
@@ -194,7 +198,7 @@ We built userTourKit, so weigh our claims accordingly. The GitHub issues and ind
 
 ### Is userTourKit free?
 
-userTourKit's three core packages (core, react, hints) are BUSL-1.1-licensed and source-available. The seven Pro packages cost $9.99 as a one-time purchase covering analytics, checklists, announcements, adoption tracking, media, and scheduling. No subscriptions. No MAU limits.
+Yes. Every userTourKit package is MIT-licensed and free, including in production: the three core packages (core, react, hints) and the extended packages for analytics, checklists, announcements, adoption tracking, media, and scheduling. No licence key. No subscriptions. No MAU limits.
 
 ### What is the difference between userTourKit and Intro.js?
 
@@ -214,7 +218,7 @@ userTourKit's core is &lt;23KB gzipped. Intro.js is ~10KB minified JS plus a req
 
 ### Is Intro.js open source?
 
-Intro.js is AGPL-3.0 licensed. For commercial use, you need a paid license ($9.99-$299.99 one-time). userTourKit's core is MIT with no copyleft restrictions.
+Intro.js is AGPL-3.0 licensed. For commercial use, you need a paid license ($9.99-$299.99 one-time). Every userTourKit package is MIT, with no copyleft restrictions.
 
 ### Does Intro.js work with React?
 

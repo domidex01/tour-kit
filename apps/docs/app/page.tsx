@@ -118,7 +118,7 @@ const FAQ = dynamic(() => import('@/components/landing/faq').then((m) => ({ defa
 
 const HOMEPAGE_NAME = 'userTourKit'
 const HOMEPAGE_DESCRIPTION =
-  'Headless, accessible product tours, onboarding flows, and in-app messaging for React. Free in development, a one-time licence to ship.'
+  'Headless, accessible product tours, onboarding flows, and in-app messaging for React. MIT-licensed and free, including in production.'
 
 export default function HomePage() {
   return (
@@ -141,11 +141,11 @@ export default function HomePage() {
         <Features />
         <CtaBand
           placement="home_after_features"
-          eyebrow="Free in development"
+          eyebrow="MIT licensed"
           heading="Ready to build your first tour?"
-          subtext="Source-available under BSL 1.1, free for development, evaluation and CI. One-time from $9.99 when you ship to production."
+          subtext="Every package is MIT-licensed: free in development and in production, with no licence key."
           ctaLabel="Build my first tour"
-          reassurance="Free in development, no signup, no credit card."
+          reassurance="No signup, no credit card, no key."
         />
         <Packages />
 

@@ -8,12 +8,16 @@ category: "Thought Leadership"
 schema_type: "TechArticle"
 spreadsheet_row: 226
 date: "2026-04-11"
-updated: "2026-04-11"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/product-tour-dead-long-live-headless-tour.png
 ---
 
 # The product tour is dead. Long live the headless tour.
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a paid licence.
 
 Seventy-eight percent of users abandon traditional product tours before reaching the final step. Not because onboarding is a bad idea, but because the tools we've been using to build it are fundamentally broken. The product tour as we know it, a linear sequence of tooltips glued to DOM elements with a third-party script, has run its course.
 
@@ -181,11 +185,11 @@ Choosing between a no-code platform, a headless library, and building from scrat
 
 **Use a no-code platform (Appcues, Userpilot, Chameleon) if:** your onboarding is owned by a non-technical team, you need to ship tours this week without developer involvement, and you can absorb per-MAU pricing as the business scales.
 
-**Use a headless tour library if:** your engineering team owns the onboarding experience, you have an existing design system, you need React 19 compatibility, accessibility compliance matters, and you want a one-time cost instead of recurring SaaS fees.
+**Use a headless tour library if:** your engineering team owns the onboarding experience, you have an existing design system, you need React 19 compatibility, accessibility compliance matters, and you want to avoid recurring SaaS fees.
 
 **Build from scratch if:** you only need a single 3-step tooltip flow and don't want any dependency. But budget 40-80 hours of engineering time for scroll handling, focus management, positioning, resize observers, and keyboard navigation. We built Tour Kit because we went down this road once and decided never to do it again.
 
-We built Tour Kit as a source-available, headless-first tour library. The core is under 23KB gzipped, with zero runtime dependencies. React 18 and 19 both work. Ten composable packages (install only what you need). Full disclosure: this is our project, so take the recommendation with appropriate skepticism. Every claim is verifiable against [npm](https://www.npmjs.com/), [GitHub](https://github.com/), and [bundlephobia](https://bundlephobia.com/).
+We built Tour Kit as an MIT-licensed, headless-first tour library. The core is under 23KB gzipped, with zero runtime dependencies. React 18 and 19 both work. Ten composable packages (install only what you need). Full disclosure: this is our project, so take the recommendation with appropriate skepticism. Every claim is verifiable against [npm](https://www.npmjs.com/), [GitHub](https://github.com/), and [bundlephobia](https://bundlephobia.com/).
 
 That said, Tour Kit doesn't have a visual builder. It requires React developers. The community is smaller than React Joyride's. If those are dealbreakers for your team, they're legitimate dealbreakers.
 

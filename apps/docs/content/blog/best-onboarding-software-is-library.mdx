@@ -8,12 +8,16 @@ category: "Thought Leadership"
 schema_type: "TechArticle"
 spreadsheet_row: 227
 date: "2026-04-11"
-updated: "2026-04-11"
+updated: "2026-10-02"
 ogImage: /og-images/best-onboarding-software-is-library.png
 published: true
 ---
 
 # Why the best onboarding software in 2026 is a React library
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 The onboarding tools market has a pricing problem. Appcues starts at $299/month. Userpilot charges $249/month with annual billing only. Pendo doesn't publish pricing, but enterprise contracts run $15,000 to $140,000 per year. Meanwhile, React libraries like Tour Kit, React Joyride, and Shepherd.js ship the same core functionality for zero dollars and a fraction of the bundle weight.
 
@@ -111,9 +115,9 @@ As of April 2026, here's what onboarding costs:
     </tr>
     <tr>
       <td>Tour Kit</td>
-      <td>Library (open core)</td>
-      <td>Free / Pro</td>
-      <td>$0 to $9.99 one-time</td>
+      <td>Library (MIT)</td>
+      <td>Free</td>
+      <td>$0</td>
     </tr>
   </tbody>
 </table>
@@ -203,7 +207,7 @@ Three trends are accelerating this shift:
 
 **AI-powered personalization.** Every onboarding vendor is adding "AI features" to their platform. But their AI works with their data, in their pipeline. When you own your onboarding code, you integrate *your* LLM and *your* user behavior model. Code ownership means AI ownership.
 
-**Composable architecture.** The composable SaaS movement ([Bitsrc](https://blog.bitsrc.io/building-a-react-component-library-d92a2da8eab9) covers this well) favors modular, API-connected tools over monolithic platforms. Tour Kit's 10-package architecture follows this pattern: install `@tourkit/core` and `@tourkit/react` for basic tours, add `@tourkit/analytics` when you need tracking. Pay for complexity only when you need it.
+**Composable architecture.** The composable SaaS movement ([Bitsrc](https://blog.bitsrc.io/building-a-react-component-library-d92a2da8eab9) covers this well) favors modular, API-connected tools over monolithic platforms. Tour Kit's 10-package architecture follows this pattern: install `@tourkit/core` and `@tourkit/react` for basic tours, add `@tourkit/analytics` when you need tracking. Add complexity only when you need it.
 
 ## What we'd do differently: the "onboarding as code" approach
 
@@ -244,7 +248,7 @@ The W3C's [ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/) doe
 
 ### Is a React library really better than Appcues or Userpilot for onboarding?
 
-For teams with React developers, a library like Tour Kit provides equivalent core functionality (step tours, highlights, tooltips, checklists) at a fraction of the cost. Appcues starts at $299/month while Tour Kit's core is free and ships at under 23KB gzipped. The tradeoff is losing the visual builder and built-in analytics dashboard.
+For teams with React developers, a library like Tour Kit provides equivalent core functionality (step tours, highlights, tooltips, checklists) at a fraction of the cost. Appcues starts at $299/month while Tour Kit is free and ships at under 23KB gzipped. The tradeoff is losing the visual builder and built-in analytics dashboard.
 
 ### What does "onboarding as code" mean?
 
@@ -252,7 +256,7 @@ Onboarding as code means defining tour steps, targeting rules, and onboarding fl
 
 ### Can a library replace a full onboarding platform?
 
-A single library handles product tours, tooltips, and highlights. Tour Kit's extended packages add checklists, surveys, announcements, and analytics. You won't get a visual builder, but you get full code ownership and zero recurring costs for core functionality.
+A single library handles product tours, tooltips, and highlights. Tour Kit's extended packages add checklists, surveys, announcements, and analytics. You won't get a visual builder, but you get full code ownership and zero recurring costs.
 
 ### How does bundle size affect onboarding tool choice?
 
@@ -260,7 +264,7 @@ SaaS onboarding scripts inject 50-200KB of JavaScript on every page load, affect
 
 ### Is Tour Kit free or paid?
 
-Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are BUSL-1.1-licensed and source-available. Extended packages like analytics and surveys require a Pro license. We're transparent about this: the best onboarding software being a library doesn't mean it has to be ours. React Joyride and Shepherd.js are solid MIT alternatives.
+Tour Kit is free. Every package is MIT-licensed, including in production: the core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) and extended packages like analytics and surveys. We're transparent about this: the best onboarding software being a library doesn't mean it has to be ours. React Joyride and Shepherd.js are solid MIT alternatives.
 
 ---
 
@@ -338,7 +342,7 @@ Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) a
       "name": "Is a React library really better than Appcues or Userpilot for onboarding?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "For teams with React developers, a library like Tour Kit provides equivalent core functionality (step tours, highlights, tooltips, checklists) at a fraction of the cost. Appcues starts at $299/month while Tour Kit's core is free and ships at under 23KB gzipped. The tradeoff is losing the visual builder and built-in analytics dashboard."
+        "text": "For teams with React developers, a library like Tour Kit provides equivalent core functionality (step tours, highlights, tooltips, checklists) at a fraction of the cost. Appcues starts at $299/month while Tour Kit is free and ships at under 23KB gzipped. The tradeoff is losing the visual builder and built-in analytics dashboard."
       }
     },
     {
@@ -354,7 +358,7 @@ Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) a
       "name": "Can a library replace a full onboarding platform?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A single library handles product tours, tooltips, and highlights. Tour Kit's extended packages add checklists, surveys, announcements, and analytics. You won't get a visual builder, but you get full code ownership and zero recurring costs for core functionality."
+        "text": "A single library handles product tours, tooltips, and highlights. Tour Kit's extended packages add checklists, surveys, announcements, and analytics. You won't get a visual builder, but you get full code ownership and zero recurring costs."
       }
     },
     {
@@ -370,7 +374,7 @@ Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) a
       "name": "Is Tour Kit free or paid?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit's core packages (@tourkit/core, @tourkit/react, @tourkit/hints) are BUSL-1.1-licensed and source-available. Extended packages like analytics and surveys require a Pro license. React Joyride and Shepherd.js are solid MIT alternatives."
+        "text": "Tour Kit is free. Every package is MIT-licensed, including in production: the core packages (@tourkit/core, @tourkit/react, @tourkit/hints) and extended packages like analytics and surveys. React Joyride and Shepherd.js are solid MIT alternatives."
       }
     }
   ]

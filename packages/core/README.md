@@ -130,7 +130,7 @@ function WelcomeButton() {
 | Bundle (gzip) | 23 KB full / 18 KB engine-only | ~24 KB | ~16 KB | ~10 KB | ~5 KB |
 | `prefers-reduced-motion` | ✅ | ❌ | ❌ | ❌ | ❌ |
 | RTL support | ✅ | ❌ | ❌ | ❌ | ❌ |
-| License | BUSL-1.1 (MIT after 4y) | MIT | GPL/Commercial | MIT | MIT |
+| License | MIT | MIT | GPL/Commercial | MIT | MIT |
 | Framework | Any React | React | Vanilla + wrappers | Any | Vanilla |
 
 ## API Reference
@@ -306,13 +306,11 @@ Full documentation: [https://usertourkit.com/docs/core](https://usertourkit.com/
 
 ## Licence
 
-[Business Source License 1.1](./LICENSE.md). Development, evaluation, testing,
-CI and any non-production environment are free and need no key. **Production
-use needs a licence key** — a one-time purchase from $9.99 at
-[usertourkit.com/pricing](https://usertourkit.com/pricing). Each version
-converts to MIT on its Change Date, four years after release.
+[MIT](./LICENSE). Free for any use, including production, with no licence key and
+no badge.
 
-Versions up to and including 2.1.0 were published under MIT and stay MIT — an
-MIT grant cannot be withdrawn. This applies from 3.0.0 onward.
+3.0.x was published under BUSL-1.1; 3.1 and later are MIT again. Core never
+rendered a badge itself, but `@tour-kit/react` and `@tour-kit/hints` 3.0.x did:
+`npm update` moves all three to MIT and removes it, with no code change.
 
 © 2026 domidex01

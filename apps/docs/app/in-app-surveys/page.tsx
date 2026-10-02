@@ -20,7 +20,7 @@ import dynamic from 'next/dynamic'
 const PAGE_PATH = '/in-app-surveys'
 const PAGE_TITLE = 'In-App Surveys & NPS for React | userTourKit'
 const PAGE_DESC =
-  'In-app survey component for React, NPS, CSAT, CES with skip logic and fatigue prevention. Your design system. Runs free in dev, from $9.99 once to ship.'
+  'In-app survey component for React, NPS, CSAT, CES with skip logic and fatigue prevention. Your design system. MIT-licensed and free, including in production.'
 // File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
 // which blocks Twitter/Facebook crawlers from fetching share images.
 const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
@@ -99,9 +99,9 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
       'Responses stay in your app. Completion handlers hand you the response map; scoring helpers (calculateNPS, calculateCSAT, calculateCES) run locally; @tour-kit/analytics streams events to your own PostHog, Mixpanel, Amplitude, or GA4. Nothing touches userTourKit servers.',
   },
   {
-    question: 'What happens before I buy a license?',
+    question: 'Do I need a licence key?',
     answer:
-      'Everything works. @tour-kit/surveys runs unlicensed in development and on localhost with full functionality, no feature gates. Production shows a small badge until you activate a one-time licence key, from $9.99 for a single project, which covers every Tour Kit package.',
+      'No. @tour-kit/surveys is MIT-licensed, like every Tour Kit package: full functionality in development and in production, with no key, no badge and no feature gates.',
   },
 ]
 
@@ -127,15 +127,15 @@ export default function InAppSurveysPage() {
       <main id="main-content" className="flex flex-1 flex-col">
         <CapabilityHero
           slug="surveys"
-          eyebrow="@tour-kit/surveys · Pro"
+          eyebrow="@tour-kit/surveys"
           heading="Ask in context."
           headingAccent="Hear the truth."
           subhead="In-app microsurveys for React, NPS, CSAT, CES, and custom flows with skip logic and fatigue prevention, rendered in your own design system."
-          primaryLabel="Try it free in dev"
+          primaryLabel="Get started"
           primaryHref="/docs/surveys"
           secondaryLabel="See pricing"
           secondaryHref="/pricing"
-          reassurance="Runs free in dev, one-time from $9.99 when you ship."
+          reassurance="MIT-licensed. Free in production, no key."
           factsLine="5 display modes · skip logic · NPS/CSAT/CES scoring · your repo, your code"
         />
 
@@ -232,9 +232,9 @@ export default function InAppSurveysPage() {
 
         <CtaBand
           placement="surveys_after_features"
-          eyebrow="Pro package"
-          heading="Try it free in dev, watermark until you license."
-          subtext="Full functionality in development and on localhost, no key required. One licence from $9.99 unlocks production for every package."
+          eyebrow="MIT licensed"
+          heading="Free in development and in production."
+          subtext="Full functionality everywhere, no key required. Every Tour Kit package is MIT."
           ctaLabel="Build my first survey"
           reassurance="No signup, no credit card, install and go."
           primaryHref="/builder"
@@ -245,7 +245,7 @@ export default function InAppSurveysPage() {
         <ComparisonTeaser
           heading="Microsurveys without the platform tax"
           rows={[
-            { label: 'Cost', tourKit: 'From $9.99 once', saas: '$200–900/mo', oss: 'DIY time' },
+            { label: 'Cost', tourKit: 'Free (MIT)', saas: '$200–900/mo', oss: 'DIY time' },
             { label: 'Fatigue prevention', tourKit: 'yes', saas: 'partial', oss: 'no' },
             {
               label: 'Response data ownership',
@@ -269,7 +269,7 @@ export default function InAppSurveysPage() {
           slug="surveys"
           heading="Ask better questions."
           headingAccent="Own the answers."
-          subtext="Install now, run it free in dev, license it when it ships."
+          subtext="Install now and ship it. MIT, no key."
           installCmd="pnpm add @tour-kit/surveys"
           primaryLabel="Get started"
           primaryHref="/builder"

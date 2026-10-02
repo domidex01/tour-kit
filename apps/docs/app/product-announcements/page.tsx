@@ -20,7 +20,7 @@ import dynamic from 'next/dynamic'
 const PAGE_PATH = '/product-announcements'
 const PAGE_TITLE = 'In-App Announcements for React | userTourKit'
 const PAGE_DESC =
-  'In-app announcements for React, modal, banner, toast, slideout, spotlight, with scheduling, audience rules, and a priority queue. From $9.99 once to ship.'
+  'In-app announcements for React, modal, banner, toast, slideout, spotlight, with scheduling, audience rules, and a priority queue. MIT-licensed and free.'
 // File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
 // which blocks Twitter/Facebook crawlers from fetching share images.
 const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
@@ -101,9 +101,9 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
       'Yes. Announcement configs take a media slot, YouTube, Vimeo, Loom, Wistia, GIF, Lottie, or plain images via @tour-kit/media, with lazy loading and reduced-motion handling built in.',
   },
   {
-    question: 'What happens before I buy a license?',
+    question: 'Do I need a licence key?',
     answer:
-      'Everything works. @tour-kit/announcements runs unlicensed in development and on localhost with full functionality, no feature gates. Production shows a small badge until you activate a one-time licence key, from $9.99 for a single project, which covers every Tour Kit package.',
+      'No. @tour-kit/announcements is MIT-licensed, like every Tour Kit package: full functionality in development and in production, with no key, no badge and no feature gates.',
   },
 ]
 
@@ -129,15 +129,15 @@ export default function ProductAnnouncementsPage() {
       <main id="main-content" className="flex flex-1 flex-col">
         <CapabilityHero
           slug="announcements"
-          eyebrow="@tour-kit/announcements · Pro"
+          eyebrow="@tour-kit/announcements"
           heading="Ship the news"
           headingAccent="inside your product."
           subhead="In-app announcements for React, modal, banner, toast, slideout, and spotlight variants with scheduling, audience rules, and a priority queue."
-          primaryLabel="Try it free in dev"
+          primaryLabel="Get started"
           primaryHref="/docs/announcements"
           secondaryLabel="See pricing"
           secondaryHref="/pricing"
-          reassurance="Runs free in dev, one-time from $9.99 when you ship."
+          reassurance="MIT-licensed. Free in production, no key."
           factsLine="5 variants · priority queue · frequency rules · your repo, your code"
         />
 
@@ -172,7 +172,7 @@ export default function ProductAnnouncementsPage() {
               pain: '$300/mo for a banner',
               painDetail:
                 'Messaging suites price in-app announcements like enterprise software and render them in their styles, not yours.',
-              outcome: 'Your design system, from $9.99 once',
+              outcome: 'Your design system, free under MIT',
               outcomeDetail:
                 'shadcn-native components or fully headless render props, the announcement looks like your product.',
             },
@@ -236,9 +236,9 @@ export default function ProductAnnouncementsPage() {
 
         <CtaBand
           placement="announcements_after_features"
-          eyebrow="Pro package"
-          heading="Try it free in dev, watermark until you license."
-          subtext="Full functionality in development and on localhost, no key required. One licence from $9.99 unlocks production for every package."
+          eyebrow="MIT licensed"
+          heading="Free in development and in production."
+          subtext="Full functionality everywhere, no key required. Every Tour Kit package is MIT."
           ctaLabel="Build my announcement"
           reassurance="No signup, no credit card, install and go."
           primaryHref="/builder"
@@ -249,7 +249,7 @@ export default function ProductAnnouncementsPage() {
         <ComparisonTeaser
           heading="In-app messaging without the platform tax"
           rows={[
-            { label: 'Cost', tourKit: 'From $9.99 once', saas: '$200–900/mo', oss: 'DIY time' },
+            { label: 'Cost', tourKit: 'Free (MIT)', saas: '$200–900/mo', oss: 'DIY time' },
             { label: 'Priority queue', tourKit: 'yes', saas: 'partial', oss: 'no' },
             {
               label: 'Design system fit',
@@ -273,7 +273,7 @@ export default function ProductAnnouncementsPage() {
           slug="announcements"
           heading="Announce it"
           headingAccent="where they'll see it."
-          subtext="Install now, run it free in dev, license it when it ships."
+          subtext="Install now and ship it. MIT, no key."
           installCmd="pnpm add @tour-kit/announcements"
           primaryLabel="Get started"
           primaryHref="/builder"

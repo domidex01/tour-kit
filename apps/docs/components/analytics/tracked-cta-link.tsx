@@ -1,17 +1,14 @@
 'use client'
 
-import type { CapabilityCtaPlacement } from '@/components/capability/types'
+import type { CapabilityCtaPlacement, CapabilitySlug } from '@/components/capability/types'
 import { trackEvent } from '@/lib/analytics'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 /**
- * Placement values for in-app (non-checkout) CTA links. Distinct from
- * `BuyButtonPlacement` in tracked-buy-button.tsx, which fires the revenue
- * `pricing_buy_clicked` event for the Polar checkout. These CTAs point at
- * /docs and /pricing, so they fire a top-of-funnel `cta_clicked` event —
- * the metric that actually moves at the blog stage is install intent, not
- * buy clicks (the purchase happens later, from the production watermark).
+ * Placement values for in-app CTA links. These point at /docs and /pricing
+ * and fire a top-of-funnel `cta_clicked` event: install intent is the metric
+ * that moves, since every package is free (MIT) and there is nothing to buy.
  */
 export type CtaPlacement =
   | 'blog_index_footer'
@@ -23,6 +20,8 @@ export type CtaPlacement =
   | 'docs_pro_callout'
   | 'site_banner'
   | CapabilityCtaPlacement
+  | 'home_teaser'
+  | `${CapabilitySlug}_teaser`
 
 interface TrackedCtaLinkProps {
   href: string

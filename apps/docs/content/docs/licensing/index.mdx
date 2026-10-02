@@ -1,268 +1,61 @@
 ---
-title: Licensing
-description: Set up userTourKit Pro licensing with Polar.sh — installation, configuration, and CI/CD
+title: 'License: MIT'
+description: Every userTourKit package is MIT-licensed and free for any use, including production. How to remove the "Unlicensed" badge that older versions show.
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout'
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 
-## Overview
+## The licence
 
-userTourKit uses a **source-available + Pro** licensing model:
+Every `@tour-kit/*` package is released under the [MIT licence](https://github.com/domidex01/tour-kit/blob/main/LICENSE):
+core, react, hints, adoption, analytics, announcements, checklists, media,
+scheduling, surveys, ai, vue and svelte.
 
-- **Source-available packages** (`@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`, plus the `@tour-kit/vue` and `@tour-kit/svelte` bindings) are BUSL-1.1-licensed: free for development, evaluation, testing, CI, and any non-production environment, with a licence key required in production.
-- **Pro packages** (`@tour-kit/adoption`, `@tour-kit/analytics`, `@tour-kit/announcements`, `@tour-kit/checklists`, `@tour-kit/media`, `@tour-kit/scheduling`, `@tour-kit/ai`, `@tour-kit/surveys`) require a valid license key for production use. The same $9.99 one-time key also covers production use of the source-available packages.
+- Use it in development **and in production**, commercially, on as many projects as you like.
+- There is no licence key, no badge and no feature gate.
+- Nothing in the library contacts a licence server.
 
-<Callout type="info">
-Source-available packages never require a license key in development, evaluation, testing, or CI. Production deployments need a key: use `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` key-free until you ship.
-</Callout>
+You do not need to configure anything. Install the packages and ship.
 
-Without a valid license, pro packages still render and function normally but display an "UNLICENSED" watermark overlay and a console warning. There is never a crash or blank screen.
+## Removing the badge from older versions
 
-## Getting a License Key
+Some older releases were published under commercial terms and render an
+"Unlicensed" badge in production when no key is configured:
 
-1. Visit [usertourkit.com/pricing](https://usertourkit.com/pricing) and choose the Pro plan.
-2. Complete the checkout via Polar.sh.
-3. Your license key arrives via email with a `TOURKIT-` prefix (e.g., `TOURKIT-abc123-def456`).
+| Packages | Versions that show the badge |
+|---|---|
+| `@tour-kit/core`, `@tour-kit/react`, `@tour-kit/hints`, `@tour-kit/vue`, `@tour-kit/svelte` | 3.0.x (core, react, hints) and 1.0.x (vue, svelte), published under BSL 1.1 |
+| `@tour-kit/adoption`, `analytics`, `announcements`, `checklists`, `media`, `scheduling`, `surveys`, `ai` | releases before October 2026 |
 
-## Installation
-
-### 1. Set up npm authentication
-
-Pro packages are published with restricted access on npm. Add the following to your `.npmrc` at the repo root:
-
-```text
-//registry.npmjs.org/:_authToken=${NPM_TOKEN}
-```
-
-This file is safe to commit — the token value comes from your environment, not the file.
-
-### 2. Install the license package
+The MIT releases sit inside the same version ranges, so updating removes the badge
+without editing `package.json`:
 
 ```bash
-pnpm add @tour-kit/license
+npm update
+# or: pnpm update / yarn upgrade
 ```
 
-### 3. Set the environment variable
+Then, if your app still has licence wiring, delete it:
 
-<Tabs items={['Next.js', 'Vite', 'Create React App']}>
-<Tab value="Next.js">
-Add to `.env.local`:
-
-```text
-NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY=TOURKIT-your-key-here
-```
-
-The `NEXT_PUBLIC_` prefix is required because `<LicenseProvider>` runs client-side.
-</Tab>
-<Tab value="Vite">
-Add to `.env`:
-
-```text
-VITE_TOUR_KIT_LICENSE_KEY=TOURKIT-your-key-here
-```
-
-The `VITE_` prefix is required for Vite to expose the variable to client-side code.
-</Tab>
-<Tab value="Create React App">
-Add to `.env`:
-
-```text
-REACT_APP_TOUR_KIT_LICENSE_KEY=TOURKIT-your-key-here
-```
-</Tab>
-</Tabs>
-
-## Configuration
-
-Wrap your app (or the section using pro features) with `<LicenseProvider>`:
-
-<Tabs items={['Next.js', 'Vite']}>
-<Tab value="Next.js">
-```tsx
-import { LicenseProvider } from '@tour-kit/license'
-
-export function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <LicenseProvider
-      organizationId="your-polar-org-id"
-      licenseKey={process.env.NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY ?? ''}
-    >
-      {children}
-    </LicenseProvider>
-  )
-}
-```
-</Tab>
-<Tab value="Vite">
-```tsx
-import { LicenseProvider } from '@tour-kit/license'
-
-function App() {
-  return (
-    <LicenseProvider
-      organizationId="your-polar-org-id"
-      licenseKey={import.meta.env.VITE_TOUR_KIT_LICENSE_KEY ?? ''}
-    >
-      <YourApp />
-    </LicenseProvider>
-  )
-}
-```
-</Tab>
-</Tabs>
-
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `organizationId` | `string` | Yes | Your Polar organization ID |
-| `licenseKey` | `string` | Yes | License key with `TOURKIT-` prefix |
-| `onValidate` | `(state: LicenseState) => void` | No | Called after validation completes |
-| `onError` | `(error: Error) => void` | No | Called on validation error |
-
-## Using LicenseGate
-
-Wrap pro components with `<LicenseGate>` for conditional rendering:
-
-```tsx
-import { LicenseGate } from '@tour-kit/license'
-
-function Dashboard() {
-  return (
-    <div>
-      <BasicFeature />
-      <LicenseGate require="pro" fallback={<UpgradePrompt />}>
-        <AdvancedAnalytics />
-      </LicenseGate>
-    </div>
-  )
-}
-```
-
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `require` | `'pro'` | Yes | Required license tier |
-| `fallback` | `ReactNode` | No | Shown when license is invalid |
-| `loading` | `ReactNode` | No | Shown during validation |
-
-`<LicenseGate>` uses interleaved render-key validation — removing the license check breaks rendering, not just gating.
-
-## Watermark Behavior
-
-Without a valid license, pro components still render and function but display an "UNLICENSED" overlay:
-
-- Semi-transparent overlay with inline styles and high z-index
-- `pointer-events: none` so the UI remains interactive beneath it
-- Console warning logged in development
-- **No crash, no blank screen, full functionality preserved**
-
-This follows the same soft-enforcement pattern used by AG Grid and MUI X.
-
-## Development Mode
-
-On `localhost`, `127.0.0.1`, and `*.local` domains, license validation is automatically bypassed **when a non-empty `licenseKey` is configured**:
-
-- No network request to Polar API
-- No activation slot consumed
-- Provider returns `{ status: 'valid', tier: 'pro', renderKey: 'dev_bypass' }`
-- All pro features work without verifying the key
-
-An empty or whitespace-only `licenseKey` is treated as unlicensed on every host, including `localhost`. Pro packages still render their UI (soft gate) and a single `Tour Kit · Unlicensed · Buy license` watermark appears bottom-right — making a missing env var surface locally before it ships.
-
-| Host | `licenseKey` | Result |
-|---|---|---|
-| `localhost` / `127.0.0.1` / `*.local` | Non-empty | `valid` / `pro`, no Polar call, no watermark |
-| `localhost` / `127.0.0.1` / `*.local` | Empty or blank | `invalid` / `free`, no Polar call, watermark visible |
-| `localhost` (no `<LicenseProvider>`) | n/a | Quiet — library cannot inspect a key that does not exist |
-| Production-like host | Non-empty | Validated against Polar (cache-aware) |
-| Production-like host | Empty or blank | `invalid` / `free`, no Polar call, watermark visible |
+1. Remove `<LicenseProvider>` from your provider tree, and any `<LicenseGate>` or `<ProGate>` wrappers.
+2. Uninstall `@tour-kit/license` and delete the `TOUR_KIT_LICENSE_KEY` / `NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY` environment variables.
+3. In Vue or Svelte, drop the `license` option from `provideTourKit()` / `<TourProvider>`. It is still accepted, but ignored.
+4. `<ScheduleGate>` from `@tour-kit/scheduling` now renders its children unchanged. You can keep it or remove it.
 
 <Callout type="info">
-The localhost bypass only skips Polar — it does not prove the key is valid. We intentionally do not verify local keys because every validation would consume an activation slot during normal dev.
+Already-published versions keep the licence they were released under. Updating is
+what moves you to MIT. If you bought a key, it keeps working on the versions it
+was bought for and nothing is revoked; receipts and invoices are on the
+[past purchases](/account) page.
 </Callout>
 
-## CI/CD Setup
+## `@tour-kit/license` is retired
 
-### GitHub Actions
-
-Add `NPM_TOKEN` to your repository secrets, then reference it in your workflow:
-
-```yaml
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      # Required for installing restricted @tour-kit/* pro packages
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-```
-
-### Vercel
-
-Add `NPM_TOKEN` as an environment variable in your Vercel project settings. Vercel automatically reads `.npmrc` during the build.
-
-### Netlify
-
-Add `NPM_TOKEN` as an environment variable in your Netlify site settings under **Build & deploy > Environment**.
-
-## Hooks Reference
-
-### `useLicense()`
-
-Returns the full license context. Must be used within `<LicenseProvider>`.
-
-```tsx
-const { state, refresh } = useLicense()
-```
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `state.status` | `'valid' \| 'invalid' \| 'expired' \| 'revoked' \| 'loading' \| 'error'` | Current license status |
-| `state.tier` | `'free' \| 'pro'` | License tier |
-| `state.activations` | `number` | Number of activated domains |
-| `state.maxActivations` | `number` | Maximum allowed activations |
-| `state.domain` | `string \| null` | Current activated domain |
-| `state.expiresAt` | `string \| null` | Expiration date (ISO string) |
-| `refresh` | `() => Promise<void>` | Re-validate the license (clears cache) |
-
-### `useIsPro()`
-
-Returns `true` when license tier is `'pro'` and status is `'valid'`.
-
-```tsx
-const isPro = useIsPro()
-```
-
-## FAQ
-
-### Do free packages need a license?
-
-No. `@tour-kit/core`, `@tour-kit/react`, and `@tour-kit/hints` are BUSL-1.1-licensed and work without any license key in development, evaluation, testing, and CI. Production deployments need a licence key.
-
-### What happens if my key expires?
-
-The watermark appears on pro components and a console warning is logged. Components continue to render and function normally — there is never a crash or blank screen.
-
-### How many domains can I activate?
-
-Each license key supports up to 5 domain activations. You can deactivate a domain to free up a slot.
-
-### Does localhost count as an activation?
-
-No. When a non-empty `licenseKey` is set, development environments (`localhost`, `127.0.0.1`, `*.local`) are automatically bypassed and do not consume an activation slot. An empty key on localhost intentionally shows the unlicensed watermark — see [Development Mode](#development-mode).
-
-### Can I use one key for staging + production?
-
-Yes. Each environment uses a separate domain activation. For example, `staging.example.com` and `example.com` would use 2 of your 5 activation slots.
-
-### What is the `TOURKIT-` prefix?
-
-All userTourKit license keys issued via Polar.sh have a `TOURKIT-` prefix. This prefix is required for validation to work.
+The package that validated keys is deprecated on npm and nothing in Tour Kit
+depends on it any more. Existing installs keep working; there will be no new
+releases.
 
 ## Related
 
-- [Trial countdown & test mode](/docs/licensing/trial) — `<TrialBadge>`, `<LicenseTestMode>`, and the dev bypass.
-- [`@tour-kit/license` API reference](/docs/api/license) — every exported provider, component, hook, and utility.
-- Pro packages that consume `<LicenseGate>`: [`@tour-kit/adoption`](/docs/adoption), [`@tour-kit/analytics`](/docs/analytics), [`@tour-kit/announcements`](/docs/announcements), [`@tour-kit/checklists`](/docs/checklists), [`@tour-kit/media`](/docs/media), [`@tour-kit/scheduling`](/docs/scheduling), [`@tour-kit/ai`](/docs/ai).
+- [Pricing](/pricing): what is free (everything) and what Tour Kit Cloud will add
+- [Installation](/docs/getting-started/installation)

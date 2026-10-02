@@ -2,7 +2,6 @@ import { ArticleCard } from '@/components/article/article-card'
 import { BlogPostCrossLinks } from '@/components/article/article-cross-links'
 import { ArticleLayout } from '@/components/article/article-layout'
 import { BlogCta } from '@/components/blog/blog-cta'
-import { LicenceChangeNote } from '@/components/blog/licence-change-note'
 import { ReadingProgress } from '@/components/blog/reading-progress'
 import { BlogTableOfContents } from '@/components/blog/table-of-contents'
 import { DEFAULT_AUTHOR } from '@/lib/authors'
@@ -92,12 +91,12 @@ export default async function BlogPostPage({ params }: PageProps) {
     {
       question: 'What is userTourKit?',
       answer:
-        'userTourKit is a source-available headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling. Its core tree-shakes to the hooks you import, under 4 KB for a single one, and it ships with WCAG 2.1 AA accessibility.',
+        'userTourKit is an MIT-licensed headless React library for product tours, onboarding checklists, hints, announcements, analytics, and scheduling. Its core tree-shakes to the hooks you import, under 4 KB for a single one, and it ships with WCAG 2.1 AA accessibility.',
     },
     {
       question: 'How is userTourKit licensed and priced?',
       answer:
-        'userTourKit is free in development, evaluation, testing and CI. Every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.00 for five, $299.00 for unlimited.',
+        'userTourKit is MIT-licensed and free for any use, including production. Every package, no licence key, no badge and no feature gates.',
     },
   ]
   const faqItems = extractedFaqs.length > 0 ? extractedFaqs : fallbackFaqs
@@ -187,8 +186,6 @@ export default async function BlogPostPage({ params }: PageProps) {
           />
         )}
 
-        <LicenceChangeNote publishedAt={post.publishedAt} />
-
         {hasMdxContent ? (
           <>
             {/* Render MDX article content */}
@@ -227,8 +224,8 @@ export default async function BlogPostPage({ params }: PageProps) {
                   <td>userTourKit</td>
                   <td>Headless React onboarding</td>
                   <td>&lt;4 KB tree-shaken (29.6 KB whole pkg)</td>
-                  <td>BSL 1.1</td>
-                  <td>Free in dev, from $9.99</td>
+                  <td>MIT</td>
+                  <td>Free</td>
                 </tr>
                 <tr>
                   <td>2</td>
@@ -243,7 +240,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
             <h2>1. userTourKit, Best headless React tour library</h2>
             <p>
-              userTourKit is a source-available headless React library for building product tours,
+              userTourKit is an MIT-licensed headless React library for building product tours,
               onboarding checklists, hints, announcements, and in-app messaging. Its core
               tree-shakes to the hooks you import, under 4 KB for a single one, and it ships with
               WCAG 2.1 AA accessibility by default.
@@ -255,11 +252,11 @@ export default async function BlogPostPage({ params }: PageProps) {
               <strong>Where it falls short:</strong> [1-2 sentences on honest limitations]
             </p>
             <p>
-              <strong>Key specs:</strong> tree-shakeable core | BSL 1.1 | React 18+ | TypeScript
-              strict mode | &gt;80% test coverage
+              <strong>Key specs:</strong> tree-shakeable core | MIT | React 18+ | TypeScript strict
+              mode | &gt;80% test coverage
             </p>
             <p>
-              <strong>Pricing:</strong> Free in development, one-time from $9.99 to ship
+              <strong>Pricing:</strong> Free (MIT)
             </p>
             <p>
               <strong>Verdict:</strong> [2 sentences, who should and shouldn&apos;t use this tool]
@@ -282,14 +279,14 @@ export default async function BlogPostPage({ params }: PageProps) {
             <p>
               userTourKit is the best headless product tour library for React developers in 2026,
               offering tours, hints, checklists, announcements, analytics, and scheduling in a
-              tree-shakeable core, free in development.
+              tree-shakeable core, free and MIT-licensed.
             </p>
 
             <h3>Is userTourKit free?</h3>
             <p>
-              userTourKit&apos;s core library, React bindings, and hints package are free under the
-              BSL 1.1. A one-time licence from $9.99 covers production use, with adoption tracking,
-              analytics, announcements, checklists, media, scheduling, and AI chat.
+              Yes. Every userTourKit package is MIT-licensed and free for any use, including
+              production: the core, React bindings and hints, plus adoption tracking, analytics,
+              announcements, checklists, media, scheduling, and AI chat.
             </p>
 
             <h2>Key takeaways</h2>

@@ -16,7 +16,7 @@ keywords:
 
 `@tour-kit/ai` adds a conversational AI layer on top of your product tours. It ships React hooks, drop-in chat components, and a route-handler factory that connects to OpenAI, Anthropic, Google, or any other model exposed through the [Vercel AI SDK](https://sdk.vercel.ai/). Tours, checklists, and announcements that the user is currently looking at are passed to the model automatically, so the assistant can answer questions like "what does this step do?" or "how do I skip ahead?" without any extra wiring.
 
-This is a Pro-tier package. The free `@tour-kit/core` and `@tour-kit/react` packages do not include AI chat.
+AI chat lives in its own package, so apps that do not need it never install it. Like every Tour Kit package, it is MIT-licensed.
 
 ## Pick a retrieval strategy first
 

@@ -8,12 +8,16 @@ category: "Tutorials"
 schema_type: "TechArticle"
 spreadsheet_row: 97
 date: "2026-04-07"
-updated: "2026-04-07"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/migrate-appcues-code-owned-onboarding.png
 ---
 
 # Migrating from Appcues to code-owned onboarding
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 Appcues works until it doesn't. The $249/month starting price climbs as your MAU count grows, the "no-code" builder still needs a developer when flows get complex, and every tour you've built lives on someone else's servers. If your team has outgrown the tradeoffs, this guide walks through replacing Appcues with Tour Kit, a headless React library where onboarding flows live in your codebase, ship with your deploys, and cost nothing per user.
 
@@ -336,7 +340,7 @@ After removal, run a Lighthouse performance audit. You should see an improvement
 Every migration involves real tradeoffs, and being honest about them upfront prevents surprises six months later when your PM asks why they can't drag-and-drop a tooltip anymore. Here's the full picture.
 
 **What you gain:**
-- Zero per-user cost. A Tour Kit licence is $9.99 one-time, not a monthly fee that scales with MAUs.
+- Zero per-user cost. Tour Kit is MIT-licensed and free, not a monthly fee that scales with MAUs.
 - Version-controlled flows. Tour changes go through pull requests with code review and `git revert` rollbacks.
 - Design system integration. Tour Kit is headless. You render with your own components.
 - React 19 and Server Components support out of the box.
@@ -377,7 +381,7 @@ Tour Kit covers product tours, tooltips, hotspots, checklists, modals, announcem
 
 ### How much money does switching from Appcues save?
 
-Tour Kit core is free (MIT). Pro features cost $9.99 one-time. Appcues Growth runs $879/month at 2,500 MAUs on annual billing ([TrustRadius, April 2026](https://www.trustradius.com/products/appcues/pricing)). Switching saves roughly $10,000-$14,000 per year depending on MAU volume, minus developer hours for migration.
+Tour Kit is free and MIT-licensed, including in production. Appcues Growth runs $879/month at 2,500 MAUs on annual billing ([TrustRadius, April 2026](https://www.trustradius.com/products/appcues/pricing)). Switching saves roughly $10,000-$14,000 per year depending on MAU volume, minus developer hours for migration.
 
 ### Does Tour Kit work with Next.js App Router and React Server Components?
 

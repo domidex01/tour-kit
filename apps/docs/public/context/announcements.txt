@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/announcements Context File
-Version: 6.0.0 | Generated: 2026-09-08
+Version: 7.0.1 | Generated: 2026-10-02
 Paste this into your LLM to get accurate answers about @tour-kit/announcements.
 =========================================================================
 
@@ -108,7 +108,7 @@ Hooks:
     useAnnouncement — Return type for useAnnouncement hook
     useAnnouncements — Filter options for announcements
     useAnnouncementQueue — Return type for useAnnouncementQueue hook
-    useFilteredAnnouncements — Filter a list of announcement configs by their `audience` prop. Mirror of
+    useFilteredAnnouncements — Segment-audience resolution lives in the ENGINE — `lib/announcements-engine/
     useResolvedText
     useUILibrary
     useReducedMotion
@@ -311,7 +311,7 @@ TYPES
       strokeColor?: 'auto' | string
     }
 
-    ... and 56 more types. See source for full definitions.
+    ... and 46 more types. See source for full definitions.
 
 HOOKS
 -----

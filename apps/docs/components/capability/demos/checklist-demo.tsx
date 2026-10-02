@@ -9,7 +9,6 @@ import {
 import { RotateCcw } from 'lucide-react'
 
 import { DemoSurface } from './demo-surface'
-import { MaybeLicensed } from './maybe-licensed'
 
 /**
  * The real @tour-kit/checklists component running on the marketing page.
@@ -79,12 +78,10 @@ function DemoChecklistCard() {
 
 export function ChecklistDemo() {
   return (
-    <MaybeLicensed>
-      <ChecklistProvider checklists={[DEMO_CHECKLIST]}>
-        <DemoSurface url="acme.app/onboarding" contentClassName="bg-fd-muted/20 py-10">
-          <DemoChecklistCard />
-        </DemoSurface>
-      </ChecklistProvider>
-    </MaybeLicensed>
+    <ChecklistProvider checklists={[DEMO_CHECKLIST]}>
+      <DemoSurface url="acme.app/onboarding" contentClassName="bg-fd-muted/20 py-10">
+        <DemoChecklistCard />
+      </DemoSurface>
+    </ChecklistProvider>
   )
 }

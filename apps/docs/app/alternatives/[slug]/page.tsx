@@ -118,12 +118,12 @@ export default async function AlternativesPage({ params }: PageProps) {
             items={[
               {
                 question: `What is the best ${alt.competitor} alternative?`,
-                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, a core that tree-shakes to under 4 KB per hook, and a one-time price from $9.99 instead of recurring SaaS fees.`,
+                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, a core that tree-shakes to under 4 KB per hook, and an MIT licence with no fees at all.`,
               },
               {
                 question: 'Is userTourKit free to use?',
                 answer:
-                  'userTourKit is free in development, evaluation, testing and CI. Every package, no feature gates. Serving it to end users of a deployed app needs a one-time licence key: $9.99 for one project, $49.00 for five, $299.00 for unlimited. Not recurring.',
+                  'Yes. Every userTourKit package is MIT-licensed and free for any use, including production. No licence key, no badge, no feature gates.',
               },
               {
                 question: `Can I migrate from ${alt.competitor} to userTourKit?`,
@@ -175,12 +175,11 @@ export default async function AlternativesPage({ params }: PageProps) {
 
           <h3>1. userTourKit, Best for headless React onboarding (recommended)</h3>
           <p>
-            <strong>Pricing:</strong> Free in dev, one-time from $9.99 to ship |{' '}
-            <strong>License:</strong> BSL 1.1
+            <strong>Pricing:</strong> Free | <strong>License:</strong> MIT
           </p>
           <p>
             We built userTourKit, so take this recommendation with appropriate skepticism.
-            userTourKit is a source-available headless React library for product tours, onboarding
+            userTourKit is an MIT-licensed headless React library for product tours, onboarding
             checklists, hints, announcements, and in-app messaging with a tree-shakeable core.
           </p>
 
@@ -199,7 +198,7 @@ export default async function AlternativesPage({ params }: PageProps) {
             items={[
               {
                 question: `What is the best ${alt.competitor} alternative?`,
-                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, a core that tree-shakes to under 4 KB per hook, and a one-time price from $9.99 instead of recurring SaaS fees.`,
+                answer: `userTourKit is the best ${alt.competitor} alternative for React developers who want code ownership, a core that tree-shakes to under 4 KB per hook, and an MIT licence with no fees at all.`,
               },
               {
                 question: `Is ${alt.competitor} free?`,
@@ -215,8 +214,8 @@ export default async function AlternativesPage({ params }: PageProps) {
           <h3>What is the best {alt.competitor} alternative?</h3>
           <p>
             userTourKit is the best {alt.competitor} alternative for React developers who want code
-            ownership, a core that tree-shakes to under 4 KB per hook, and a one-time price from
-            $9.99 instead of recurring SaaS fees.
+            ownership, a core that tree-shakes to under 4 KB per hook, and an MIT licence with no
+            fees at all.
           </p>
 
           <h3>Is {alt.competitor} free?</h3>

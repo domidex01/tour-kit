@@ -1,20 +1,29 @@
 ---
 title: Components
 description: >-
-  ScheduleGate component for the @tour-kit/scheduling package — pro license
-  enforcement wrapper for scheduled content
+  ScheduleGate, the deprecated pass-through component in @tour-kit/scheduling.
+  Use useSchedule or isScheduleActive to gate UI on a schedule.
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
-`@tour-kit/scheduling` is a Pro package, so it ships with a single component used to enforce licensing at the render boundary.
+`@tour-kit/scheduling` is mostly hooks and pure functions. It ships one component,
+`ScheduleGate`, which is deprecated.
 
 ## ScheduleGate
 
-Wraps any subtree that depends on the scheduling APIs. When a valid Pro license is present, `children` render normally. Without a license, the children are replaced by a branded placeholder and a console warning is emitted. Dev environments (`localhost`, `127.0.0.1`, `*.local`) always render `children`.
+<Callout type="warn">
+**Deprecated.** `ScheduleGate` used to fence the scheduling package behind the
+paid licence. Tour Kit is MIT now, so it renders its `children` unchanged. It is
+kept so existing imports still compile; you can remove it.
+</Callout>
+
+`ScheduleGate` never evaluated a schedule. To show UI only while a schedule is
+active, read `useSchedule` (or call `isScheduleActive`) and branch in your own
+render:
 
 ```tsx
-import { ScheduleGate, useSchedule } from '@tour-kit/scheduling'
+import { useSchedule } from '@tour-kit/scheduling'
 
 function ScheduledTour() {
   const { isActive } = useSchedule({
@@ -23,11 +32,7 @@ function ScheduledTour() {
     timeOfDay: { start: '09:00', end: '17:00' },
   })
 
-  return (
-    <ScheduleGate>
-      {isActive ? <Tour tourId="weekly" /> : null}
-    </ScheduleGate>
-  )
+  return isActive ? <Tour tourId="weekly" /> : null
 }
 ```
 
@@ -35,16 +40,4 @@ function ScheduledTour() {
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `children` | `ReactNode` | Subtree to render when licensed |
-
-### Behavior
-
-`ScheduleGate` is a thin wrapper around `<ProGate package="@tour-kit/scheduling">` from `@tour-kit/license`. You get the same gating semantics as every other Pro package:
-
-- **Licensed (production)** — children render as-is
-- **Unlicensed (production)** — children replaced with a placeholder; one-time `console.warn`
-- **Dev environment** — children always render; no warning
-
-<Callout type="info">
-For licensing setup and installation, see [Licensing](/docs/licensing). For the underlying gate, see [ProGate](/docs/api/license#progate).
-</Callout>
+| `children` | `ReactNode` | Rendered as-is |

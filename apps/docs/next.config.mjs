@@ -72,6 +72,18 @@ const config = {
         destination: '/docs/build-with-llms',
         permanent: true,
       },
+      {
+        // MIT relicense (2026-10): the key setup, trial and API pages folded
+        // into the single licence page.
+        source: '/docs/licensing/trial',
+        destination: '/docs/licensing',
+        permanent: true,
+      },
+      {
+        source: '/docs/api/license',
+        destination: '/docs/licensing',
+        permanent: true,
+      },
     ]
   },
   async headers() {

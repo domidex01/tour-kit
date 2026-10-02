@@ -1,25 +1,12 @@
 'use client'
 
-import {
-  ArrowRight,
-  Check,
-  Code2,
-  Download,
-  Scale,
-  ShieldCheck,
-  Sparkles,
-  X,
-  Zap,
-} from 'lucide-react'
+import { ArrowRight, Check, Cloud, Download, Scale, ShieldCheck, Sparkles } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { TrackedBuyButton } from '@/components/analytics/tracked-buy-button'
-import { checkoutUrl } from '@/lib/polar-config'
-import { TIERS, formatPrice, formatProjects } from '@/lib/pricing'
 import { PRICING_FAQS } from '@/lib/pricing-faqs'
 
-const EVERY_TIER_FEATURES = [
+const EVERY_PACKAGE = [
   'Product tours, steps & spotlight overlays',
   'Persistent hints & beacons',
   'Analytics integration',
@@ -34,255 +21,120 @@ const EVERY_TIER_FEATURES = [
   'Full TypeScript support, shadcn/ui compatible',
 ]
 
-const COMPARISON_ROWS = [
-  { feature: 'Every package, no feature gates', free: true, pro: true },
-  { feature: 'Local development & evaluation', free: true, pro: true },
-  { feature: 'CI, tests & preview deploys', free: true, pro: true },
-  { feature: 'Reading and modifying the source', free: true, pro: true },
-  { feature: 'Serving to end users of a deployed app', free: false, pro: true },
-  { feature: 'No "Unlicensed" badge in production', free: false, pro: true },
-  { feature: 'Projects covered', free: 'Unlimited', pro: '1 / 5 / unlimited' },
-  { feature: 'Converts to MIT on its Change Date', free: true, pro: true },
-]
-
 // Verifiable social proof only. Source: npmjs.org last-month downloads for
 // @tour-kit/core = 4,144/mo on 2026-05-27 (~8,600/mo across core+react+hints).
-// Refresh quarterly. Deliberately no GitHub star count (4 — would hurt) and no
-// testimonials (none yet). See marketing-strategy/funnel-strategy-20260527.md (A1).
+// Refresh quarterly. Deliberately no GitHub star count and no testimonials.
 const MONTHLY_INSTALLS = '4,000+'
 
+// External URLs live in env (CLAUDE.md). Until the waitlist form exists, the
+// card falls back to email so the CTA never points at nothing.
+const CLOUD_WAITLIST_URL =
+  process.env.NEXT_PUBLIC_CLOUD_WAITLIST_URL ||
+  'mailto:hello@usertourkit.com?subject=Tour%20Kit%20Cloud%20waitlist'
+
+/** Every old badge links here with this UTM (plan D5). */
+const BADGE_UTM_SOURCE = 'unlicensed_badge'
+
 export function Pricing() {
+  // Static for everyone else; a visitor who clicked an old badge gets the
+  // explanation first. Read after mount so the page stays statically rendered.
+  const [fromBadge, setFromBadge] = useState(false)
+  useEffect(() => {
+    setFromBadge(new URLSearchParams(window.location.search).get('utm_source') === BADGE_UTM_SOURCE)
+  }, [])
+
   return (
     <section className="px-6 pb-36 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1120px]">
-        {/* The model, stated before the cards. Lead with the free half. */}
-        <div className="mx-auto mb-10 max-w-2xl rounded-xl border border-[var(--tk-card-edge)] bg-fd-card px-6 py-5 text-center">
-          <p className="text-[15px] leading-[1.6] text-fd-muted-foreground">
-            <strong className="font-semibold text-fd-foreground">
-              Free in development, a key in production.
-            </strong>{' '}
-            Every package is source-available under BSL&nbsp;1.1, build, evaluate, test and run CI
-            without paying anything. A key is for serving it to end users of a deployed app. Every
-            tier gets the whole library; they differ only in how many projects one key covers.
-          </p>
-        </div>
+        {fromBadge ? <BadgeNotice /> : null}
 
         {/* Social proof strip — verifiable signals only */}
         <ul className="mx-auto mb-12 flex max-w-2xl flex-wrap items-center justify-center gap-2.5">
-          <li className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-card-edge)] bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
-            <Download
-              className="h-3.5 w-3.5 shrink-0 text-[var(--color-fd-primary)]"
-              aria-hidden="true"
-            />
-            <span>
-              <strong className="font-semibold text-fd-foreground">{MONTHLY_INSTALLS}</strong>{' '}
-              monthly npm installs
-            </span>
-          </li>
-          <li className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-card-edge)] bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
-            <Scale
-              className="h-3.5 w-3.5 shrink-0 text-[var(--color-fd-primary)]"
-              aria-hidden="true"
-            />
-            <span>Converts to MIT on its Change Date</span>
-          </li>
-          <li className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-card-edge)] bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
-            <ShieldCheck
-              className="h-3.5 w-3.5 shrink-0 text-[var(--color-fd-primary)]"
-              aria-hidden="true"
-            />
-            <span>Secure checkout via Polar</span>
-          </li>
+          <Chip icon={Download}>
+            <strong className="font-semibold text-fd-foreground">{MONTHLY_INSTALLS}</strong> monthly
+            npm installs
+          </Chip>
+          <Chip icon={Scale}>MIT licensed, every package</Chip>
+          <Chip icon={ShieldCheck}>No key, no badge, no licence server</Chip>
         </ul>
 
-        {/* Three tiers. Same library in each — only the project count moves. */}
-        <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3 md:gap-6">
-          {TIERS.map((tier) => (
-            <div
-              key={tier.id}
-              className={
-                tier.highlight
-                  ? 'group relative flex flex-col rounded-xl border-2 border-[var(--color-fd-primary)] bg-fd-card p-7 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg'
-                  : 'group relative flex flex-col rounded-xl border border-[var(--tk-card-edge)] bg-fd-card p-7 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md'
-              }
-            >
-              {tier.highlight && (
-                <div className="absolute -top-3 right-6 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-fd-primary)] px-3 py-1 text-[11px] font-semibold text-white shadow-sm shadow-[var(--color-fd-primary)]/20">
-                  <Sparkles className="h-3 w-3" aria-hidden="true" />
-                  Most popular
-                </div>
-              )}
-
-              <div className="mb-5 flex items-center gap-3">
-                <div
-                  className={
-                    tier.highlight
-                      ? 'flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--color-fd-primary)]/10 ring-1 ring-[var(--color-fd-primary)]/20'
-                      : 'flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--tk-card-edge)] bg-fd-muted'
-                  }
-                >
-                  {tier.highlight ? (
-                    <Zap className="h-5 w-5 text-[var(--color-fd-primary)]" aria-hidden="true" />
-                  ) : (
-                    <Code2 className="h-5 w-5 text-fd-muted-foreground" aria-hidden="true" />
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-fd-foreground">{tier.name}</h3>
-                  <p className="text-[13px] text-fd-muted-foreground">
-                    {formatProjects(tier.projects)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-2">
-                <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
-                  {formatPrice(tier.price)}
-                </span>
-                <span className="ml-1.5 text-[15px] text-fd-muted-foreground">one-time</span>
-              </div>
-
-              <p className="mb-6 text-[13px] leading-snug text-fd-muted-foreground">{tier.blurb}</p>
-
-              <ul className="mb-8 flex-1 space-y-2.5">
-                {EVERY_TIER_FEATURES.map((feature) => (
-                  <li
-                    key={feature}
-                    className="flex items-start gap-2.5 text-[13px] text-fd-muted-foreground"
-                  >
-                    <Check
-                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
-                      aria-hidden="true"
-                    />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              <TrackedBuyButton
-                href={checkoutUrl(tier.id)}
-                placement={`pricing_page_${tier.id}`}
-                value={tier.price}
-                className={
-                  tier.highlight
-                    ? 'inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--color-fd-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--color-fd-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--color-fd-primary)]/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]'
-                    : 'inline-flex items-center justify-center gap-2.5 rounded-lg border border-[var(--tk-card-edge)] bg-fd-background/60 px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]'
-                }
-              >
-                Get {tier.name}, {formatPrice(tier.price)}
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </TrackedBuyButton>
+        <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+          <div className="relative flex flex-col rounded-xl border-2 border-[var(--color-fd-primary)] bg-fd-card p-7 shadow-md">
+            <div className="absolute -top-3 right-6 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-fd-primary)] px-3 py-1 text-[11px] font-semibold text-white shadow-sm shadow-[var(--color-fd-primary)]/20">
+              <Sparkles className="h-3 w-3" aria-hidden="true" />
+              Available now
             </div>
-          ))}
-        </div>
-
-        {/* Risk reversal, once — it applies to all three tiers */}
-        <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-[13px] text-fd-muted-foreground">
-          <ShieldCheck
-            className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
-            aria-hidden="true"
-          />
-          14-day money-back guarantee · No subscription, ever
-        </p>
-
-        {/* Honest anchor — most onboarding SaaS bills monthly; we charge once */}
-        <p className="mx-auto mt-4 max-w-xl text-center text-[13px] leading-snug text-fd-muted-foreground">
-          Appcues, Pendo &amp; WalkMe bill monthly, per seat.{' '}
-          <Link
-            href="/compare"
-            className="font-medium text-[var(--color-fd-primary)] underline-offset-2 hover:underline"
-          >
-            See the comparison
-          </Link>
-          .
-        </p>
-
-        {/* Comparison table */}
-        <div className="mt-20">
-          <div className="mb-8 text-center">
-            <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-fd-primary)]">
-              Compare
+            <h3 className="text-lg font-bold text-fd-foreground">The library</h3>
+            <p className="mb-2 mt-4">
+              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
+                Free
+              </span>
+              <span className="ml-1.5 text-[15px] text-fd-muted-foreground">MIT licence</span>
             </p>
-            <h3 className="text-2xl font-bold tracking-[-0.01em] text-fd-foreground">
-              What the key is actually for
-            </h3>
-          </div>
-          <div className="overflow-hidden rounded-xl border border-[var(--tk-card-edge)]">
-            {/* The global `table{display:block}` rule (globals.css) is unlayered and beats
-                Tailwind utilities in the cascade, so force real table layout inline to fill
-                the card width. Fixed 50/25/25 columns via colgroup. */}
-            <table
-              className="text-sm"
-              style={{ display: 'table', width: '100%', tableLayout: 'fixed' }}
+            <p className="mb-6 text-[13px] leading-snug text-fd-muted-foreground">
+              Every package, in development and in production, on as many projects as you like.
+            </p>
+            <ul className="mb-8 flex-1 space-y-2.5">
+              {EVERY_PACKAGE.map((feature) => (
+                <li
+                  key={feature}
+                  className="flex items-start gap-2.5 text-[13px] text-fd-muted-foreground"
+                >
+                  <Check
+                    className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                    aria-hidden="true"
+                  />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/docs/getting-started"
+              className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[var(--color-fd-primary)] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-[var(--color-fd-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
             >
-              <caption className="sr-only">
-                What Tour Kit allows in development versus in production.
-              </caption>
-              <colgroup>
-                <col style={{ width: '50%' }} />
-                <col style={{ width: '25%' }} />
-                <col style={{ width: '25%' }} />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-[var(--tk-card-edge)] bg-fd-muted/50">
-                  <th
-                    scope="col"
-                    className="px-6 py-3.5 text-left text-[13px] font-semibold text-fd-foreground"
-                  >
-                    Feature
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3.5 text-center text-[13px] font-semibold text-fd-foreground"
-                  >
-                    In development
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3.5 text-center text-[13px] font-semibold text-[var(--color-fd-primary)]"
-                  >
-                    In production
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON_ROWS.map((row) => (
-                  <tr
-                    key={row.feature}
-                    className="border-b border-[var(--tk-card-edge)] transition-colors last:border-b-0 hover:bg-fd-muted/30"
-                  >
-                    <th
-                      scope="row"
-                      className="px-6 py-3 text-left text-[14px] font-normal text-fd-foreground"
-                    >
-                      {row.feature}
-                    </th>
-                    <td className="px-6 py-3 text-center">
-                      <ComparisonCell value={row.free} />
-                    </td>
-                    <td className="px-6 py-3 text-center">
-                      <ComparisonCell value={row.pro} isPro />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+              Get started
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div
+            id="cloud"
+            className="flex scroll-mt-24 flex-col rounded-xl border border-[var(--tk-card-edge)] bg-fd-card p-7 shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <Cloud className="h-5 w-5 text-fd-muted-foreground" aria-hidden="true" />
+              <h3 className="text-lg font-bold text-fd-foreground">Tour Kit Cloud</h3>
+            </div>
+            <p className="mb-2 mt-4">
+              <span className="text-4xl font-extrabold tracking-[-0.02em] text-fd-foreground">
+                Soon
+              </span>
+            </p>
+            <p className="mb-8 flex-1 text-[14px] leading-relaxed text-fd-muted-foreground">
+              A hosted dashboard for Tour Kit is in development. The library stays MIT and complete
+              without it. Join the waitlist to hear when it opens.
+            </p>
+            <a
+              href={CLOUD_WAITLIST_URL}
+              className="inline-flex items-center justify-center gap-2.5 rounded-lg border border-[var(--tk-card-edge)] bg-fd-background/60 px-6 py-3 text-[15px] font-semibold text-fd-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-fd-background/80 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-fd-primary)]"
+            >
+              Join the waitlist
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </a>
           </div>
         </div>
 
-        {/* FAQ */}
+        {fromBadge ? null : <BadgeNotice />}
+
         <FAQ />
 
-        {/* License & fulfillment — H5 expansion (license terms, refund, Polar fulfillment) */}
-        <LicenseTerms />
-
         <p className="mt-12 text-center text-[13px] text-fd-muted-foreground">
-          Already a customer?{' '}
+          Bought a licence key before the MIT release?{' '}
           <Link
             href="/account"
             className="text-fd-foreground underline decoration-dotted underline-offset-4 hover:decoration-solid"
           >
-            Manage your license →
+            Receipts and invoices →
           </Link>
         </p>
       </div>
@@ -290,115 +142,48 @@ export function Pricing() {
   )
 }
 
-function LicenseTerms() {
+function Chip({
+  icon: Icon,
+  children,
+}: {
+  icon: typeof Download
+  children: React.ReactNode
+}) {
   return (
-    <div className="mx-auto mt-20 max-w-3xl">
-      <div className="mb-8 text-center">
-        <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-fd-primary)]">
-          License &amp; fulfillment
-        </p>
-        <h3 className="text-2xl font-bold tracking-[-0.01em] text-fd-foreground">
-          What you&apos;re actually buying
-        </h3>
-      </div>
-      <dl className="space-y-6 text-[14px] leading-relaxed text-fd-muted-foreground">
-        <div>
-          <dt className="mb-1 font-semibold text-fd-foreground">License grant</dt>
-          <dd>
-            A non-exclusive, non-transferable commercial licence to use every Tour Kit package in
-            production, on the number of projects your tier covers. A project is a registrable
-            domain, so <code>foo.com</code> and <code>app.foo.com</code> count once. Includes all
-            future updates. Development, evaluation, testing and CI stay free under BSL 1.1 whether
-            you buy or not, and each published version converts to the MIT licence on its Change
-            Date.
-          </dd>
-        </div>
-        <div>
-          <dt className="mb-1 font-semibold text-fd-foreground">14-day refund</dt>
-          <dd>
-            If Tour Kit doesn&apos;t fit your stack within 14 days of purchase, email{' '}
-            <a
-              href="mailto:hello@usertourkit.com"
-              className="text-fd-foreground underline decoration-dotted underline-offset-4 hover:decoration-solid"
-            >
-              hello@usertourkit.com
-            </a>{' '}
-            from your purchase address with your order ID. Refunds are processed by Polar in 5–10
-            business days.
-          </dd>
-        </div>
-        <div>
-          <dt className="mb-1 font-semibold text-fd-foreground">Fulfillment</dt>
-          <dd>
-            Checkout runs on{' '}
-            <a
-              href="https://polar.sh"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-fd-foreground underline decoration-dotted underline-offset-4 hover:decoration-solid"
-            >
-              Polar.sh
-            </a>
-            , which acts as merchant of record. Card, Apple Pay, Google Pay, and Link are accepted.
-            VAT and sales tax are calculated and remitted to your tax authority automatically. Your
-            license key is delivered to your billing email within a few minutes of payment.
-          </dd>
-        </div>
-        <div>
-          <dt className="mb-1 font-semibold text-fd-foreground">Activation &amp; reassignment</dt>
-          <dd>
-            Add the license key as an environment variable. The first production page load on each
-            domain consumes one of five activation slots automatically, no manual claim step.
-            Domains can be deactivated and reassigned at any time from your{' '}
-            <Link
-              href="/account"
-              className="text-fd-foreground underline decoration-dotted underline-offset-4 hover:decoration-solid"
-            >
-              account portal
-            </Link>
-            .
-          </dd>
-        </div>
-        <div>
-          <dt className="mb-1 font-semibold text-fd-foreground">No subscription, no auto-charge</dt>
-          <dd>
-            Pro is a one-time purchase. There is no recurring billing, no per-seat charge, and no
-            future upgrade fee for the eight packages covered by the license.
-          </dd>
-        </div>
-      </dl>
-    </div>
+    <li className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-card-edge)] bg-fd-card px-3.5 py-1.5 text-[13px] text-fd-muted-foreground">
+      <Icon className="h-3.5 w-3.5 shrink-0 text-[var(--color-fd-primary)]" aria-hidden="true" />
+      <span>{children}</span>
+    </li>
   )
 }
 
-function ComparisonCell({
-  value,
-  isPro,
-}: {
-  value: boolean | string
-  isPro?: boolean
-}) {
-  if (typeof value === 'string') {
-    return <span className="text-[13px] font-medium text-fd-muted-foreground">{value}</span>
-  }
-  if (value) {
-    return (
-      <>
-        <Check
-          aria-hidden="true"
-          className={`mx-auto h-4 w-4 ${
-            isPro ? 'text-[var(--color-fd-primary)]' : 'text-emerald-600 dark:text-emerald-400'
-          }`}
-        />
-        <span className="sr-only">Included</span>
-      </>
-    )
-  }
+/**
+ * Every badge older versions render links to /pricing. Those visitors need
+ * "update to remove it", not a sales page (plan D5).
+ */
+function BadgeNotice() {
   return (
-    <>
-      <X aria-hidden="true" className="mx-auto h-4 w-4 text-fd-muted-foreground/30" />
-      <span className="sr-only">Not included</span>
-    </>
+    <div
+      id="unlicensed-badge"
+      className="mx-auto my-16 max-w-3xl scroll-mt-24 rounded-xl border border-[var(--tk-card-edge)] bg-fd-card px-6 py-6"
+    >
+      <h3 className="text-xl font-bold tracking-[-0.01em] text-fd-foreground">
+        Seeing an &ldquo;Unlicensed&rdquo; badge on your site?
+      </h3>
+      <p className="mt-3 text-[14px] leading-relaxed text-fd-muted-foreground">
+        Your app runs an older Tour Kit version. Core, react and hints 3.0.x, and the extended
+        packages released before October 2026, were published under commercial terms and showed that
+        badge in production without a key. Tour Kit is MIT now: update your packages and the badge
+        is gone. No key, and no code change.
+      </p>
+      <pre className="mt-4 overflow-x-auto rounded-lg bg-fd-muted px-4 py-3 text-[13px]">
+        <code>npm update</code>
+      </pre>
+      <p className="mt-3 text-[13px] text-fd-muted-foreground">
+        The MIT versions are inside your existing version range, so <code>npm update</code> (or{' '}
+        <code>pnpm update</code>) picks them up without editing <code>package.json</code>.
+      </p>
+    </div>
   )
 }
 

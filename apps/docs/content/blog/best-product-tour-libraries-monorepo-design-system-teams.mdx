@@ -8,12 +8,17 @@ category: "Listicle"
 schema_type: "TechArticle"
 spreadsheet_row: 50
 date: "2026-04-07"
-lastUpdated: "2026-04-07"
+updated: "2026-10-02"
+lastUpdated: "2026-10-02"
 ogImage: /og-images/best-product-tour-libraries-monorepo-design-system-teams.png
 published: true
 ---
 
 # 7 best product tour libraries for monorepo and design system teams (2026)
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 Most product tour roundups test libraries in a single-app Vite starter. That tells you nothing about what happens when you drop one into a Turborepo workspace with a shared design system, three apps consuming the same component library, and strict bundle budgets per package.
 
@@ -57,7 +62,7 @@ We weighted style isolation highest because it is the single most common reason 
 <td>Per-package</td>
 <td>Zero injected CSS</td>
 <td>Under 23KB core</td>
-<td>BUSL-1.1</td>
+<td>MIT</td>
 <td>9.4</td>
 </tr>
 <tr>
@@ -111,7 +116,7 @@ We weighted style isolation highest because it is the single most common reason 
 <td>Acceptable</td>
 <td>Styled-components</td>
 <td>&#126;12KB + SC</td>
-<td>BUSL-1.1</td>
+<td>MIT</td>
 <td>4.5</td>
 </tr>
 </tbody>
@@ -189,7 +194,7 @@ export function WelcomeTour({ children }: { children: React.ReactNode }) {
 - You must build your own tooltip UI. No pre-built components to drop in.
 - Smaller community than React Joyride or Shepherd.js.
 
-**Pricing:** Free (MIT core). Pro features $9.99 one-time.
+**Pricing:** Free (MIT), every package included.
 
 **Best for:** Teams with an existing design system who want the tour library to disappear into their component architecture, not fight it.
 

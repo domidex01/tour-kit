@@ -65,6 +65,7 @@ export const COMPARISONS: ComparisonMeta[] = [
       'product tour library',
       'react tour',
     ],
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'tour-kit-vs-shepherd-js',
@@ -72,7 +73,7 @@ export const COMPARISONS: ComparisonMeta[] = [
     competitorSlug: 'shepherd-js',
     category: 'open-source',
     published: true,
-    lastUpdated: '2026-04-26',
+    lastUpdated: '2026-10-02',
     title: 'Looking for a Shepherd.js alternative? userTourKit vs Shepherd.js compared',
     metaTitle: 'Shepherd.js Alternative for React (2026): userTourKit vs Shepherd.js',
     description:
@@ -104,6 +105,7 @@ export const COMPARISONS: ComparisonMeta[] = [
       'product tour library',
       'onboarding',
     ],
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'tour-kit-vs-driver-js',
@@ -122,6 +124,7 @@ export const COMPARISONS: ComparisonMeta[] = [
       'product tour library',
       'lightweight tour',
     ],
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'tour-kit-vs-reactour',
@@ -140,6 +143,7 @@ export const COMPARISONS: ComparisonMeta[] = [
       'react tour library',
       'product tour',
     ],
+    lastUpdated: '2026-10-02',
   },
   // Tier 2: Commercial tools (months 1-2)
   {
@@ -151,7 +155,7 @@ export const COMPARISONS: ComparisonMeta[] = [
     title: 'userTourKit vs Appcues: Which Onboarding Tool Should You Choose in 2026?',
     metaTitle: 'userTourKit vs Appcues: 2026 Comparison for React Teams',
     description:
-      'Compare userTourKit vs Appcues for product onboarding. One-time from $9.99 vs $300+/month. See features, pricing, and developer experience side-by-side in 2026.',
+      'Compare userTourKit vs Appcues for product onboarding. Free under MIT vs $300+/month. See features, pricing, and developer experience side-by-side in 2026.',
     keywords: [
       'usertourkit',
       'appcues',
@@ -159,6 +163,7 @@ export const COMPARISONS: ComparisonMeta[] = [
       'product onboarding',
       'no-code onboarding',
     ],
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'tour-kit-vs-userguiding',
@@ -177,6 +182,7 @@ export const COMPARISONS: ComparisonMeta[] = [
       'product tour',
       'onboarding tool',
     ],
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'tour-kit-vs-userpilot',
@@ -195,6 +201,7 @@ export const COMPARISONS: ComparisonMeta[] = [
       'product analytics',
       'onboarding tool',
     ],
+    lastUpdated: '2026-10-02',
   },
   // Tier 3: Enterprise (months 2-4)
   {
@@ -225,6 +232,7 @@ export const COMPARISONS: ComparisonMeta[] = [
       'digital adoption platform',
       'enterprise',
     ],
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'tour-kit-vs-userflow',
@@ -243,6 +251,7 @@ export const COMPARISONS: ComparisonMeta[] = [
       'product onboarding',
       'flow builder',
     ],
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'tour-kit-vs-frigade',
@@ -267,6 +276,7 @@ export const COMPARISONS: ComparisonMeta[] = [
     description:
       'Compare userTourKit vs Onborda for Next.js product tours. See features, framework support, and compatibility side-by-side in 2026.',
     keywords: ['usertourkit', 'onborda', 'onborda alternative', 'nextjs tour', 'product tour'],
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'tour-kit-vs-onboardjs',
@@ -285,6 +295,7 @@ export const COMPARISONS: ComparisonMeta[] = [
       'headless tour',
       'product tour',
     ],
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'tour-kit-vs-usertour',
@@ -320,6 +331,7 @@ export const COMPARISONS: ComparisonMeta[] = [
       'product onboarding',
       'in-app messaging',
     ],
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'tour-kit-vs-whatfix',
@@ -433,7 +445,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     ],
     published: true,
     publishedAt: '2026-04-18',
-    lastUpdated: '2026-04-18',
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'shepherd-js-alternatives',
@@ -451,7 +463,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     ],
     published: true,
     publishedAt: '2026-04-18',
-    lastUpdated: '2026-04-18',
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'intro-js-alternatives',
@@ -469,7 +481,7 @@ export const ALTERNATIVES: AlternativeMeta[] = [
     ],
     published: true,
     publishedAt: '2026-04-18',
-    lastUpdated: '2026-04-18',
+    lastUpdated: '2026-10-02',
   },
   {
     slug: 'frigade-alternatives',
@@ -507,7 +519,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Comparison',
     published: true,
     publishedAt: '2026-05-03',
-    lastUpdated: '2026-05-03',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-vs-usertour-feature-parity-update.png',
   },
   {
@@ -543,7 +555,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Tutorial',
     published: true,
     publishedAt: '2026-04-18',
-    lastUpdated: '2026-04-18',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/nextjs-onboarding-flow-tutorial.avif',
   },
   {
@@ -596,7 +608,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-01',
-    lastUpdated: '2026-04-01',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-product-tour-tools-react.avif',
   },
   {
@@ -614,7 +626,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-02',
-    lastUpdated: '2026-04-02',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-free-product-tour-libraries-open-source.avif',
   },
   {
@@ -650,7 +662,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-02',
-    lastUpdated: '2026-04-02',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-headless-ui-libraries-onboarding.avif',
   },
   {
@@ -668,7 +680,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-02',
-    lastUpdated: '2026-04-02',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-typescript-product-tour-libraries.avif',
   },
   {
@@ -685,7 +697,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-intercom-product-tour-alternatives.png',
   },
   {
@@ -739,7 +751,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-chameleon-alternatives.png',
   },
   {
@@ -757,7 +769,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-onboarding-tools-developer-platforms.png',
   },
   {
@@ -775,7 +787,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-userflow-alternatives-saas-teams.png',
   },
   {
@@ -793,7 +805,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-whatfix-alternatives-small-teams.png',
   },
   {
@@ -811,7 +823,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-digital-adoption-platforms-startups.png',
   },
   {
@@ -829,7 +841,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-in-app-guidance-tools-saas.png',
   },
   {
@@ -847,7 +859,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-onboarding-tools-ab-testing.png',
   },
   {
@@ -865,7 +877,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-onboarding-tools-mobile-web.png',
   },
   {
@@ -883,7 +895,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/lightweight-product-tour-libraries-under-10kb.png',
   },
   {
@@ -955,7 +967,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicles',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-alternatives-building-onboarding-in-house.png',
   },
   {
@@ -973,7 +985,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicles',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-onboarding-chrome-extensions.png',
   },
   {
@@ -991,7 +1003,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicles',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-onboarding-solutions-real-analytics.png',
   },
   {
@@ -1009,7 +1021,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicles',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-onboarding-tool-reviews.png',
   },
   {
@@ -1027,7 +1039,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicle',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-product-tour-libraries-monorepo-design-system-teams.png',
   },
   {
@@ -1045,7 +1057,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicles',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-product-tour-tools-b2b-saas.png',
   },
   {
@@ -1063,7 +1075,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicles',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-product-tour-tools-gdpr-compliance.png',
   },
   {
@@ -1081,7 +1093,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicles',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-self-hosted-onboarding-tools.png',
   },
   {
@@ -1297,7 +1309,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Tutorials',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/migrate-pendo-to-react.png',
   },
   {
@@ -1315,7 +1327,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Tutorials',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/migrate-react-joyride-tour-kit.png',
   },
   {
@@ -1333,7 +1345,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Tutorials',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/migrate-shepherd-js-tour-kit.png',
   },
   {
@@ -1351,7 +1363,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Tutorials',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/migrate-userpilot-tour-kit-posthog.png',
   },
   {
@@ -1477,7 +1489,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Tutorials',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/react-resource-center-component.png',
   },
   {
@@ -1513,7 +1525,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Listicles',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/react-tour-library-benchmark-2026.png',
   },
   {
@@ -1585,7 +1597,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Tutorials',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/replace-intro-js-react.png',
   },
   {
@@ -1783,7 +1795,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Tutorials',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/whats-new-modal-react.png',
   },
   {
@@ -1819,7 +1831,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tco-comparison-appcues-tour-kit.png',
   },
   {
@@ -1952,7 +1964,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/build-vs-buy-product-tour-calculator.png',
   },
   {
@@ -1989,7 +2001,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/calculate-onboarding-software-roi.png',
   },
   {
@@ -2008,7 +2020,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Use Cases',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/complex-dashboard-onboarding.png',
   },
   {
@@ -2027,7 +2039,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Deep-Dives',
     published: true,
     publishedAt: '2026-04-08',
-    lastUpdated: '2026-04-08',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/composable-tour-library-architecture.png',
   },
   {
@@ -2254,7 +2266,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Use Cases',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/gamification-onboarding-badges-streaks-progress-bars.png',
   },
   {
@@ -2347,7 +2359,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Integrations',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/intercom-product-tour-integration.png',
   },
   {
@@ -2366,7 +2378,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Use Cases',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/internal-tool-onboarding.png',
   },
   {
@@ -2423,7 +2435,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Use Cases',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/marketplace-app-onboarding-two-sided-tour-strategies.png',
   },
   {
@@ -2442,7 +2454,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/mau-pricing-onboarding-tool.png',
   },
   {
@@ -2480,7 +2492,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Tutorials',
     published: true,
     publishedAt: '2026-04-07',
-    lastUpdated: '2026-04-07',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/migrate-appcues-code-owned-onboarding.png',
   },
   {
@@ -2575,7 +2587,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/onboarding-software-cost-2026.png',
   },
   {
@@ -2613,7 +2625,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/onboarding-tool-evaluation-checklist.png',
   },
   {
@@ -2640,7 +2652,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'One-time license vs subscription: the math for bootstrapped teams',
     metaTitle: 'One-time license vs subscription: the math for bootstrapped ',
     description:
-      'Compare 3-year total cost of one-time licenses vs subscriptions for bootstrapped teams. Real pricing data from onboarding tools and subscription fatigue.',
+      'One-time license vs subscription software: 3-year cost math for bootstrapped teams. Update: Tour Kit is now MIT and free, so it costs $0 either way.',
     keywords: [
       'one-time license vs subscription software',
       'lifetime deal vs subscription',
@@ -2651,7 +2663,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/one-time-license-vs-subscription-math-bootstrapped-teams.png',
   },
   {
@@ -2669,7 +2681,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/open-source-onboarding-cost-developer-time.png',
   },
   {
@@ -2687,7 +2699,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/pendo-cost-startup.png',
   },
   {
@@ -2724,7 +2736,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/pitch-cto-open-source-onboarding.png',
   },
   {
@@ -2968,7 +2980,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/real-cost-userpilot-growing-saas.png',
   },
   {
@@ -3006,7 +3018,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/saas-tool-developer-tax.png',
   },
   {
@@ -3210,7 +3222,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Integrations',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-clerk-role-based-tours.png',
   },
   {
@@ -3237,7 +3249,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'Can you use Tour Kit without the Pro license? (free vs Pro breakdown)',
     metaTitle: 'Can you use Tour Kit without the Pro license? (free vs Pro b',
     description:
-      'See exactly what Tour Kit gives you free in development and what a production licence adds. Package-by-package comparison with code examples.',
+      'Tour Kit free vs Pro, kept as a record: since October 2026 every package is MIT-licensed and free, so there is no Pro license any more.',
     keywords: [
       'tour kit free vs pro',
       'tour kit pricing breakdown',
@@ -3248,7 +3260,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-free-vs-pro.png',
   },
   {
@@ -3266,7 +3278,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Integrations',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-hubspot-crm-workflows.png',
   },
   {
@@ -3285,7 +3297,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Integrations',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-launchdarkly-feature-flagged-onboarding.png',
   },
   {
@@ -3293,7 +3305,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'Tour Kit + Lemon Squeezy: handling license validation for Pro features',
     metaTitle: 'Tour Kit + Lemon Squeezy: handling license validation for Pr',
     description:
-      'Wire Lemon Squeezy license keys to Tour Kit Pro feature gating in React. Server-side validation, client caching, and the three gotchas we hit.',
+      'Lemon Squeezy license validation in React, as built for the old Tour Kit Pro tier. Tour Kit is now MIT and needs no key; the pattern still fits your own library.',
     keywords: [
       'lemon squeezy license validation',
       'lemon squeezy react integration',
@@ -3304,7 +3316,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Integrations',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-lemon-squeezy-license-validation.png',
   },
   {
@@ -3322,7 +3334,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Integrations',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-novu-onboarding-notifications.png',
   },
   {
@@ -3348,7 +3360,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'Tour Kit + Polar.sh: managing Pro subscriptions with license keys',
     metaTitle: 'Tour Kit + Polar.sh: managing Pro subscriptions with license',
     description:
-      'Wire Polar.sh license keys to Tour Kit Pro packages in React. Client-side validation, activation limits, and the real cost at international scale.',
+      'A Polar.sh integration for license keys in React, as built for the old Tour Kit Pro tier. Tour Kit is now MIT and needs no key; the pattern still fits your library.',
     keywords: [
       'polar sh integration',
       'polar sh react',
@@ -3359,7 +3371,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Integrations',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-polar-sh-managing-pro-subscriptions.png',
   },
   {
@@ -3367,7 +3379,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: "How we set Tour Kit's price at $99 (building in public)",
     metaTitle: "How we set Tour Kit's price at $99 (building in public)",
     description:
-      "The real pricing decision behind Tour Kit's original $99 one-time license, since superseded by a three-tier ladder from $9.99. Unit economics, anchoring psychology, and why we left subscription revenue on the table.",
+      'The Tour Kit pricing decision behind the original $99 one-time license, kept as a record. Tour Kit is now MIT-licensed and free, with nothing left to buy.',
     keywords: [
       'tour kit pricing decision',
       'open source pricing strategy',
@@ -3377,7 +3389,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-09-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-pricing-decision-building-in-public.png',
   },
   {
@@ -3432,7 +3444,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Integrations',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-sentry-error-tracking.png',
   },
   {
@@ -3507,7 +3519,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/vendor-lock-in-onboarding-tool.png',
   },
   {
@@ -3601,7 +3613,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/when-saas-onboarding-makes-sense.png',
   },
   {
@@ -3639,7 +3651,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Build vs Buy',
     published: true,
     publishedAt: '2026-04-09',
-    lastUpdated: '2026-04-09',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/yc-startups-skip-saas-onboarding-tools.png',
   },
   {
@@ -3677,7 +3689,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Metrics & Analytics',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/ab-test-onboarding-statsig.png',
   },
   {
@@ -3752,7 +3764,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-appcues-alternatives-developers.png',
   },
   {
@@ -3771,7 +3783,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-onboarding-software-is-library.png',
   },
   {
@@ -3790,7 +3802,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-open-source-onboarding-framework.png',
   },
   {
@@ -3809,7 +3821,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-product-tour-library-ssr.png',
   },
   {
@@ -3828,7 +3840,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/best-shadcn-ui-compatible-tour-library.png',
   },
   {
@@ -3855,7 +3867,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'What is the cheapest product tour tool in 2026?',
     metaTitle: 'What is the cheapest product tour tool in 2026?',
     description:
-      'Compare every product tour tool by real cost in 2026. SaaS starts at $468/year, enterprise hits $140K. Tour Kit is free in development and starts at $9.99 once. See the full breakdown.',
+      'Compare every product tour tool by real cost in 2026. SaaS starts at $468/year, enterprise hits $140K. Tour Kit is free (MIT). See the full breakdown.',
     keywords: [
       'cheapest product tour tool',
       'affordable onboarding software',
@@ -3865,7 +3877,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/cheapest-product-tour-tool-2026.png',
   },
   {
@@ -3903,7 +3915,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Metrics',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/custom-events-tour-analytics-react.png',
   },
   {
@@ -3960,7 +3972,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/does-shepherd-js-work-with-react-19.png',
   },
   {
@@ -3987,7 +3999,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: "GitHub stars don't pay the bills (but they help)",
     metaTitle: "GitHub stars don't pay the bills (but they help)",
     description:
-      "A solo developer's honest look at what GitHub stars actually do for an open-source library. Real numbers on the gap between stars and revenue.",
+      "A solo developer on GitHub stars vs revenue under Tour Kit's old paid model. Tour Kit is now MIT-licensed and free; this post is kept as a record.",
     keywords: [
       'github stars business',
       'open source marketing github stars',
@@ -3998,7 +4010,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/github-stars-business.png',
   },
   {
@@ -4017,7 +4029,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/github-stars-playbook-tour-kit.png',
   },
   {
@@ -4036,7 +4048,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Pillar Pages',
     published: true,
     publishedAt: '2026-04-12',
-    lastUpdated: '2026-04-12',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/headless-onboarding-explained.png',
   },
   {
@@ -4054,7 +4066,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/how-add-product-tour-react-app.png',
   },
   {
@@ -4072,7 +4084,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/how-i-built-10-package-react-library-solo-developer.png',
   },
   {
@@ -4091,7 +4103,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Industry Guides',
     published: true,
     publishedAt: '2026-04-12',
-    lastUpdated: '2026-04-12',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/hr-tech-onboarding-employee-training-tours.png',
   },
   {
@@ -4110,7 +4122,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/indie-hacker-competing-vc-saas.png',
   },
   {
@@ -4204,7 +4216,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/no-code-vs-library-product-tour.png',
   },
   {
@@ -4298,7 +4310,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Metrics',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/onboarding-nps-survey.png',
   },
   {
@@ -4336,7 +4348,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Pillar Pages',
     published: true,
     publishedAt: '2026-04-12',
-    lastUpdated: '2026-04-12',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/onboarding-software-comparison-hub.png',
   },
   {
@@ -4354,7 +4366,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/onboarding-tool-best-free-tier.png',
   },
   {
@@ -4362,7 +4374,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'The open-source business model for developer libraries',
     metaTitle: 'The open-source business model for developer libraries',
     description:
-      'Compare open core, dual licensing, and SaaS models for monetizing developer libraries. Real revenue data and lessons from building Tour Kit.',
+      'Open core, dual licensing and SaaS: the open source business model options for developer libraries. Update: Tour Kit itself is now MIT and free.',
     keywords: [
       'open source business model developer library',
       'monetize open source library',
@@ -4373,7 +4385,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/open-source-business-model-developer-libraries.png',
   },
   {
@@ -4392,7 +4404,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Pillar Pages',
     published: true,
     publishedAt: '2026-04-12',
-    lastUpdated: '2026-04-12',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/open-source-onboarding-stack.png',
   },
   {
@@ -4410,7 +4422,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/pendo-vs-appcues-vs-open-source.png',
   },
   {
@@ -4429,7 +4441,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/plg-without-expensive-tools.png',
   },
   {
@@ -4485,7 +4497,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Pillar Pages',
     published: true,
     publishedAt: '2026-04-12',
-    lastUpdated: '2026-04-12',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/product-tour-best-practices-react.png',
   },
   {
@@ -4523,7 +4535,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/product-tour-dead-long-live-headless-tour.png',
   },
   {
@@ -4581,7 +4593,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Metrics',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/product-tour-heatmap.png',
   },
   {
@@ -4599,7 +4611,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/product-tour-libraries-typescript-support.png',
   },
   {
@@ -4618,7 +4630,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/product-tour-library-vue-react.png',
   },
   {
@@ -4637,7 +4649,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/product-tour-software-cost-2026.png',
   },
   {
@@ -4692,7 +4704,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/product-tour-without-jquery.png',
   },
   {
@@ -4860,7 +4872,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Metrics',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/roi-product-tour-formula.png',
   },
   {
@@ -4897,7 +4909,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Metrics',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/session-replay-onboarding.avif',
   },
   {
@@ -4954,7 +4966,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Metrics',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/time-to-value-onboarding-metric.png',
   },
   {
@@ -4973,7 +4985,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Pillar Pages',
     published: true,
     publishedAt: '2026-04-12',
-    lastUpdated: '2026-04-12',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-comparison-index.png',
   },
   {
@@ -5011,7 +5023,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-faq.png',
   },
   {
@@ -5029,7 +5041,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/tour-kit-launch-metrics-month-1.png',
   },
   {
@@ -5065,7 +5077,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/unbundling-onboarding-tools.png',
   },
   {
@@ -5102,7 +5114,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Pillar Pages',
     published: true,
     publishedAt: '2026-04-12',
-    lastUpdated: '2026-04-12',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/user-onboarding-handbook.png',
   },
   {
@@ -5271,7 +5283,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Glossary',
     published: true,
     publishedAt: '2026-04-12',
-    lastUpdated: '2026-04-12',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/what-is-agpl-license.png',
   },
   {
@@ -5309,7 +5321,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Glossary',
     published: true,
     publishedAt: '2026-04-12',
-    lastUpdated: '2026-04-12',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/what-is-an-sdk-onboarding.png',
   },
   {
@@ -5328,7 +5340,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/what-is-best-react-product-tour-library.png',
   },
   {
@@ -5403,7 +5415,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/what-is-digital-adoption-platform.png',
   },
   {
@@ -5441,7 +5453,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'GEO',
     published: true,
     publishedAt: '2026-04-10',
-    lastUpdated: '2026-04-10',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/what-is-headless-onboarding-library.png',
   },
   {
@@ -5762,7 +5774,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Glossary',
     published: true,
     publishedAt: '2026-04-12',
-    lastUpdated: '2026-04-12',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/what-is-vendor-lock-in.png',
   },
   {
@@ -5789,7 +5801,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'Why I chose $99 one-time over $300/month recurring',
     metaTitle: 'Why I chose $99 one-time over $300/month recurring',
     description:
-      "A solo developer explains the pricing decision behind Tour Kit's original $99 one-time license, since superseded by a three-tier ladder from $9.99. Real numbers, real tradeoffs, and why subscription models felt wrong.",
+      'One-time pricing vs subscription for a developer tool: why Tour Kit chose a $99 one-time price. Kept as a record; Tour Kit is now MIT-licensed and free.',
     keywords: [
       'one-time pricing vs subscription developer tool',
       'developer tool pricing strategy',
@@ -5800,7 +5812,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-09-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/why-i-chose-99-one-time-over-300-month-recurring.png',
   },
   {
@@ -5808,7 +5820,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'Why we open-sourced Tour Kit under MIT (not AGPL, not BSL)',
     metaTitle: 'Why we open-sourced Tour Kit under MIT (not AGPL, not BSL)',
     description:
-      'Why I chose MIT over AGPL and BSL for Tour Kit. Real data from HashiCorp, Redis, Elastic, and Shepherd.js shaped the open source license decision.',
+      'The open source MIT license choice behind Tour Kit, over AGPL and BSL. After a BSL 1.1 detour, every Tour Kit package is MIT as of October 2026.',
     keywords: [
       'open source mit license choice',
       'mit vs agpl license',
@@ -5818,7 +5830,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Thought Leadership',
     published: true,
     publishedAt: '2026-04-11',
-    lastUpdated: '2026-04-11',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/why-we-open-sourced-tour-kit-mit-not-agpl-bsl.png',
   },
   {
@@ -5826,7 +5838,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     title: 'userTourKit May 2026 release: codemods, testing helpers, and a soft-gate license',
     metaTitle: 'userTourKit May 2026 release notes: codemods, testing-library, soft-gate license',
     description:
-      'Five phases shipped: @tour-kit/testing-library, @tour-kit/playwright, three migration codemods (Joyride, Shepherd, Driver), license soft-gate with try-before-buy watermark, and a Phase 8 QA pass covering analytics, accessibility, and autostart.',
+      'userTourKit release notes for May 2026: testing helpers, a Playwright bridge, three codemods and a licence soft-gate since removed. Tour Kit is now MIT.',
     keywords: [
       'userTourKit release notes',
       'tour-kit codemods',
@@ -5838,7 +5850,7 @@ export const BLOG_POSTS: BlogMeta[] = [
     category: 'Releases',
     published: true,
     publishedAt: '2026-05-15',
-    lastUpdated: '2026-05-15',
+    lastUpdated: '2026-10-02',
     ogImage: '/og-images/may-2026-release-update.png',
   },
 ]

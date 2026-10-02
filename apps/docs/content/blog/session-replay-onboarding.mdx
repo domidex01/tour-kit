@@ -8,12 +8,16 @@ category: "Metrics"
 schema_type: "TechArticle"
 spreadsheet_row: 267
 date: "2026-04-11"
-updated: "2026-04-11"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/session-replay-onboarding.png
 ---
 
 # Session replay for onboarding: finding where users get stuck
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a paid licence.
 
 Your onboarding funnel shows a 40% drop-off at step three. You know *where* users leave. You have no idea *why*. Perhaps the tooltip obscures the button they need to click. The form validation could be firing before they finish typing. Or the product tour skips a step on mobile viewports entirely. Funnel charts can't answer any of those questions. Session replay can.
 
@@ -222,7 +226,7 @@ But these tools analyze what happened, not why the design failed. You still need
 
 Teams that want full control over user data without vendor lock-in can assemble an entirely open-source onboarding analytics stack in 2026, combining MIT-licensed tour logic with self-hosted replay and funnel analytics. As of April 2026, the components are mature enough for production use:
 
-- **Tour Kit** (BUSL-1.1): product tours and onboarding flows
+- **Tour Kit** (MIT): product tours and onboarding flows
 - **PostHog** (MIT, self-hosted): analytics, funnels, and session replay
 - **rrweb** (MIT): core replay recording library if you need custom replay without PostHog
 - **OpenReplay** (open-source, self-hosted): full replay suite alternative to PostHog

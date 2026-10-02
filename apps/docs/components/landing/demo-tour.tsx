@@ -1340,7 +1340,6 @@ const tabs = [
     icon: Component,
     color: 'text-[var(--tk-primary)]',
     component: TourDemo,
-    tier: 'free',
   },
   {
     id: 'hints',
@@ -1349,7 +1348,6 @@ const tabs = [
     icon: Lightbulb,
     color: 'text-amber-500',
     component: HintsDemo,
-    tier: 'free',
   },
   {
     id: 'announcements',
@@ -1358,7 +1356,6 @@ const tabs = [
     icon: Bell,
     color: 'text-rose-500',
     component: AnnouncementsDemo,
-    tier: 'pro',
   },
   {
     id: 'checklists',
@@ -1367,7 +1364,6 @@ const tabs = [
     icon: CheckSquare,
     color: 'text-emerald-500',
     component: ChecklistsDemo,
-    tier: 'pro',
   },
   {
     id: 'media',
@@ -1376,7 +1372,6 @@ const tabs = [
     icon: Eye,
     color: 'text-pink-500',
     component: MediaDemo,
-    tier: 'pro',
   },
   {
     id: 'analytics',
@@ -1385,7 +1380,6 @@ const tabs = [
     icon: BarChart3,
     color: 'text-sky-500',
     component: AnalyticsDemo,
-    tier: 'pro',
   },
   {
     id: 'adoption',
@@ -1394,7 +1388,6 @@ const tabs = [
     icon: TrendingUp,
     color: 'text-orange-500',
     component: AdoptionDemo,
-    tier: 'pro',
   },
   {
     id: 'scheduling',
@@ -1403,7 +1396,6 @@ const tabs = [
     icon: Clock,
     color: 'text-teal-500',
     component: SchedulingDemo,
-    tier: 'pro',
   },
   {
     id: 'surveys',
@@ -1412,7 +1404,6 @@ const tabs = [
     icon: Star,
     color: 'text-amber-500',
     component: SurveysDemo,
-    tier: 'pro',
   },
   {
     id: 'ai',
@@ -1421,7 +1412,6 @@ const tabs = [
     icon: Sparkles,
     color: 'text-violet-500',
     component: AIDemo,
-    tier: 'pro',
   },
 ] as const
 
@@ -1470,13 +1460,12 @@ export function DemoTour() {
             <div key={row[0].id} className="flex flex-wrap justify-center gap-1.5">
               {row.map((tab) => {
                 const isActive = activeTab === tab.id
-                const isPro = tab.tier === 'pro'
                 return (
                   <button
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
-                    aria-label={`${tab.label}${isPro ? ' (Pro)' : ''}`}
+                    aria-label={tab.label}
                     aria-pressed={isActive}
                     className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
                       isActive
@@ -1489,17 +1478,6 @@ export function DemoTour() {
                       className={`h-3.5 w-3.5 ${isActive ? '' : tab.color}`}
                     />
                     <span className="hidden sm:inline">{tab.label}</span>
-                    {isPro && (
-                      <span
-                        className={`inline-flex items-center gap-0.5 rounded-[4px] px-1 py-px text-[9px] font-bold uppercase tracking-wide ${
-                          isActive ? 'bg-white/25 text-white' : 'bg-violet-500/10 text-violet-500'
-                        }`}
-                        aria-hidden="true"
-                      >
-                        <Sparkles className="h-2 w-2" aria-hidden="true" />
-                        Pro
-                      </span>
-                    )}
                   </button>
                 )
               })}
@@ -1513,17 +1491,10 @@ export function DemoTour() {
             <span className={`h-2 w-2 rounded-full ${active.color.replace('text-', 'bg-')}`} />
             {active.pkg}
           </span>
-          {active.tier === 'pro' ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-[11px] font-semibold text-violet-500">
-              <Sparkles className="h-3 w-3" aria-hidden="true" />
-              Pro &middot; from $9.99 one-time
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-500">
-              <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-              Free in development
-            </span>
-          )}
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-500">
+            <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+            Free &middot; MIT
+          </span>
         </div>
 
         {/* Theme switcher — re-skins whichever package demo is active, live */}

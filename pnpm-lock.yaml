@@ -164,9 +164,6 @@ importers:
       '@tour-kit/hints':
         specifier: workspace:*
         version: link:../../packages/hints
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../../packages/license
       '@tour-kit/react':
         specifier: workspace:*
         version: link:../../packages/react

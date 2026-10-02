@@ -8,12 +8,16 @@ category: "Build vs Buy"
 schema_type: "TechArticle"
 spreadsheet_row: 141
 date: "2026-04-09"
-updated: "2026-04-09"
+updated: "2026-10-02"
 ogImage: /og-images/tco-comparison-appcues-tour-kit.png
 published: true
 ---
 
 # TCO comparison: 3 years of Appcues vs 3 years of Tour Kit
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 Appcues charges per user per month. Tour Kit charges nothing per user, ever. Over three years that difference compounds into a gap that ranges from $30,000 to over $120,000, depending on your MAU tier. We modeled both paths at 5K, 25K, and 100K monthly active users, including every cost we could identify: licenses, engineering time, maintenance, price increases, and switching costs.
 
@@ -48,7 +52,7 @@ We built this model with the following assumptions. Where we had to estimate, we
 **Tour Kit assumptions:**
 - 80 hours initial implementation (2 weeks for a senior developer)
 - 30 hours/year ongoing maintenance (library updates, new flow creation)
-- Tour Kit Pro license at $9.99 one-time for advanced features
+- No licence cost: every Tour Kit package is MIT-licensed and free
 - Zero per-MAU cost (client-side library, no server component)
 
 ## 3-year TCO at 5,000 MAU
@@ -67,7 +71,7 @@ At the smallest tier, the gap is real but modest. Appcues wins on time-to-first-
     <tr>
       <td>License / subscription</td>
       <td>$45,540</td>
-      <td>$9.99 (one-time)</td>
+      <td>$0 (MIT)</td>
     </tr>
     <tr>
       <td>Initial implementation</td>
@@ -92,11 +96,11 @@ At the smallest tier, the gap is real but modest. Appcues wins on time-to-first-
     <tr>
       <td><strong>3-year total</strong></td>
       <td><strong>$53,940</strong></td>
-      <td><strong>$25,599</strong></td>
+      <td><strong>$25,500</strong></td>
     </tr>
     <tr>
       <td><strong>Savings with Tour Kit</strong></td>
-      <td colspan="2"><strong>$28,341 (53%)</strong></td>
+      <td colspan="2"><strong>$28,440 (53%)</strong></td>
     </tr>
   </tbody>
 </table>
@@ -119,7 +123,7 @@ This is where the compounding starts to bite. Appcues MAU pricing scales non-lin
     <tr>
       <td>License / subscription</td>
       <td>$105,600</td>
-      <td>$9.99</td>
+      <td>$0</td>
     </tr>
     <tr>
       <td>Initial implementation</td>
@@ -139,11 +143,11 @@ This is where the compounding starts to bite. Appcues MAU pricing scales non-lin
     <tr>
       <td><strong>3-year total</strong></td>
       <td><strong>$114,000</strong></td>
-      <td><strong>$25,599</strong></td>
+      <td><strong>$25,500</strong></td>
     </tr>
     <tr>
       <td><strong>Savings with Tour Kit</strong></td>
-      <td colspan="2"><strong>$88,401 (78%)</strong></td>
+      <td colspan="2"><strong>$88,500 (78%)</strong></td>
     </tr>
   </tbody>
 </table>
@@ -168,7 +172,7 @@ At enterprise scale, the comparison becomes dramatic. Appcues moves to custom En
     <tr>
       <td>License / subscription</td>
       <td>$216,000+</td>
-      <td>$9.99</td>
+      <td>$0</td>
     </tr>
     <tr>
       <td>Initial implementation</td>
@@ -193,11 +197,11 @@ At enterprise scale, the comparison becomes dramatic. Appcues moves to custom En
     <tr>
       <td><strong>3-year total</strong></td>
       <td><strong>$264,000+</strong></td>
-      <td><strong>$36,099</strong></td>
+      <td><strong>$36,000</strong></td>
     </tr>
     <tr>
       <td><strong>Savings with Tour Kit</strong></td>
-      <td colspan="2"><strong>$227,901+ (86%)</strong></td>
+      <td colspan="2"><strong>$228,000+ (86%)</strong></td>
     </tr>
   </tbody>
 </table>
@@ -230,7 +234,7 @@ This article would be dishonest if we didn't acknowledge where Appcues is the be
 
 **Code ownership.** Flows live in your repository, go through code review, ship with your deploys, and roll back with your rollbacks. There's no third-party dependency in your critical onboarding path. For a deeper comparison of the three paths (DIY, library, SaaS), see our [build vs buy calculator](/blog/build-vs-buy-product-tour-calculator).
 
-**No vendor lock-in.** Tour Kit is source-available under BSL 1.1, and each release converts to MIT on its Change Date. If you stop using it tomorrow, your flows are still React components that render without the library. There's nothing to migrate away from.
+**No vendor lock-in.** Tour Kit is MIT-licensed. If you stop using it tomorrow, your flows are still React components that render without the library. There's nothing to migrate away from.
 
 **Performance.** Tour Kit's core is under 23KB gzipped. Appcues' SDK adds 80-120KB to your bundle. At scale, that affects Core Web Vitals, which affects SEO, which affects acquisition cost. The performance tax compounds just like the subscription cost.
 

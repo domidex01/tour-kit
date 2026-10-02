@@ -8,7 +8,7 @@ const TITLE = 'Privacy Policy'
 
 // Bumped by hand when the policy actually changes. Deriving this from
 // `new Date()` made every build claim the policy had just been reviewed.
-const LAST_UPDATED = '2026-09-13'
+const LAST_UPDATED = '2026-10-02'
 const DESCRIPTION =
   'How usertourkit.com handles visitor data, analytics, cookies, and third-party services.'
 
@@ -49,8 +49,8 @@ export default function PrivacyPage() {
           <h2>Summary</h2>
           <p>
             This site is the documentation and marketing homepage for the userTourKit library. We
-            collect the minimum data needed to operate the site, bill Pro licenses, and understand
-            which pages are useful.
+            collect the minimum data needed to operate the site, keep records of past licence
+            purchases, and understand which pages are useful.
           </p>
 
           <h2>What we collect</h2>
@@ -78,8 +78,9 @@ export default function PrivacyPage() {
               <a href="https://polar.sh/" target="_blank" rel="noopener noreferrer">
                 Polar.sh
               </a>
-              ): for Pro license buyers, we receive your email and order ID to issue license keys.
-              Payment card data is handled entirely by Polar and Stripe, we never see it.
+              ): for people who bought a licence key before October 2026, we hold the email and
+              order ID from that purchase. We no longer sell keys. Payment card data was handled
+              entirely by Polar and Stripe, we never saw it.
             </li>
           </ul>
 
@@ -122,7 +123,7 @@ export default function PrivacyPage() {
               </li>
             ) : null}
             <li>
-              <strong>Polar.sh</strong>, payments and license management for Pro purchases.{' '}
+              <strong>Polar.sh</strong>, records of licence purchases made before October 2026.{' '}
               <a href="https://polar.sh/legal/privacy" target="_blank" rel="noopener noreferrer">
                 Polar's privacy policy
               </a>
@@ -143,7 +144,7 @@ export default function PrivacyPage() {
 
           <h2>Your rights</h2>
           <p>
-            If you bought a Pro license and want your record deleted, email support via{' '}
+            If you bought a licence key and want your record deleted, email support via{' '}
             <a
               href="https://github.com/domidex01/tour-kit/issues/new"
               target="_blank"

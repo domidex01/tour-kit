@@ -8,12 +8,16 @@ category: "Integrations"
 schema_type: "TechArticle"
 spreadsheet_row: 186
 date: "2026-04-09"
-updated: "2026-04-09"
+updated: "2026-10-02"
 ogImage: /og-images/intercom-product-tour-integration.png
 published: true
 ---
 
 # Tour Kit + Intercom: show tours before chat, not after
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 Most teams wire up Intercom, bolt on its product tours add-on, and hope for the best. The problem: users who don't understand a feature reach for the chat widget first. Support answers the same "how do I..." questions on repeat. Intercom's own data shows proactive onboarding can reduce support contact rates by roughly 80% ([Intercom blog](https://www.intercom.com/blog/self-serve-support/)). But Intercom's built-in tours can't coordinate with its own Messenger to make that happen.
 
@@ -31,7 +35,7 @@ The whole integration is about 40 lines of glue code. No custom backend required
 
 ## Why Intercom + Tour Kit instead of Intercom tours alone?
 
-Intercom's built-in product tours are a bolt-on add-on that costs $9.99 to $199 per month on top of your base plan, ships without lifecycle callbacks, and silently fails on mobile. Tour Kit fills those gaps at a fraction of the cost while letting Intercom do what it does best: messaging and support. Intercom product tours cost $9.99 to $199 per month as an add-on to a base plan that starts at $29 per seat per month ([Intercom Proactive Support Plus](https://www.intercom.com/help/en/articles/9061648-proactive-support-plus-add-on)). At 50,000+ MAU, one G2 reviewer reported the tours add-on alone would cost "over 4,000 EUR" ([via UserGuiding](https://userguiding.com/blog/intercom-product-tours)). And you get some real limitations for that price:
+Intercom's built-in product tours are a bolt-on add-on that costs $9.99 to $199 per month on top of your base plan, ships without lifecycle callbacks, and silently fails on mobile. Tour Kit fills those gaps at no cost while letting Intercom do what it does best: messaging and support. Intercom product tours cost $9.99 to $199 per month as an add-on to a base plan that starts at $29 per seat per month ([Intercom Proactive Support Plus](https://www.intercom.com/help/en/articles/9061648-proactive-support-plus-add-on)). At 50,000+ MAU, one G2 reviewer reported the tours add-on alone would cost "over 4,000 EUR" ([via UserGuiding](https://userguiding.com/blog/intercom-product-tours)). And you get some real limitations for that price:
 
 <table>
   <thead>
@@ -70,7 +74,7 @@ Intercom's built-in product tours are a bolt-on add-on that costs $9.99 to $199 
     <tr>
       <td>Pricing</td>
       <td>$9.99–$199/month add-on</td>
-      <td>Free core (MIT), $9.99 one-time Pro</td>
+      <td>Free (MIT)</td>
     </tr>
   </tbody>
 </table>
@@ -234,7 +238,7 @@ Intercom's `startTour` API silently does nothing on mobile web ([Intercom FAQ](h
 
 ### How much does this save compared to the Intercom tours add-on?
 
-The Proactive Support Plus add-on costs $9.99 per month for 500 tour sends, with overages beyond that (a 3,000-user run adds roughly $145). Tour Kit's core is BUSL-1.1-licensed and source-available. The Pro package is a one-time $9.99 purchase. For 5,000 monthly tour views: $200+ per month with Intercom versus $0 ongoing with Tour Kit.
+The Proactive Support Plus add-on costs $9.99 per month for 500 tour sends, with overages beyond that (a 3,000-user run adds roughly $145). Tour Kit is MIT-licensed and free, including in production. For 5,000 monthly tour views: $200+ per month with Intercom versus $0 with Tour Kit.
 
 ### Can I still use Intercom's built-in tours alongside Tour Kit?
 

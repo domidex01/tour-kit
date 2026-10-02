@@ -20,7 +20,7 @@ import dynamic from 'next/dynamic'
 const PAGE_PATH = '/onboarding-checklists'
 const PAGE_TITLE = 'Onboarding Checklists for React | userTourKit'
 const PAGE_DESC =
-  'React onboarding checklist component with task dependencies, progress persistence, and your design system. Runs free in dev, from $9.99 once when you ship.'
+  'React onboarding checklist component with task dependencies, progress persistence, and your design system. MIT-licensed and free, including in production.'
 // File-based metadata route (opengraph-image.tsx) — /api/og is robots-disallowed,
 // which blocks Twitter/Facebook crawlers from fetching share images.
 const OG_IMAGE = `${PAGE_PATH}/opengraph-image`
@@ -101,9 +101,9 @@ const FAQ_ITEMS: CapabilityFaqItem[] = [
       'No iframe, no injected CSS. The styled component follows shadcn/ui conventions and inherits your tokens; the headless ChecklistHeadless render-prop variant hands you raw state (tasks, progress, completeTask) to render any UI you want.',
   },
   {
-    question: 'What happens before I buy a license?',
+    question: 'Do I need a licence key?',
     answer:
-      'Everything works. @tour-kit/checklists runs unlicensed in development and on localhost with full functionality, no feature gates. Production shows a small badge until you activate a one-time licence key, from $9.99 for a single project, which covers every Tour Kit package.',
+      'No. @tour-kit/checklists is MIT-licensed, like every Tour Kit package: full functionality in development and in production, with no key, no badge and no feature gates.',
   },
 ]
 
@@ -129,15 +129,15 @@ export default function OnboardingChecklistsPage() {
       <main id="main-content" className="flex flex-1 flex-col">
         <CapabilityHero
           slug="checklists"
-          eyebrow="@tour-kit/checklists · Pro"
+          eyebrow="@tour-kit/checklists"
           heading="Checklists that walk users"
           headingAccent="to activation."
           subhead="An embeddable onboarding checklist for React, task dependencies, progress persistence, and adoption nudges, rendered with your own design system."
-          primaryLabel="Try it free in dev"
+          primaryLabel="Get started"
           primaryHref="/docs/checklists"
           secondaryLabel="See pricing"
           secondaryHref="/pricing"
-          reassurance="Runs free in dev, one-time from $9.99 when you ship."
+          reassurance="MIT-licensed. Free in production, no key."
           factsLine="< 10KB gzipped · TypeScript strict · WCAG 2.1 AA · your repo, your code"
         />
 
@@ -235,9 +235,9 @@ export default function OnboardingChecklistsPage() {
 
         <CtaBand
           placement="checklists_after_features"
-          eyebrow="Pro package"
-          heading="Try it free in dev, watermark until you license."
-          subtext="Full functionality in development and on localhost, no key required. One licence from $9.99 unlocks production for every package."
+          eyebrow="MIT licensed"
+          heading="Free in development and in production."
+          subtext="Full functionality everywhere, no key required. Every Tour Kit package is MIT."
           ctaLabel="Build my checklist"
           reassurance="No signup, no credit card, install and go."
           primaryHref="/builder"
@@ -248,7 +248,7 @@ export default function OnboardingChecklistsPage() {
         <ComparisonTeaser
           heading="Checklists without the platform tax"
           rows={[
-            { label: 'Cost', tourKit: 'From $9.99 once', saas: '$200–900/mo', oss: 'DIY time' },
+            { label: 'Cost', tourKit: 'Free (MIT)', saas: '$200–900/mo', oss: 'DIY time' },
             { label: 'Task dependencies', tourKit: 'yes', saas: 'partial', oss: 'no' },
             {
               label: 'Design system fit',
@@ -272,7 +272,7 @@ export default function OnboardingChecklistsPage() {
           slug="checklists"
           heading="Ship the checklist."
           headingAccent="Skip the side project."
-          subtext="Install now, watch it run free in dev, license it when it ships."
+          subtext="Install now and ship it. MIT, no key."
           installCmd="pnpm add @tour-kit/checklists"
           primaryLabel="Get started"
           primaryHref="/builder"

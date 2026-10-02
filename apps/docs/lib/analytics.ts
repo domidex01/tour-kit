@@ -27,7 +27,7 @@ type EventProps = Record<string, string | number | undefined>
  *
  * The shared name is the point. GA and PostHog run side by side through the
  * migration, and the two are only comparable across that overlap window if
- * `pricing_buy_clicked` means the same thing in both. Fanning out from one
+ * an event like `cta_clicked` means the same thing in both. Fanning out from one
  * function makes that true by construction rather than by remembering to
  * update a second call site.
  */

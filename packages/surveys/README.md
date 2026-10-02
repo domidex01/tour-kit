@@ -9,7 +9,7 @@
 
 Drop-in **in-app microsurveys** for React — **NPS**, **CSAT**, **CES**, and custom feedback flows with skip logic, audience targeting, sampling, snooze, and built-in fatigue prevention. Five display modes: Modal, Slideout, Banner, Popover, Inline.
 
-> **Pro tier** — requires a license key. See [Licensing](https://usertourkit.com/docs/licensing).
+> **MIT licensed.** Free for any use, including production, with no licence key.
 
 **Alternative to:** [Delighted](https://delighted.com/), [Sprig](https://sprig.com/), [Wootric](https://www.wootric.com/), [Typeform](https://www.typeform.com/) embedded surveys, [Pendo](https://www.pendo.io/) feedback, [Hotjar](https://www.hotjar.com/) surveys.
 
@@ -27,15 +27,14 @@ Drop-in **in-app microsurveys** for React — **NPS**, **CSAT**, **CES**, and cu
 ## Installation
 
 ```bash
-npm install @tour-kit/surveys @tour-kit/license
+npm install @tour-kit/surveys
 # or
-pnpm add @tour-kit/surveys @tour-kit/license
+pnpm add @tour-kit/surveys
 ```
 
 ## Quick Start
 
 ```tsx
-import { LicenseProvider } from '@tour-kit/license'
 import { SurveysProvider, SurveyModal } from '@tour-kit/surveys'
 
 const npsSurvey = {
@@ -61,12 +60,10 @@ const npsSurvey = {
 
 function App() {
   return (
-    <LicenseProvider licenseKey={process.env.NEXT_PUBLIC_TOURKIT_LICENSE!}>
-      <SurveysProvider surveys={[npsSurvey]} userContext={{ plan: 'pro' }}>
-        <SurveyModal id="nps-q4" />
-        <YourApp />
-      </SurveysProvider>
-    </LicenseProvider>
+    <SurveysProvider surveys={[npsSurvey]} userContext={{ plan: 'pro' }}>
+      <SurveyModal id="nps-q4" />
+      <YourApp />
+    </SurveysProvider>
   )
 }
 ```
@@ -248,7 +245,6 @@ import type {
 - [`@tour-kit/scheduling`](https://www.npmjs.com/package/@tour-kit/scheduling) — optional time-based gating (release windows, business hours)
 - [`@tour-kit/announcements`](https://www.npmjs.com/package/@tour-kit/announcements) — modal / toast / banner announcements
 - [`@tour-kit/analytics`](https://www.npmjs.com/package/@tour-kit/analytics) — track survey events to PostHog, Mixpanel, etc.
-- [`@tour-kit/license`](https://www.npmjs.com/package/@tour-kit/license) — required Pro license validation
 
 ## Documentation
 
@@ -256,7 +252,7 @@ Full documentation: [https://usertourkit.com/docs/surveys](https://usertourkit.c
 
 ## License
 
-Pro tier — see [LICENSE.md](./LICENSE.md). Requires a Tour Kit Pro license key.
+MIT. See [LICENSE](./LICENSE).
 
 ## `@tour-kit/surveys/engine` — the React-free subpath
 
@@ -305,6 +301,3 @@ createSurveysEngine({ surveys, isScheduleActive })
 
 `samplingRate` reads a roll drawn once at construction; pass `random` to make
 it deterministic in tests.
-
-> The engine path is currently **ungated**: the Pro licence check lives in
-> `<SurveysProvider>`, not in the engine.

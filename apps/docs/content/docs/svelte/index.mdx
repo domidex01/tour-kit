@@ -186,32 +186,12 @@ The action's `destroy` deactivates before releasing. For an action, node
 destruction *is* the card unmounting — which is exactly where React runs
 `deactivate()` — and releasing alone would strand focus on `<body>`.
 
-## Licensing
+## Licence
 
-`@tour-kit/svelte` ships under BUSL-1.1. Development, evaluation, testing, CI and
-any non-production environment are free and need no key. Production needs one.
-Without a key the binding still works in full and layers a small badge in the
-corner on non-development hosts. See [Licensing](/docs/licensing) for the full
-setup.
-
-```svelte
-<script lang="ts">
-  import { provideTourKit } from '@tour-kit/svelte'
-  import { PUBLIC_TOUR_KIT_LICENSE_KEY } from '$env/static/public'
-
-  const kit = provideTourKit({
-    tours,
-    license: { licenseKey: PUBLIC_TOUR_KIT_LICENSE_KEY },
-  })
-</script>
-```
-
-<Callout type="warn">
-**Pass the key from static config.** It is read once at mount, like every other
-option this binding takes, so a key fetched at runtime arrives too late to take
-the badge down. `$env/static/public` is the right source. On a development host
-the key is never sent anywhere, so local work never consumes an activation slot.
-</Callout>
+`@tour-kit/svelte` is MIT-licensed: free for any use, including production, with
+no key and no badge. The `license` option is deprecated and ignored; 1.0.x
+accepted it, and it stays only so existing code still compiles. See
+[License: MIT](/docs/licensing).
 
 ## SSR
 

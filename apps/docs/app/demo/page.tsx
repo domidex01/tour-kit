@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Tour Kit, Live Interactive Demo',
     description:
-      'Click through a working product tour built with Tour Kit. Headless React, WCAG 2.1 AA, free in development.',
+      'Click through a working product tour built with Tour Kit. Headless React, WCAG 2.1 AA, MIT-licensed.',
     url: '/demo',
     type: 'website',
     siteName: 'userTourKit',
@@ -47,7 +47,7 @@ const FAQS = [
   {
     question: 'How do I install Tour Kit after trying the demo?',
     answer:
-      'Run `pnpm add @tour-kit/core @tour-kit/react` (npm install and bun add work too). The core requires only React 18 or 19 and Node 18+, and needs no licence key to develop against. Add @tour-kit/hints for the persistent beacon shown in the demo.',
+      'Run `pnpm add @tour-kit/core @tour-kit/react` (npm install and bun add work too). The core requires only React 18 or 19 and Node 18+, and needs no licence key, in development or in production. Add @tour-kit/hints for the persistent beacon shown in the demo.',
   },
   {
     question: 'Does Tour Kit work with Next.js, Remix, Vite, or React Router?',
@@ -62,7 +62,7 @@ const FAQS = [
   {
     question: 'Is the demo using paid features?',
     answer:
-      'No. Nothing on this page needs a key, and neither does anything you build locally. Development, evaluation, testing and CI are free for every package. A one-time licence key, from $9.99, is for serving Tour Kit to end users of a deployed application.',
+      'There are no paid features. Every Tour Kit package is MIT-licensed and free for any use, including production, with no licence key.',
   },
 ]
 
@@ -256,9 +256,9 @@ export default function DemoPage() {
                 href="/pricing"
                 className="block rounded-xl border border-fd-border bg-fd-card p-5 transition hover:border-[var(--tk-primary)]"
               >
-                <h3 className="font-semibold text-fd-foreground">Unlock Pro features</h3>
+                <h3 className="font-semibold text-fd-foreground">Free, and MIT</h3>
                 <p className="mt-1 text-sm text-fd-muted-foreground">
-                  Checklists, announcements, surveys, AI chat, and analytics, one-time from $9.99.
+                  Checklists, announcements, surveys, AI chat, and analytics are free too.
                 </p>
               </Link>
             </div>

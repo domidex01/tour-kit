@@ -9,7 +9,7 @@
 
 Time-based **scheduling utilities and React hooks** — decide whether a tour, announcement, survey, or any UI is currently active given **date ranges**, **time-of-day**, **day-of-week**, **business hours**, **blackouts**, and **recurring patterns**. Full IANA timezone support with automatic DST handling.
 
-> **Pro tier** — requires a license key. See [Licensing](https://usertourkit.com/docs/licensing).
+> **MIT licensed.** Free for any use, including production, with no licence key.
 
 **Use this for:** time-windowed announcements (release windows), business-hours-only tours, scheduled product walkthroughs, blackout periods (holidays / freezes), recurring weekly nudges.
 
@@ -28,33 +28,30 @@ Time-based **scheduling utilities and React hooks** — decide whether a tour, a
 ## Installation
 
 ```bash
-npm install @tour-kit/scheduling @tour-kit/license
+npm install @tour-kit/scheduling
 # or
-pnpm add @tour-kit/scheduling @tour-kit/license
+pnpm add @tour-kit/scheduling
 ```
 
 ## Quick Start
 
 ```tsx
-import { LicenseProvider } from '@tour-kit/license'
 import { ScheduleGate } from '@tour-kit/scheduling'
 
 function App() {
   return (
-    <LicenseProvider licenseKey={process.env.NEXT_PUBLIC_TOURKIT_LICENSE!}>
-      <ScheduleGate
-        schedule={{
-          startAt: '2026-05-01',
-          endAt: '2026-06-01',
-          timezone: 'America/Los_Angeles',
-          businessHours: {
-            preset: '9-to-5-weekdays',
-          },
-        }}
-      >
-        <ReleaseAnnouncementBanner />
-      </ScheduleGate>
-    </LicenseProvider>
+    <ScheduleGate
+      schedule={{
+        startAt: '2026-05-01',
+        endAt: '2026-06-01',
+        timezone: 'America/Los_Angeles',
+        businessHours: {
+          preset: '9-to-5-weekdays',
+        },
+      }}
+    >
+      <ReleaseAnnouncementBanner />
+    </ScheduleGate>
   )
 }
 ```
@@ -147,8 +144,8 @@ If all checks pass → schedule is **active**.
 ### The React-free subpath
 
 `@tour-kit/scheduling/engine` gives a Vue, Svelte or Node consumer every
-evaluation function and constant with no `react`, no `@tour-kit/license` and no
-`@tour-kit/analytics` in its runtime or its type declarations:
+evaluation function and constant with no `react` and no `@tour-kit/analytics`
+in its runtime or its type declarations:
 
 ```ts
 import { checkSchedule, isWithinBusinessHours } from '@tour-kit/scheduling/engine'
@@ -277,7 +274,6 @@ import type {
 
 - [`@tour-kit/announcements`](https://www.npmjs.com/package/@tour-kit/announcements) — accepts `@tour-kit/scheduling` as optional peer
 - [`@tour-kit/surveys`](https://www.npmjs.com/package/@tour-kit/surveys) — same
-- [`@tour-kit/license`](https://www.npmjs.com/package/@tour-kit/license) — required Pro license validation
 
 ## Documentation
 
@@ -285,4 +281,4 @@ Full documentation: [https://usertourkit.com/docs/scheduling](https://usertourki
 
 ## License
 
-Pro tier — see [LICENSE.md](./LICENSE.md). Requires a Tour Kit Pro license key.
+MIT. See [LICENSE](./LICENSE).

@@ -9,7 +9,7 @@
 
 Auto-detecting **React video embeds** and **rich media** for product demos, onboarding videos, announcement modals, and feature walkthroughs. Pass any URL — TourMedia detects YouTube / Vimeo / Loom / Wistia / native HTML5 / GIF / Lottie and renders the right player with captions, responsive sources, and reduced-motion fallbacks.
 
-> **Pro tier** — requires a license key. See [Licensing](https://usertourkit.com/docs/licensing).
+> **MIT licensed.** Free for any use, including production, with no licence key.
 
 **Use this for:** product demo videos, onboarding walkthroughs (Loom-style), in-app feature explainers, animated illustrations (Lottie), GIF tutorials.
 
@@ -28,9 +28,9 @@ Auto-detecting **React video embeds** and **rich media** for product demos, onbo
 ## Installation
 
 ```bash
-npm install @tour-kit/media @tour-kit/license
+npm install @tour-kit/media
 # or
-pnpm add @tour-kit/media @tour-kit/license
+pnpm add @tour-kit/media
 
 # Optional: Lottie support
 pnpm add @lottiefiles/react-lottie-player
@@ -39,20 +39,17 @@ pnpm add @lottiefiles/react-lottie-player
 ## Quick Start
 
 ```tsx
-import { LicenseProvider } from '@tour-kit/license'
 import { TourMedia } from '@tour-kit/media'
 
 function ProductDemo() {
   return (
-    <LicenseProvider licenseKey={process.env.NEXT_PUBLIC_TOURKIT_LICENSE!}>
-      <TourMedia
-        src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-        title="Product walkthrough"
-        autoplay
-        muted
-        captions={[{ src: '/captions/en.vtt', srclang: 'en', label: 'English' }]}
-      />
-    </LicenseProvider>
+    <TourMedia
+      src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      title="Product walkthrough"
+      autoplay
+      muted
+      captions={[{ src: '/captions/en.vtt', srclang: 'en', label: 'English' }]}
+    />
   )
 }
 ```
@@ -186,7 +183,6 @@ import type {
 
 - [`@tour-kit/announcements`](https://www.npmjs.com/package/@tour-kit/announcements) — embed media in announcement modals / slideouts
 - [`@tour-kit/react`](https://www.npmjs.com/package/@tour-kit/react) — embed media in tour step content
-- [`@tour-kit/license`](https://www.npmjs.com/package/@tour-kit/license) — required Pro license validation
 
 ## Documentation
 
@@ -194,4 +190,4 @@ Full documentation: [https://usertourkit.com/docs/media](https://usertourkit.com
 
 ## License
 
-Pro tier — see [LICENSE.md](./LICENSE.md). Requires a Tour Kit Pro license key.
+MIT. See [LICENSE](./LICENSE).

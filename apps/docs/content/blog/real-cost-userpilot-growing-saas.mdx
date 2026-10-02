@@ -8,12 +8,16 @@ category: "Build vs Buy"
 schema_type: "TechArticle"
 spreadsheet_row: 138
 date: "2026-04-09"
-updated: "2026-04-09"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/real-cost-userpilot-growing-saas.png
 ---
 
 # The real cost of Userpilot for growing SaaS teams
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 Userpilot's pricing page shows $299/month for the Starter plan. That number is accurate for about five minutes. Specifically, the five minutes before your SaaS crosses 2,000 monthly active users and you discover what "Growth" pricing actually means.
 
@@ -191,16 +195,16 @@ The comparison most articles skip: what does it cost to not use Userpilot? Here 
       <td>Non-technical teams</td>
     </tr>
     <tr>
-      <td>Tour Kit (open source + Pro)</td>
-      <td>$9.99 one-time</td>
-      <td>$9.99 total</td>
+      <td>Tour Kit (MIT)</td>
+      <td>$0</td>
+      <td>$0</td>
       <td>No MAU fees</td>
       <td>React dev teams</td>
     </tr>
     <tr>
       <td>PostHog + Tour Kit</td>
-      <td>$9.99 + PostHog free tier</td>
-      <td>$9.99 + usage-based analytics</td>
+      <td>$0 + PostHog free tier</td>
+      <td>$0 + usage-based analytics</td>
       <td>Analytics scales, tours don't</td>
       <td>Data-driven dev teams</td>
     </tr>
@@ -214,9 +218,9 @@ The comparison most articles skip: what does it cost to not use Userpilot? Here 
   </tbody>
 </table>
 
-Tour Kit's cost model is fundamentally different. You pay $9.99 once for the Pro license. No monthly fees, no MAU tracking, no "Contact sales" as your product grows. The tradeoff: you need React developers and you won't get a visual builder.
+Tour Kit's cost model is fundamentally different. It is MIT-licensed and free, including in production. No monthly fees, no MAU tracking, no "Contact sales" as your product grows. The tradeoff: you need React developers and you won't get a visual builder.
 
-We calculated TCO across 12 months including developer time at $150/hr. For a React team building standard product tours, implementation with Tour Kit takes roughly 8-16 hours. That's $1,200-$2,400 in developer time plus $9.99 for the license, compared to $9,588+ for Userpilot Growth in the same period.
+We calculated TCO across 12 months including developer time at $150/hr. For a React team building standard product tours, implementation with Tour Kit takes roughly 8-16 hours. That's $1,200-$2,400 in developer time and nothing for the license, compared to $9,588+ for Userpilot Growth in the same period.
 
 ```tsx
 // src/components/OnboardingTour.tsx
@@ -276,7 +280,7 @@ Userpilot and Appcues have similar entry pricing — both start around $249-$299
 
 ### What's the cheapest Userpilot alternative for React teams?
 
-Tour Kit costs $9.99 one-time for the Pro license with no MAU fees. Shepherd.js (free, AGPL) and React Joyride (free, MIT) cost nothing upfront but need more implementation work. All three require React developers. Tour Kit sits between them: lower setup cost than raw open-source, no ongoing subscription.
+Tour Kit is free (MIT) with no MAU fees. Shepherd.js (free, AGPL) and React Joyride (free, MIT) also cost nothing upfront but need more implementation work. All three require React developers. Tour Kit needs less setup work than the other two, with no ongoing subscription.
 
 ### Does Userpilot have a free plan?
 

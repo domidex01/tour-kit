@@ -8,12 +8,16 @@ category: "Pillar Pages"
 schema_type: "TechArticle"
 spreadsheet_row: 293
 date: "2026-04-12"
-updated: "2026-04-12"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/product-tour-best-practices-react.png
 ---
 
 # Product tour best practices for React developers (2026)
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a paid licence.
 
 Every "product tour best practices" article tells you to keep tours short and add progress indicators. That's fine for product managers picking a SaaS tool. But if you're building product tours in React, you need to know which hooks to compose, how to handle Server Components, where to put state, what ARIA attributes to set, and how to keep your tour library from doubling your bundle. This guide covers the React-specific patterns that matter.
 
@@ -607,7 +611,7 @@ Three requirements: focus trapping within each tour step using `aria-modal="true
 
 ### Should I use a product tour library or build tours from scratch?
 
-Use a library unless your requirements are genuinely simple (a single tooltip pointing at one element). The positioning math, scroll handling, resize observation, focus management, and cross-browser quirks represent hundreds of hours of edge-case work. Tour Kit exists specifically so React teams don't rebuild these patterns. The source-available core is BUSL-1.1-licensed and ships at under 23KB gzipped.
+Use a library unless your requirements are genuinely simple (a single tooltip pointing at one element). The positioning math, scroll handling, resize observation, focus management, and cross-browser quirks represent hundreds of hours of edge-case work. Tour Kit exists specifically so React teams don't rebuild these patterns. It is MIT-licensed, and the core ships at under 23KB gzipped.
 
 ### How do I handle product tours with React Server Components?
 

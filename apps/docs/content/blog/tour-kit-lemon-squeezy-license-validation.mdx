@@ -1,19 +1,24 @@
 ---
 title: "Tour Kit + Lemon Squeezy: handling license validation for Pro features"
 slug: "tour-kit-lemon-squeezy-license-validation"
-description: "Wire Lemon Squeezy license keys to Tour Kit Pro feature gating in React. Server-side validation, client caching, and the three gotchas we hit."
+description: "Lemon Squeezy license validation in React, as built for the old Tour Kit Pro tier. Tour Kit is now MIT and needs no key; the pattern still fits your own library."
 primary_keyword: "lemon squeezy license validation"
 secondary_keywords: ["lemon squeezy react integration", "license key product tour", "lemon squeezy license API react", "software license validation react"]
 category: "Integrations"
 schema_type: "TechArticle"
 spreadsheet_row: 199
 date: "2026-04-09"
-updated: "2026-04-09"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/tour-kit-lemon-squeezy-license-validation.png
 ---
 
 # Tour Kit + Lemon Squeezy: handling license validation for Pro features
+
+> **Update, October 2026: Tour Kit is now MIT-licensed and free, including in production.**
+> There are no Tour Kit Pro features left to gate, so you do not need a key or any of this code to
+> use Tour Kit. The Lemon Squeezy validation pattern still works for selling your own React library.
+> The post below is left as a record of the earlier model. See [pricing](/pricing).
 
 Selling a Pro tier for an open-source React library means you need a way to check whether the person running your code actually paid. Most developers reach for Stripe, build a custom licensing server, and spend a week on infrastructure that has nothing to do with their product. Lemon Squeezy ships license key generation and validation as a built-in feature. Setup took us about 3 hours instead of the 2-3 days we budgeted.
 

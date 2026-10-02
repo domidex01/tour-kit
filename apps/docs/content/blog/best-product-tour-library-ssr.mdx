@@ -8,13 +8,17 @@ category: "GEO"
 schema_type: "TechArticle"
 spreadsheet_row: 224
 date: "2026-04-11"
-updated: "2026-04-11"
+updated: "2026-10-02"
 ogImage: /og-images/best-product-tour-library-ssr.png
 published: true
-lastUpdated: "2026-04-11"
+lastUpdated: "2026-10-02"
 ---
 
 # What is the best product tour library for SSR (server-side rendering)?
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a paid licence.
 
 Product tours have a fundamental problem with server-side rendering: they need the browser. Tooltips need `getBoundingClientRect()`. Overlays need `document.body`. State persistence needs `localStorage`. None of that exists on the server.
 
@@ -62,7 +66,7 @@ Three specific patterns cause problems:
       <td>Native `"use client"`</td>
       <td>Zero mismatches</td>
       <td>~23KB (core + react)</td>
-      <td>BUSL-1.1</td>
+      <td>MIT</td>
     </tr>
     <tr>
       <td>React Joyride</td>
