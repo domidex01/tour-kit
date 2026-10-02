@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/surveys Context File
-Version: 5.0.0 | Generated: 2026-09-08
+Version: 6.0.1 | Generated: 2026-10-02
 Paste this into your LLM to get accurate answers about @tour-kit/surveys.
 =========================================================================
 
@@ -119,21 +119,22 @@ Utilities:
 TYPES
 -----
 
-    /** Survey measurement types */
-    export type SurveyType = 'nps' | 'csat' | 'ces' | 'custom'
+    /** Position options for slideout variant */
+    export type SlideoutPosition = 'left' | 'right'
     
-    /** Display mode variants */
-    export type DisplayMode = 'popover' | 'modal' | 'slideout' | 'banner' | 'inline'
+    /** Position options for banner variant */
+    export type BannerPosition = 'top' | 'bottom'
     
-    /** Survey priority levels for queue ordering */
-    export type SurveyPriority = 'critical' | 'high' | 'normal' | 'low'
+    /** Position options for popover variant */
+    export type PopoverPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
     
-    /** Frequency rules for how often a survey can be shown */
-    export type FrequencyRule =
-      | 'once'
-      | 'session'
-      | 'always'
-      | { type: 'times'; count: number }
+    /** Modal variant options */
+    export interface ModalOptions {
+      size?: 'sm' | 'md' | 'lg'
+      closeOnOverlayClick?: boolean
+      closeOnEscape?: boolean
+      showCloseButton?: boolean
+    }
 
     /** Slideout variant options */
     export interface SlideoutOptions {
@@ -160,7 +161,7 @@ TYPES
     }
 
     /** Main survey configuration */
-    export interface SurveyConfig {
+    export interface SurveyConfig extends EngineSurveyConfig {
       /** Unique identifier for the survey */
       id: string
     
@@ -169,9 +170,6 @@ TYPES
     
       /** Display mode variant */
       displayMode: DisplayMode
-    
-      /** Priority for queue ordering */
-      priority?: SurveyPriority
     
       /** Survey title */
       title?: string
@@ -184,9 +182,6 @@ TYPES
     
       /** Frequency rule for showing this survey */
       frequency?: FrequencyRule
-    
-      /** Schedule configuration (requires @tour-kit/scheduling) */
-      schedule?: import('@tour-kit/scheduling').Schedule
     
       /** Audience targeting conditions */
       audience?: AudienceCondition[]
@@ -234,32 +229,37 @@ TYPES
       onAnswer?: (questionId: string, value: import('./question').AnswerValue) => void
     }
 
-    /** Survey measurement types */
-    export type SurveyType = 'nps' | 'csat' | 'ces' | 'custom'
+    /** Position options for slideout variant */
+    export type SlideoutPosition = 'left' | 'right'
 
-    /** Display mode variants */
-    export type DisplayMode = 'popover' | 'modal' | 'slideout' | 'banner' | 'inline'
+    /** Position options for banner variant */
+    export type BannerPosition = 'top' | 'bottom'
 
-    /** Survey priority levels for queue ordering */
-    export type SurveyPriority = 'critical' | 'high' | 'normal' | 'low'
+    /** Position options for popover variant */
+    export type PopoverPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
 
-    /** Frequency rules for how often a survey can be shown */
-    export type FrequencyRule =
-      | 'once'
-      | 'session'
-      | 'always'
-      | { type: 'times';
+    /** Question input types */
+    export type QuestionType =
+      | 'rating'
+      | 'text'
+      | 'textarea'
+      | 'single-select'
+      | 'multi-select'
+      | 'boolean'
+    
+    /**
+     * Answer value union covering all question types.
+     *
+     * v3 Phase 3 (§0 C3) — the definition moved to `../lib/surveys-engine/types`.
+     * `SurveyState.responses` referenced it through inline `import('./question')`
+     * type imports, and THIS file imports `MediaSlotProps` from `@tour-kit/media`,
+     * whose declarations name React — so the engine's state type reached React
+     * through four inline imports that leave no trace in the emitted JS.
+     * `QuestionConfig` genuinely carries media and stays here.
+     */
+    export type { AnswerValue }
 
-    /** Reasons a survey was dismissed */
-    export type DismissalReason =
-      | 'close_button'
-      | 'overlay_click'
-      | 'escape_key'
-      | 'snooze'
-      | 'completed'
-      | 'programmatic'
-
-    ... and 27 more types. See source for full definitions.
+    ... and 18 more types. See source for full definitions.
 
 HOOKS
 -----

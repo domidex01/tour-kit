@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/core Context File
-Version: 1.0.7 | Generated: 2026-09-08
+Version: 3.0.1 | Generated: 2026-10-02
 Paste this into your LLM to get accurate answers about @tour-kit/core.
 =========================================================================
 
@@ -91,6 +91,7 @@ Types:
     UseFlowSessionReturn
     UseBroadcastReturn
     UseAdvanceOnOptions
+    SyncStorage
     LogLevel
     LoggerConfig
     ThrottledFunction
@@ -361,9 +362,8 @@ TYPES
      *
      * The `EligibilityReport` is what `explainTour` produces and
      * `useTourDiagnostic` exposes. The `DiagnosticGate` interface is the
-     * extension contract — upper packages (`@tour-kit/license`,
-     * `@tour-kit/scheduling`, etc.) implement it WITHOUT this package importing
-     * any of them. Hard rule: `@tour-kit/core` sits at the bottom of the
+     * extension contract — upper packages (`@tour-kit/scheduling`, etc.)
+     * implement it WITHOUT this package importing any of them. Hard rule: `@tour-kit/core` sits at the bottom of the
      * dependency graph; never `import { ... } from '@tour-kit/<anything>'` here.
      */
     
@@ -386,7 +386,19 @@ TYPES
       | 'AUTOSTART_DISABLED'
       | (string & {})
 
-    ... and 7 more types. See source for full definitions.
+    export type GateName =
+      | 'structure'
+      | 'audience'
+      | 'persistence'
+      | 'scheduling'
+      | 'license'
+      | 'target'
+      | 'when'
+      | 'route'
+      | 'autostart'
+      | (string & {})
+
+    ... and 6 more types. See source for full definitions.
 
 HOOKS
 -----
@@ -473,16 +485,16 @@ Example 3: Extension gates
 
     import type { DiagnosticGate } from '@tour-kit/core'
     
-    const licenseGate: DiagnosticGate = {
-      id: 'license',
+    const planGate: DiagnosticGate = {
+      id: 'plan',
       evaluate: async (ctx) => {
-        const ok = await checkLicense(ctx.userContext)
+        const ok = await userHasPaidPlan(ctx.userContext)
         return ok
-          ? { ok: true, gate: 'license' }
-          : { ok: false, gate: 'license', code: 'LICENSE_INVALID', message: 'License invalid', detail: {} }
+          ? { ok: true, gate: 'plan' }
+          : { ok: false, gate: 'plan', code: 'PLAN_REQUIRED', message: 'Paid plan required', detail: {} }
       },
     }
     
-    <TourProvider tours={tours} diagnose diagnosticGates={[licenseGate]}>
+    <TourProvider tours={tours} diagnose diagnosticGates={[planGate]}>
       ...
     </TourProvider>

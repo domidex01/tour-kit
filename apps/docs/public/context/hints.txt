@@ -1,5 +1,5 @@
 userTourKit — @tour-kit/hints Context File
-Version: 2.0.0 | Generated: 2026-09-08
+Version: 3.0.1 | Generated: 2026-10-02
 Paste this into your LLM to get accurate answers about @tour-kit/hints.
 =========================================================================
 
@@ -164,9 +164,9 @@ TYPES
        */
       hints?: HintConfig[]
       /**
-       * Backing storage for hint frequency persistence (Phase 3a). Defaults to
-       * `localStorage`. Tests inject an in-memory mock to keep jsdom global state
-       * untouched. Keys are namespaced as `tourkit:hint:freq:<hintId>`.
+       * Backing storage for hint frequency persistence. Defaults to
+       * `localStorage`, resolved by the engine at boot. Keys are namespaced as
+       * `tourkit:hint:freq:<hintId>`. Must be SYNCHRONOUS. Read once.
        */
       storage?: Storage
     }
@@ -213,13 +213,17 @@ TYPES
       onDismiss?: () => void
     }
 
-    export interface HintState {
-      id: string
-      isOpen: boolean
-      isDismissed: boolean
+    export interface HintsContextValue {
+      hints: Map<string, HintState>
+      activeHint: string | null
+      registerHint: (id: string) => void
+      unregisterHint: (id: string) => void
+      showHint: (id: string) => void
+      hideHint: (id: string) => void
+      dismissHint: (id: string) => void
+      resetHint: (id: string) => void
+      resetAllHints: () => void
     }
-
-    ... and 1 more types. See source for full definitions.
 
 HOOKS
 -----
