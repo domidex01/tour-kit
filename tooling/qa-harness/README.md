@@ -21,8 +21,8 @@ apps are excluded from the pnpm workspace in `pnpm-workspace.yaml`.
 - `examples/qa-vite` — Vite + React 19 + Tailwind v3
 
 Each has a page per package (tour, hints, announcements, surveys, adoption,
-media, ai-chat, license-test, …). Pro packages run **watermarked** unless you set
-`NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY` + `NEXT_PUBLIC_POLAR_ORG_ID`.
+media, ai-chat, …). Every package is MIT with no licence badge, so any
+"Unlicensed" badge on a page is a regression.
 
 ## Workflow
 

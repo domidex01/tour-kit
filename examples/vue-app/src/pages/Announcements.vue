@@ -9,12 +9,6 @@ import { provideAnnouncementsEngine } from '../composables/useAnnouncementsEngin
  * component is imported — the markup below is ordinary Vue. The engine owns
  * the queue, the priority ordering, the frequency rules, the audience and the
  * schedule; this page owns every pixel.
- *
- * NOTE: the engine path carries no licence gate. `<AnnouncementsProvider>`
- * wraps its tree in `<LicenseGate require="pro">`; the engine does not, and
- * whether non-React consumers should be gated is still an open commercial
- * question. This page is a demonstration of the runtime, not a statement that
- * the Pro tier is free through this door.
  */
 const { handle, state } = provideAnnouncementsEngine(
   [

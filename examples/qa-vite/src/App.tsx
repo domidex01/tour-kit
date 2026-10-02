@@ -11,7 +11,6 @@ import {
 } from '@tour-kit/analytics'
 import { type ChecklistConfig, ChecklistLauncher, ChecklistProvider } from '@tour-kit/checklists'
 import { HintsProvider } from '@tour-kit/hints'
-import { LicenseProvider } from '@tour-kit/license'
 import {
   MultiTourKitProvider,
   Tour,
@@ -33,7 +32,6 @@ import {
   ContactPage,
   FeaturesPage,
   HomePage,
-  LicenseTestPage,
   MediaPage,
   PricingPage,
   SurveysPage,
@@ -424,7 +422,6 @@ function AppContent() {
               <Route path="/media" element={<MediaPage />} />
               <Route path="/surveys" element={<SurveysPage />} />
               <Route path="/ai-chat" element={<AiChatPage />} />
-              <Route path="/license-test" element={<LicenseTestPage />} />
             </Routes>
           </Layout>
         </HintsProvider>
@@ -442,32 +439,19 @@ function App() {
   // Load Google Analytics if configured
   useGoogleAnalytics()
 
-  const location = useLocation()
-
-  // License test page renders outside the main LicenseProvider
-  // so "no-provider" scenario actually has no provider in the tree
-  if (location.pathname === '/license-test') {
-    return <LicenseTestPage />
-  }
-
   return (
-    <LicenseProvider
-      organizationId={import.meta.env.VITE_POLAR_ORG_ID ?? ''}
-      licenseKey={import.meta.env.VITE_TOUR_KIT_LICENSE_KEY ?? ''}
+    <AiChatProvider
+      config={{
+        endpoint: '/api/chat',
+        suggestions: {
+          static: ['How do I get started?', 'What features are available?', 'How do tours work?'],
+        },
+      }}
     >
-      <AiChatProvider
-        config={{
-          endpoint: '/api/chat',
-          suggestions: {
-            static: ['How do I get started?', 'What features are available?', 'How do tours work?'],
-          },
-        }}
-      >
-        <AnalyticsProvider config={analyticsConfig}>
-          <AppContent />
-        </AnalyticsProvider>
-      </AiChatProvider>
-    </LicenseProvider>
+      <AnalyticsProvider config={analyticsConfig}>
+        <AppContent />
+      </AnalyticsProvider>
+    </AiChatProvider>
   )
 }
 

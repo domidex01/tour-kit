@@ -17,7 +17,6 @@
     "@tour-kit/ai": "workspace:*",
     "@tour-kit/announcements": "workspace:*",
     "@tour-kit/core": "workspace:*",
-    "@tour-kit/license": "workspace:*",
     "@tour-kit/react": "workspace:*",
     "@tour-kit/scheduling": "workspace:*",
     "@tour-kit/surveys": "workspace:*",

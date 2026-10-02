@@ -8,9 +8,6 @@ import { provideSurveysEngine } from '../composables/useSurveysEngine'
  * No React is installed. The engine owns the queue, the six fatigue gates, the
  * audience, the schedule, persistence and the NPS scoring; this page owns the
  * markup and decides what a "question" looks like.
- *
- * NOTE: the engine path carries no licence gate, exactly as on the
- * announcements page. See that file's note.
  */
 // The ENGINE computes this — the page never scores anything itself.
 const score = ref<number | null>(null)

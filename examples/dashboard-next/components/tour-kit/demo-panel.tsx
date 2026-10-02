@@ -8,13 +8,11 @@ import { useAiChat } from '@tour-kit/ai'
 import { useAnnouncement } from '@tour-kit/announcements'
 import { useChecklist } from '@tour-kit/checklists'
 import { useTourActions } from '@tour-kit/core'
-import { LicenseWatermark, useLicense } from '@tour-kit/license'
 import { useSurvey } from '@tour-kit/surveys'
 import {
   Bell,
   CheckSquare,
   Compass,
-  KeyRound,
   Layers,
   MessageSquare,
   RotateCcw,
@@ -22,7 +20,6 @@ import {
   Target,
   TrendingUp,
 } from 'lucide-react'
-import { useState } from 'react'
 
 const TOUR_KIT_LS_PREFIXES = ['tour-kit:', 'tourkit-', 'tourkit:', 'tk-', 'tk:']
 
@@ -94,9 +91,7 @@ export function TourKitDemoPanel() {
   const adoptionStats = useAdoptionStats()
   const aiChat = useAiChat()
   const csat = useSurvey('onboarding-csat')
-  const { state: licenseState } = useLicense()
   const onboardingTour = useTourActions('dashboard-onboarding')
-  const [showWatermark, setShowWatermark] = useState(false)
 
   return (
     <Card>
@@ -117,19 +112,6 @@ export function TourKitDemoPanel() {
         </Button>
       </CardHeader>
       <CardContent className="space-y-3">
-        <DemoRow
-          icon={KeyRound}
-          pkg="@tour-kit/license"
-          title="License gate (Pro)"
-          state={`${licenseState.status} · ${licenseState.tier ?? '—'}`}
-          description="Soft-gate Pro packages on the client. Localhost uses dev bypass when NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY is set — the watermark is the production unlicensed UX."
-          action={{
-            label: showWatermark ? 'Hide watermark' : 'Show watermark',
-            onClick: () => setShowWatermark((v) => !v),
-          }}
-        />
-        {showWatermark && <LicenseWatermark />}
-
         <DemoRow
           icon={Compass}
           pkg="@tour-kit/react"
