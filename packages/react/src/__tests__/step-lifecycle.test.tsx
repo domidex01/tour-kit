@@ -12,16 +12,16 @@ import { act, render, waitFor } from '@testing-library/react'
  * 1. `TourProvider` is a binding over `createTourEngine()` (v2 §1.4) — one
  *    engine, no second implementation to drift. The core dep is also a caret
  *    range now, so a core hotfix flows into existing react installs.
- * 2. The react-owned provider symbol — the `LicenseGate` shim a consumer gets
- *    from `import { TourProvider } from '@tour-kit/react'` — must fire every
+ * 2. The provider symbol a consumer gets from
+ *    `import { TourProvider } from '@tour-kit/react'` — must fire every
  *    step hook in the engine's order. A regression here is invisible to
  *    core's own provider tests, which exercise core's component directly.
  */
 import { type Tour, useTour } from '@tour-kit/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { TourProvider } from '../components/provider/licensed-providers'
 import { Tour as DeclarativeTour } from '../components/tour/tour'
 import { TourStep } from '../components/tour/tour-step'
+import { TourProvider } from '../index'
 
 /**
  * The veto-capable hooks (`onBeforeShow` / `onBeforeHide`) type as

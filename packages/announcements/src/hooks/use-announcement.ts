@@ -24,8 +24,7 @@ export interface UseAnnouncementReturn {
   show: () => void
   /**
    * Force-show the announcement (admin/demo affordance). Bypasses frequency,
-   * cooldown, viewCount, isDismissed, and audience gates. License soft-gate
-   * is preserved — unlicensed renders still show the watermark.
+   * cooldown, viewCount, isDismissed, and audience gates.
    */
   forceShow: () => void
   /** Hide the announcement temporarily */

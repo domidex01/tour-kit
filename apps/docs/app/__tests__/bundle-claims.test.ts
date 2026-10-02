@@ -22,7 +22,6 @@ const ROW: Record<string, string> = {
   media: 'media',
   analytics: 'analytics:main',
   scheduling: 'scheduling',
-  license: 'license',
 }
 
 /**
@@ -61,7 +60,7 @@ function mdxFiles(dir: string, out: string[] = []): string[] {
 // flagged Zustand's 1.2KB and react-aria's 8kB as our claims. The React package
 // is policed through its scoped name only.
 const BARE =
-  'core|hints|checklists|announcements|surveys|adoption|media|analytics|scheduling|license'
+  'core|hints|checklists|announcements|surveys|adoption|media|analytics|scheduling'
 // `(?!\.js)` keeps "Analytics.js 2.0 loads about 16KB" — Segment's SDK — from
 // reading as a claim about `@tour-kit/analytics`.
 const PKG = String.raw`(?:@tour-kit\/(react|${BARE})|\b(${BARE})\b(?!\.js))`

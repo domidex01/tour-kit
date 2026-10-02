@@ -1,6 +1,5 @@
 'use client'
 
-import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import { useAdoptionAnalytics } from '../analytics'
 import {
@@ -244,9 +243,5 @@ export function AdoptionProvider({
     pendingNudges,
   }
 
-  return (
-    <LicenseGate require="pro">
-      <AdoptionContext.Provider value={contextValue}>{children}</AdoptionContext.Provider>
-    </LicenseGate>
-  )
+  return <AdoptionContext.Provider value={contextValue}>{children}</AdoptionContext.Provider>
 }

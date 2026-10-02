@@ -60,7 +60,7 @@ export interface TourProviderProps {
    */
   diagnose?: boolean
   /**
-   * Extension gates (license, scheduling, custom) appended to the diagnostic
+   * Extension gates (scheduling, custom) appended to the diagnostic
    * pipeline AFTER built-ins. Only consulted when `diagnose` is `true`.
    */
   diagnosticGates?: DiagnosticGate[]

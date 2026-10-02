@@ -3,9 +3,8 @@
  *
  * The `EligibilityReport` is what `explainTour` produces and
  * `useTourDiagnostic` exposes. The `DiagnosticGate` interface is the
- * extension contract — upper packages (`@tour-kit/license`,
- * `@tour-kit/scheduling`, etc.) implement it WITHOUT this package importing
- * any of them. Hard rule: `@tour-kit/core` sits at the bottom of the
+ * extension contract — upper packages (`@tour-kit/scheduling`, etc.)
+ * implement it WITHOUT this package importing any of them. Hard rule: `@tour-kit/core` sits at the bottom of the
  * dependency graph; never `import { ... } from '@tour-kit/<anything>'` here.
  */
 

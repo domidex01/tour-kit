@@ -20,7 +20,6 @@ export default defineConfig({
   external: [
     '@amplitude/analytics-browser',
     '@tour-kit/core',
-    '@tour-kit/license',
     'mixpanel-browser',
     'posthog-js',
     'react',

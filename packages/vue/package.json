@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "description": "Headless Vue 3 binding for the Tour Kit engine — product tours with no React installed.",
   "author": "Tour Kit Team",
-  "license": "BUSL-1.1",
+  "license": "MIT",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",
@@ -41,7 +41,7 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["LICENSE.md", "dist", "README.md", "CHANGELOG.md"],
+  "files": ["LICENSE", "dist", "README.md", "CHANGELOG.md"],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",
@@ -56,8 +56,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@tour-kit/core": "workspace:^",
-    "@tour-kit/license": "workspace:*"
+    "@tour-kit/core": "workspace:^"
   },
   "peerDependencies": {
     "vue": "^3.3.0",

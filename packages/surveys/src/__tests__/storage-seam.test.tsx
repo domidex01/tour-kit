@@ -1,5 +1,4 @@
 import { act, render, waitFor } from '@testing-library/react'
-import type * as React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { SurveysProvider } from '../context'
 import { useSurvey } from '../hooks'
@@ -28,11 +27,6 @@ const adapterSpy = vi.fn(() => ({
   getItem: (k: string) => written.get(k) ?? null,
   setItem: (k: string, v: string) => void written.set(k, v),
   removeItem: (k: string) => void written.delete(k),
-}))
-
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  ProGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
 vi.mock('@tour-kit/core', async (importOriginal) => {

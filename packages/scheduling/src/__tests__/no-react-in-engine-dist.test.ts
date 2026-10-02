@@ -43,7 +43,7 @@ const distExists = () => pkgDistExists(PKG_ROOT)
 
 // `@tour-kit/analytics` is the hooks' optional peer. It must not follow the
 // twenty-four pure functions through the engine door.
-const FORBIDDEN = ['react', 'react-dom', '@tour-kit/license', '@tour-kit/analytics'] as const
+const FORBIDDEN = ['react', 'react-dom', '@tour-kit/analytics'] as const
 
 /**
  * What the CONTROL asserts the main closure still names — deliberately NOT the
@@ -55,7 +55,7 @@ const FORBIDDEN = ['react', 'react-dom', '@tour-kit/license', '@tour-kit/analyti
  * Forbidding it on the engine side is still right; a guard may only use as its
  * control what the sibling demonstrably contains.
  */
-const CONTROL_SPECIFIERS = ['react', '@tour-kit/license', '@tour-kit/analytics'] as const
+const CONTROL_SPECIFIERS = ['react', '@tour-kit/analytics'] as const
 
 /**
  * Any BARE specifier, in every call shape a bundler emits — `from`, `import(`
@@ -123,7 +123,7 @@ describe('@tour-kit/scheduling/engine ships no React', () => {
     assertEngineExportsResolve(expect, PKG_ROOT)
   })
 
-  it('no source file the engine barrel reaches imports react, license or analytics', () => {
+  it('no source file the engine barrel reaches imports react or analytics', () => {
     const files = reachableFrom(join(PKG_ROOT, 'src', 'engine', 'index.ts'))
     // A silently-empty walk passes every assertion below it forever. Say out
     // loud what it must have found. 15 = barrel + utils/index + 9 util leaves +
@@ -135,7 +135,7 @@ describe('@tour-kit/scheduling/engine ships no React', () => {
     for (const file of files) {
       const source = read(file)
       expect(file.endsWith('.tsx'), `${file} is a React file`).toBe(false)
-      for (const pkg of ['react', '@tour-kit/license', '@tour-kit/analytics'] as const) {
+      for (const pkg of ['react', '@tour-kit/analytics'] as const) {
         expect(specifierPattern(pkg).test(source), `${file} imports ${pkg}`).toBe(false)
       }
     }

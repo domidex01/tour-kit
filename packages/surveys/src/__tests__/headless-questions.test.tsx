@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import type { HeadlessQuestionBooleanRenderProps } from '../components/headless/headless-question-boolean'
 import { HeadlessQuestionBoolean } from '../components/headless/headless-question-boolean'
 import type { HeadlessQuestionRatingRenderProps } from '../components/headless/headless-question-rating'
@@ -8,12 +8,6 @@ import type { HeadlessQuestionSelectRenderProps } from '../components/headless/h
 import { HeadlessQuestionSelect } from '../components/headless/headless-question-select'
 import type { HeadlessQuestionTextRenderProps } from '../components/headless/headless-question-text'
 import { HeadlessQuestionText } from '../components/headless/headless-question-text'
-
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }: { children: React.ReactNode }) => children,
-  ProGate: ({ children }: { children: React.ReactNode }) => children,
-  useLicenseGate: () => ({ isAllowed: true, isLoading: false }),
-}))
 
 describe('HeadlessQuestionRating', () => {
   it('should provide expected render props', () => {

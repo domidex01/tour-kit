@@ -1,108 +1,86 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { describe, expect, it } from 'vitest'
-// Strips comments before scanning. `core/src/types/diagnostic.ts` names
-// `@tour-kit/license` in a doc comment describing the extension contract —
-// the invariant is what a module IMPORTS, not what it mentions.
+// `specifierPattern` matches `from`, `import(` and `require(` — an import, not a
+// test that names the package to assert it is absent. `readCode` strips
+// comments, so a doc comment quoting an import cannot trip it either.
+import { specifierPattern } from '../../tooling/bundle-check/closure.mjs'
 import { readCode } from '../../tooling/bundle-check/engine-guard.mjs'
 
 const PACKAGES_ROOT = path.resolve(__dirname, '..')
+const LICENCE = '@tour-kit/license'
 
 /**
- * Packages that must never import `@tour-kit/license`.
+ * Tour Kit is MIT (2026-10, plan/v3/mit-relicense-plan.md). `@tour-kit/license`
+ * is retired: no package may import it or depend on it.
  *
- * This used to read `['core', 'react', 'hints', 'vue', 'svelte']` and was
- * named after a free tier that no longer exists — every package is now
- * BSL 1.1, so "free package" is not the reason any of these stay licence-free.
- * One structural reason survives, and it applies to exactly one package:
- *
- * - `core` cannot import the licence package because the licence package
- *   imports `core`. The rule here is a cycle guard, not a policy — and it is
- *   also what keeps `core/engine` React-free and core's 77 B of dist-gzip
- *   headroom intact.
- *
- * `react` and `hints` were removed when they started mounting `LicenseGate`,
- * which is the whole point of the licence-payment work — the badge reaching
- * the packages consumers actually install. `vue` and `svelte` followed when
- * they went public under BUSL-1.1: they have no React tree to portal a badge
- * from, so they start the DOM gate from `@tour-kit/license/headless` instead.
- * That entry is React-free, which is what keeps their `.d.ts` chains clean.
+ * This is the guard against a repeat of 2.1.1, when `@tour-kit/react` and
+ * `@tour-kit/hints` shipped the licence badge as a 2.x patch. If this test goes
+ * red, someone put the gate back — that needs a decision, not a test edit.
  */
-const LICENCE_FREE_PACKAGES = ['core']
+const PACKAGES = fs
+  .readdirSync(PACKAGES_ROOT, { withFileTypes: true })
+  .filter((d) => d.isDirectory() && d.name !== 'license' && d.name !== '__tests__')
+  .filter((d) => fs.existsSync(path.join(PACKAGES_ROOT, d.name, 'package.json')))
+  .map((d) => d.name)
 
-/** Packages that MUST import it — the positive control, so a broken scan fails. */
-const LICENCE_GATED_PACKAGES = ['react', 'hints', 'vue', 'svelte']
+const SOURCE_EXTENSIONS = ['.ts', '.tsx', '.mts', '.js', '.mjs', '.vue', '.svelte']
 
-function getAllFiles(dir: string, extensions: string[]): string[] {
-  const results: string[] = []
-
-  if (!fs.existsSync(dir)) return results
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true })
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name)
-    if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name === 'dist') continue
-      results.push(...getAllFiles(fullPath, extensions))
-    } else if (extensions.some((ext) => entry.name.endsWith(ext))) {
-      results.push(fullPath)
-    }
-  }
-  return results
+function sourceFiles(pkg: string): string[] {
+  const srcDir = path.join(PACKAGES_ROOT, pkg, 'src')
+  if (!fs.existsSync(srcDir)) return []
+  // `readdirSync(..., { recursive: true })`, not `fs.globSync`: CI runs Node 20.
+  return fs
+    .readdirSync(srcDir, { recursive: true, encoding: 'utf8' })
+    .filter((f) => SOURCE_EXTENSIONS.some((ext) => f.endsWith(ext)))
+    .map((f) => path.join(srcDir, f))
 }
 
-describe('Licence-free packages — zero @tour-kit/license imports', () => {
-  for (const pkg of LICENCE_FREE_PACKAGES) {
-    describe(`@tour-kit/${pkg}`, () => {
-      it('has no @tour-kit/license references in source files', () => {
-        const srcDir = path.join(PACKAGES_ROOT, pkg, 'src')
-        const files = getAllFiles(srcDir, ['.ts', '.tsx'])
+function filesImporting(pkg: string, specifier: string): string[] {
+  const pattern = specifierPattern(specifier)
+  return sourceFiles(pkg)
+    .filter((f) => pattern.test(readCode(f)))
+    .map((f) => path.relative(PACKAGES_ROOT, f))
+}
 
-        for (const file of files) {
-          const content = readCode(file)
-          const relativePath = path.relative(PACKAGES_ROOT, file)
-          expect(
-            content.includes('@tour-kit/license'),
-            `Found @tour-kit/license reference in ${relativePath}`
-          ).toBe(false)
-        }
-      })
-
-      it('has no @tour-kit/license in package.json dependencies', () => {
-        const pkgJsonPath = path.join(PACKAGES_ROOT, pkg, 'package.json')
-        const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'))
-
-        const allDeps = {
-          ...pkgJson.dependencies,
-          ...pkgJson.devDependencies,
-          ...pkgJson.peerDependencies,
-        }
-
-        expect(allDeps).not.toHaveProperty('@tour-kit/license')
-      })
-    })
+function allDeps(pkg: string): Record<string, string> {
+  const json = JSON.parse(fs.readFileSync(path.join(PACKAGES_ROOT, pkg, 'package.json'), 'utf8'))
+  return {
+    ...json.dependencies,
+    ...json.devDependencies,
+    ...json.peerDependencies,
+    ...json.optionalDependencies,
   }
+}
+
+describe('no package imports or depends on the retired @tour-kit/license', () => {
+  it.each(PACKAGES)('@tour-kit/%s source never imports it', (pkg) => {
+    expect(filesImporting(pkg, LICENCE)).toEqual([])
+  })
+
+  it.each(PACKAGES)('@tour-kit/%s package.json never depends on it', (pkg) => {
+    expect(allDeps(pkg)).not.toHaveProperty(LICENCE)
+  })
 })
 
-// Positive control. Without this, deleting `getAllFiles`'s recursion or
-// pointing PACKAGES_ROOT at an empty directory would make every assertion
-// above pass vacuously.
-describe('Licence-gated packages — the scan can actually see an import', () => {
-  for (const pkg of LICENCE_GATED_PACKAGES) {
-    describe(`@tour-kit/${pkg}`, () => {
-      it('does reference @tour-kit/license in source', () => {
-        const files = getAllFiles(path.join(PACKAGES_ROOT, pkg, 'src'), ['.ts', '.tsx'])
-        expect(files.length).toBeGreaterThan(0)
-        const hits = files.filter((f) => readCode(f).includes('@tour-kit/license'))
-        expect(hits.length).toBeGreaterThan(0)
-      })
+// Positive control. Without it, a walker that returns nothing (a wrong root, a
+// broken recursion, an extension typo) would make every case above pass.
+describe('positive control — the same scan does see real imports', () => {
+  it('walks every package that ships, not an empty list', () => {
+    for (const pkg of ['core', 'react', 'hints', 'surveys', 'vue', 'svelte']) {
+      expect(PACKAGES).toContain(pkg)
+    }
+  })
 
-      it('declares @tour-kit/license as a dependency', () => {
-        const pkgJson = JSON.parse(
-          fs.readFileSync(path.join(PACKAGES_ROOT, pkg, 'package.json'), 'utf-8')
-        )
-        expect(pkgJson.dependencies).toHaveProperty('@tour-kit/license')
-      })
-    })
-  }
+  it.each(['react', 'hints', 'adoption', 'surveys', 'vue', 'svelte'])(
+    '@tour-kit/%s source is found to import @tour-kit/core',
+    (pkg) => {
+      expect(sourceFiles(pkg).length).toBeGreaterThan(5)
+      expect(filesImporting(pkg, '@tour-kit/core').length).toBeGreaterThan(0)
+    }
+  )
+
+  it('the dependency reader sees a real dependency', () => {
+    expect(allDeps('react')).toHaveProperty('@tour-kit/core')
+  })
 })

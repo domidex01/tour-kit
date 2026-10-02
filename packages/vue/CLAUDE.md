@@ -57,13 +57,9 @@ no `@floating-ui/*`. The consumer renders their own card — see
   `/engine` subpath is sufficient. Run through turbo (`turbo run test
   --filter=@tour-kit/vue`) so core builds first; do not add a source alias, which
   would also drag core's `src/**` into this package's coverage denominator.
-- **The licence gate is started in `onMounted`, and its release joins `detach`.**
-  `startLicenseGate` comes from `@tour-kit/license/headless` — the React-free
-  entry — and reads `location` plus `document.body`, so it cannot run in
-  `setup()`. It is not optional and not a peer: an opt-in gate is no gate.
-- **BUSL-1.1, published.** Production use needs a key; development, evaluation,
-  testing and CI do not. Without a key the binding works in full and layers the
-  badge on non-development hosts.
+- **MIT, published, with no licence gate.** The `license` option on
+  `TourKitOptions` is a deprecated, ignored pass-through kept so 1.0.x call
+  sites still compile — removing it is a breaking change.
 
 ## Commands
 

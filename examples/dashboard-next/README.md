@@ -23,28 +23,16 @@ pnpm --filter dashboard-next dev
 Open http://localhost:3000 (or 3001 if 3000 is taken).
 
 `.env.local` (the `/api/chat` route returns a stub when `OPENAI_API_KEY` is
-empty, and the Polar org id is only consulted on non-dev hosts):
+empty):
 
 ```
-NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY=
-NEXT_PUBLIC_POLAR_ORGANIZATION_ID=
 OPENAI_API_KEY=
 ```
-
-License key behavior on localhost:
-
-- Empty key — Tour Kit treats the app as unlicensed and the standard "Tour Kit
-  · Unlicensed · Buy license" badge renders bottom-right. Useful as a missing
-  env-var canary before deploy and for previewing the free-tier experience of
-  the Pro packages.
-- Non-empty key — the localhost dev bypass kicks in: no Polar call, no
-  activation slot consumed, and no watermark.
 
 ## Package map
 
 | Package | File | What it does here |
 | --- | --- | --- |
-| `@tour-kit/license` | `app/providers.tsx`, `app/dashboard/settings/page.tsx`, `components/tour-kit/license-debug-panel.tsx` | Wraps the app in `<LicenseProvider>`; Settings → Billing gates `<AdvancedBillingControls>` behind `<LicenseGate require="pro">`; debug panel prints `useLicense()` state. |
 | `@tour-kit/analytics` | `app/providers.tsx` | `consolePlugin` streams tour/hint/announcement/checklist/adoption events to the browser console. |
 | `@tour-kit/react` | `components/tour-kit/onboarding-tour.tsx` | 5-step dashboard onboarding tour that autostarts on first visit. `onComplete` persists to localStorage and triggers the CSAT survey. |
 | `@tour-kit/hints` | `components/tour-kit/hints.tsx` | `DarkModeHint` on `#dark-mode-toggle` (rendered by dashboard layout); `ExportHint` on `#export-btn` (rendered by project kanban page). |
@@ -76,15 +64,14 @@ The tour, hints, and adoption triggers all target stable IDs:
 ## Provider stack (`app/providers.tsx`)
 
 ```
-LicenseProvider
-└── AnalyticsProvider
-    └── TourKitProvider
-        └── HintsProvider
-            └── AnnouncementsProvider
-                └── ChecklistProvider
-                    └── AdoptionProvider
-                        └── SurveysProvider
-                            └── AiChatProvider
+AnalyticsProvider
+└── TourKitProvider
+    └── HintsProvider
+        └── AnnouncementsProvider
+            └── ChecklistProvider
+                └── AdoptionProvider
+                    └── SurveysProvider
+                        └── AiChatProvider
 ```
 
 ## Scripts

@@ -107,9 +107,7 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
   // the same commit — `- announcements <14 KB, surveys <12.5 KB, license <8 KB`
   // gave all three patterns the SAME line to match, so an unanchored
   // /surveys\s*<…/ read the announcements number and raising one raised all
-  // three. `license` is the sharp edge the recipe calls out: prose elsewhere in
-  // CLAUDE.md must say "licence gate", never "license <", or this first-match
-  // scan reads a sentence instead of a budget row (:196 and :206 already do).
+  // three.
   announcements: {
     pattern: /^\s*-\s*announcements\s*<\s*([\d.]+)\s*KB/m,
     mode: 'exact',
@@ -129,16 +127,6 @@ const CLAIMS: Record<string, { pattern: RegExp; mode: 'exact' | 'ceiling' }> = {
   // bullet beginning `- surveys/engine` cannot satisfy it.
   'surveys:engine': {
     pattern: /surveys\/engine subpath\s*<\s*([\d.]+)\s*KB/,
-    mode: 'exact',
-  },
-  license: { pattern: /^\s*-\s*license\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },
-  // Anchored on `license/headless subpath`, exactly as the four engine rows
-  // are. The sibling `license` pattern above requires whitespace after the
-  // name, so a bullet beginning `- license/headless` cannot satisfy it. This
-  // row exists because `vue` and `svelte` hold the licence package external:
-  // their own rows cannot show what a non-React consumer downloads.
-  'license:headless': {
-    pattern: /license\/headless subpath\s*<\s*([\d.]+)\s*KB/,
     mode: 'exact',
   },
   media: { pattern: /^\s*-\s*media\s*<\s*([\d.]+)\s*KB/m, mode: 'exact' },

@@ -102,31 +102,25 @@
     "name": "@tour-kit/analytics/posthog",
     "path": "packages/analytics/dist/plugins/posthog.js",
     "limit": "1500 B",
-    "ignore": ["@tour-kit/core", "@tour-kit/license", "posthog-js", "react", "react-dom"]
+    "ignore": ["@tour-kit/core", "posthog-js", "react", "react-dom"]
   },
   {
     "name": "@tour-kit/analytics/mixpanel",
     "path": "packages/analytics/dist/plugins/mixpanel.js",
     "limit": "1500 B",
-    "ignore": ["@tour-kit/core", "@tour-kit/license", "mixpanel-browser", "react", "react-dom"]
+    "ignore": ["@tour-kit/core", "mixpanel-browser", "react", "react-dom"]
   },
   {
     "name": "@tour-kit/analytics/amplitude",
     "path": "packages/analytics/dist/plugins/amplitude.js",
     "limit": "1000 B",
-    "ignore": [
-      "@tour-kit/core",
-      "@tour-kit/license",
-      "@amplitude/analytics-browser",
-      "react",
-      "react-dom"
-    ]
+    "ignore": ["@tour-kit/core", "@amplitude/analytics-browser", "react", "react-dom"]
   },
   {
     "name": "@tour-kit/analytics/google-analytics",
     "path": "packages/analytics/dist/plugins/google-analytics.js",
     "limit": "1000 B",
-    "ignore": ["@tour-kit/core", "@tour-kit/license", "react", "react-dom"]
+    "ignore": ["@tour-kit/core", "react", "react-dom"]
   },
   {
     "name": "@tour-kit/scheduling",
@@ -139,11 +133,6 @@
     "path": "packages/scheduling/dist/engine/index.js",
     "limit": "3 KB",
     "ignore": ["@tour-kit/analytics"]
-  },
-  {
-    "name": "@tour-kit/license",
-    "path": "packages/license/dist/index.js",
-    "limit": "70 KB"
   },
   {
     "name": "@tour-kit/ai (client)",

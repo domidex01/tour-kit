@@ -6,12 +6,6 @@ import { useSurvey, useSurveyScoring } from '../hooks'
 import type { CESResult, CSATResult, NPSResult } from '../types'
 import type { SurveyConfig } from '../types'
 
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  ProGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useLicenseGate: () => ({ isAllowed: true, isLoading: false }),
-}))
-
 vi.mock('@tour-kit/core', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tour-kit/core')>()
   return {

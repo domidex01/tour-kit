@@ -24,7 +24,6 @@ export default defineConfig({
     '@tour-kit/core',
     '@tour-kit/analytics',
     '@tour-kit/scheduling',
-    '@tour-kit/license',
     '@floating-ui/react',
     '@radix-ui/react-dialog',
     'tailwindcss',

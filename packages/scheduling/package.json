@@ -3,7 +3,7 @@
   "version": "2.0.1",
   "description": "React scheduling hooks with IANA timezones, business hours, blackouts & recurring patterns — show UI on a schedule.",
   "author": "Tour Kit Team",
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "MIT",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",
@@ -68,9 +68,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
-  },
-  "dependencies": {
-    "@tour-kit/license": "workspace:*"
   },
   "peerDependencies": {
     "@tour-kit/analytics": "workspace:*",

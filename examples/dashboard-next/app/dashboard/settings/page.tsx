@@ -1,14 +1,11 @@
 'use client'
 
-import { LicenseDebugPanel } from '@/components/tour-kit/license-debug-panel'
-import { UpgradePromptCard } from '@/components/tour-kit/upgrade-prompt-card'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { LicenseGate } from '@tour-kit/license'
 
 function AdvancedBillingControls() {
   return (
@@ -105,11 +102,7 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <LicenseGate require="pro" fallback={<UpgradePromptCard />}>
-            <AdvancedBillingControls />
-          </LicenseGate>
-
-          <LicenseDebugPanel />
+          <AdvancedBillingControls />
         </TabsContent>
 
         <TabsContent value="integrations" className="space-y-4 pt-4">

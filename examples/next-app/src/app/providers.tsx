@@ -14,7 +14,6 @@ import {
 import { type AnnouncementConfig, AnnouncementsProvider } from '@tour-kit/announcements'
 import { type ChecklistConfig, ChecklistLauncher, ChecklistProvider } from '@tour-kit/checklists'
 import { HintsProvider } from '@tour-kit/hints'
-import { LicenseProvider } from '@tour-kit/license'
 import {
   MultiTourKitProvider,
   Tour,
@@ -517,34 +516,29 @@ function ProvidersInner({ children }: { children: React.ReactNode }) {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <LicenseProvider
-      organizationId="your-polar-org-id" // TODO: replace with your Polar organization ID
-      licenseKey={process.env.NEXT_PUBLIC_TOUR_KIT_LICENSE_KEY ?? ''}
+    <AiChatProvider
+      config={{
+        endpoint: '/api/chat',
+        tourContext: true,
+        suggestions: {
+          static: ['How do I get started?', 'What features are available?', 'How do tours work?'],
+        },
+        persistence: 'local',
+      }}
     >
-      <AiChatProvider
-        config={{
-          endpoint: '/api/chat',
-          tourContext: true,
-          suggestions: {
-            static: ['How do I get started?', 'What features are available?', 'How do tours work?'],
-          },
-          persistence: 'local',
-        }}
-      >
-        <AnalyticsProvider config={analyticsConfig}>
-          <AnnouncementsProvider
-            announcements={demoAnnouncements}
-            userContext={{ plan: 'pro', role: 'admin' }}
-            onAnnouncementShow={(id) => console.log('📣 [announcement] shown:', id)}
-            onAnnouncementDismiss={(id, reason) =>
-              console.log('📣 [announcement] dismissed:', id, reason)
-            }
-            onAnnouncementComplete={(id) => console.log('📣 [announcement] completed:', id)}
-          >
-            <ProvidersInner>{children}</ProvidersInner>
-          </AnnouncementsProvider>
-        </AnalyticsProvider>
-      </AiChatProvider>
-    </LicenseProvider>
+      <AnalyticsProvider config={analyticsConfig}>
+        <AnnouncementsProvider
+          announcements={demoAnnouncements}
+          userContext={{ plan: 'pro', role: 'admin' }}
+          onAnnouncementShow={(id) => console.log('📣 [announcement] shown:', id)}
+          onAnnouncementDismiss={(id, reason) =>
+            console.log('📣 [announcement] dismissed:', id, reason)
+          }
+          onAnnouncementComplete={(id) => console.log('📣 [announcement] completed:', id)}
+        >
+          <ProvidersInner>{children}</ProvidersInner>
+        </AnnouncementsProvider>
+      </AnalyticsProvider>
+    </AiChatProvider>
   )
 }

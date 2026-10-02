@@ -3,7 +3,7 @@
   "version": "7.0.1",
   "description": "In-app product announcements for React — modal, toast, banner, slideout, spotlight with frequency rules and changelog support.",
   "author": "Tour Kit Team",
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "MIT",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",
@@ -119,7 +119,6 @@
   },
   "dependencies": {
     "@tour-kit/core": "workspace:*",
-    "@tour-kit/license": "workspace:*",
     "@tour-kit/media": "workspace:*",
     "@floating-ui/react": "catalog:",
     "@radix-ui/react-slot": "catalog:",

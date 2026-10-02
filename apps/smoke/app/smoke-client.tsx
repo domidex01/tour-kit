@@ -7,7 +7,6 @@ import * as announcements from '@tour-kit/announcements'
 import * as checklists from '@tour-kit/checklists'
 import * as core from '@tour-kit/core'
 import * as hints from '@tour-kit/hints'
-import * as license from '@tour-kit/license'
 import * as media from '@tour-kit/media'
 import * as react from '@tour-kit/react'
 import * as scheduling from '@tour-kit/scheduling'
@@ -21,7 +20,6 @@ const packages: Record<string, Record<string, unknown>> = {
   '@tour-kit/checklists': checklists,
   '@tour-kit/core': core,
   '@tour-kit/hints': hints,
-  '@tour-kit/license': license,
   '@tour-kit/media': media,
   '@tour-kit/react': react,
   '@tour-kit/scheduling': scheduling,

@@ -3,7 +3,7 @@
   "version": "6.0.1",
   "description": "React in-app microsurveys — NPS, CSAT, CES with skip logic, audience targeting, fatigue prevention and 5 display modes.",
   "author": "Tour Kit Team",
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "MIT",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",
@@ -89,7 +89,6 @@
   },
   "dependencies": {
     "@tour-kit/core": "workspace:*",
-    "@tour-kit/license": "workspace:*",
     "@tour-kit/media": "workspace:*",
     "@floating-ui/react": "catalog:",
     "@radix-ui/react-dialog": "catalog:",

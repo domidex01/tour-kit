@@ -16,7 +16,6 @@ export const TARBALL_DIR = resolve(HERE, '.tarballs')
 // Order matters: dependencies before dependents so `pnpm pack` sees fresh deps.
 export const TK_PACKAGES = [
   'core',
-  'license',
   'analytics',
   'react',
   'hints',

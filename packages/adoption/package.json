@@ -3,7 +3,7 @@
   "version": "3.0.3",
   "description": "React feature adoption tracking — measure which features users actually adopt and re-engage them with contextual nudges.",
   "author": "Tour Kit Team",
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "MIT",
   "homepage": "https://usertourkit.com/",
   "repository": {
     "type": "git",
@@ -77,7 +77,6 @@
     "@tour-kit/analytics": "workspace:*",
     "@radix-ui/react-slot": "catalog:",
     "@tour-kit/core": "workspace:*",
-    "@tour-kit/license": "workspace:*",
     "class-variance-authority": "catalog:"
   },
   "peerDependencies": {

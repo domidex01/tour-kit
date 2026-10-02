@@ -21,7 +21,6 @@
     "@tour-kit/checklists": "latest",
     "@tour-kit/core": "latest",
     "@tour-kit/hints": "latest",
-    "@tour-kit/license": "latest",
     "@tour-kit/media": "latest",
     "@tour-kit/react": "latest",
     "@tour-kit/scheduling": "latest",

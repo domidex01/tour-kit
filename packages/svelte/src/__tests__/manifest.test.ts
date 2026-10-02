@@ -44,18 +44,15 @@ describe('@tour-kit/svelte package.json', () => {
     expect(pkg.peerDependenciesMeta?.['@sveltejs/kit']?.optional).toBe(true)
   })
 
-  it('is published, under BUSL-1.1, with the licence text in the tarball', () => {
-    // The binding layers the unlicensed badge, so the terms it layers it under
-    // have to actually ship. `files` is explicit rather than left to npm's
-    // implicit licence-file include — the same call the core/react/hints
-    // relicense made.
+  it('is published under MIT, with the licence text in the tarball', () => {
+    // `files` is explicit rather than left to npm's implicit licence-file
+    // include, so a rename of the file cannot silently drop it.
     expect(pkg.private).toBeUndefined()
-    expect(pkg.license).toBe('BUSL-1.1')
-    expect(pkg.files).toContain('LICENSE.md')
+    expect(pkg.license).toBe('MIT')
+    expect(pkg.files).toContain('LICENSE')
   })
 
-  it('depends on the licence package — the badge is not optional', () => {
-    // An optional peer would make the gate opt-in, which is no gate at all.
-    expect(pkg.dependencies?.['@tour-kit/license']).toBe('workspace:*')
+  it('does not depend on the retired licence package', () => {
+    expect(pkg.dependencies?.['@tour-kit/license']).toBeUndefined()
   })
 })

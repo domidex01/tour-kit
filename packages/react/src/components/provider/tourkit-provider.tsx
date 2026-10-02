@@ -8,7 +8,6 @@ import {
   TourProvider,
   type Tour as TourType,
 } from '@tour-kit/core'
-import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 
 interface TourRegistryContextValue {
@@ -121,30 +120,25 @@ export function MultiTourKitProvider({
     [registerTour, unregisterTour, tours]
   )
 
-  // The multi-tour path gets the badge too. The badge is held by a count in
-  // `@tour-kit/license`'s `mountWatermark`, so mounting this alongside
-  // <TourProvider> or a Pro package still renders exactly one.
   return (
-    <LicenseGate require="pro">
-      <TourRegistryContext.Provider value={registryValue}>
-        <CoreTourKitProvider
-          config={config}
-          onTourStart={onTourStart}
-          onTourComplete={onTourComplete}
-          onTourSkip={onTourSkip}
-          onStepView={onStepView}
+    <TourRegistryContext.Provider value={registryValue}>
+      <CoreTourKitProvider
+        config={config}
+        onTourStart={onTourStart}
+        onTourComplete={onTourComplete}
+        onTourSkip={onTourSkip}
+        onStepView={onStepView}
+      >
+        <TourProvider
+          tours={tours}
+          router={router}
+          routePersistence={routePersistence}
+          autoNavigate={autoNavigate}
+          onNavigationRequired={onNavigationRequired}
         >
-          <TourProvider
-            tours={tours}
-            router={router}
-            routePersistence={routePersistence}
-            autoNavigate={autoNavigate}
-            onNavigationRequired={onNavigationRequired}
-          >
-            {children}
-          </TourProvider>
-        </CoreTourKitProvider>
-      </TourRegistryContext.Provider>
-    </LicenseGate>
+          {children}
+        </TourProvider>
+      </CoreTourKitProvider>
+    </TourRegistryContext.Provider>
   )
 }

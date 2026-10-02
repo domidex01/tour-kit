@@ -9,7 +9,7 @@
  *   - Case 1 asserts the four engine files exist. A wrong path makes every
  *     negative assertion below pass forever.
  *   - Case 2 is a POSITIVE CONTROL over the sibling main entry, which
- *     legitimately names React and the licence gate. If it stops tripping,
+ *     legitimately names React. If it stops tripping,
  *     either the matcher broke or the package changed shape — both deserve a
  *     red, and without it a broken regex is green forever.
  *
@@ -45,7 +45,7 @@ const P = enginePaths(PKG_ROOT)
 // silent skip (measured in v2 §1.5 — "3 skipped", green, proving nothing).
 const distExists = () => pkgDistExists(PKG_ROOT)
 
-const FORBIDDEN = ['react', 'react-dom', '@tour-kit/license'] as const
+const FORBIDDEN = ['react', 'react-dom'] as const
 
 /**
  * The BARE `@tour-kit/core`, in every call shape a bundler emits.
@@ -80,7 +80,6 @@ describe('@tour-kit/analytics/engine ships no React', () => {
   it.skipIf(!distExists())('CONTROL — the main entry trips the same matcher', () => {
     // If this stops tripping, the matcher broke or the package changed shape.
     expect(specifierPattern('react').test(closureSrc(P.mainJs))).toBe(true)
-    expect(specifierPattern('@tour-kit/license').test(closureSrc(P.mainJs))).toBe(true)
     expect(specifierPattern('react').test(closureSrc(P.mainDts))).toBe(true)
   })
 
@@ -139,7 +138,7 @@ describe('@tour-kit/analytics/engine ships no React', () => {
     assertEngineExportsResolve(expect, PKG_ROOT)
   })
 
-  it('no source file the engine barrel reaches imports react, license or bare core', () => {
+  it('no source file the engine barrel reaches imports react or bare core', () => {
     const files = reachableFrom(join(PKG_ROOT, 'src', 'engine', 'index.ts'))
     // The walker can fail silently; say out loud what it must have found.
     // The floor is pinned at today's exact count (barrel + tracker + queue +
@@ -152,9 +151,6 @@ describe('@tour-kit/analytics/engine ships no React', () => {
       const source = read(file)
       expect(file.endsWith('.tsx'), `${file} is a React file`).toBe(false)
       expect(specifierPattern('react').test(source), `${file} imports react`).toBe(false)
-      expect(specifierPattern('@tour-kit/license').test(source), `${file} imports license`).toBe(
-        false
-      )
       expect(BARE_CORE.test(source), `${file} imports bare core`).toBe(false)
     }
   })

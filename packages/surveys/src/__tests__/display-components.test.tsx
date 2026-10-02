@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react'
-import type * as React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { HeadlessSurvey } from '../components/headless/headless-survey'
 import { SurveyBanner } from '../components/survey-banner'
@@ -7,11 +6,6 @@ import { SurveyInline } from '../components/survey-inline'
 import { SurveySlideout } from '../components/survey-slideout'
 import { SurveysProvider } from '../context'
 import type { SurveyConfig } from '../types'
-
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  ProGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}))
 
 vi.mock('@tour-kit/core', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tour-kit/core')>()

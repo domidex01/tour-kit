@@ -7,13 +7,6 @@ import { SurveysProvider } from '../context'
 import { useSurvey, useSurveys } from '../hooks'
 import type { SurveyConfig } from '../types'
 
-// License gate is a pass-through in tests (copied from question-rating.test.tsx:7-11).
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  ProGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useLicenseGate: () => ({ isAllowed: true, isLoading: false }),
-}))
-
 // Module-scoped storage Map + tour-context stub (copied from storage.test.tsx:13-31).
 // Only the persistence-guard test exercises it; the gate tests pass `storage={null}`.
 const sharedStore = new Map<string, string>()

@@ -2,7 +2,6 @@
 
 import { useAnalyticsOptional } from '@tour-kit/analytics'
 import { useSegments } from '@tour-kit/core'
-import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import { createAnnouncementsHandle } from '../lib/announcements-engine/create-announcements-handle'
 import { STORAGE_KEY_PREFIX } from '../lib/announcements-engine/persistence'
@@ -16,10 +15,10 @@ import { AnnouncementsContext } from './announcements-context'
  *
  * Everything that was 831 lines of reducer, scheduler orchestration, queue
  * timers, persistence and eligibility now lives in `lib/announcements-engine/`
- * and runs with no React at all. What is left here is the four things only
+ * and runs with no React at all. What is left here is the three things only
  * React can do: read the two hooks the engine cannot (`useSegments`,
  * `useAnalyticsOptional`), subscribe a component tree to the engine's snapshot,
- * forward prop changes as verbs, and wrap the tree in the licence gate.
+ * and forward prop changes as verbs.
  *
  * `FORCE_SHOW_BYPASS` is re-exported from THIS module path under the same name
  * on purpose: `__tests__/force-show.test.tsx:11` imports it from
@@ -149,8 +148,6 @@ export function AnnouncementsProvider({
   )
 
   return (
-    <LicenseGate require="pro">
-      <AnnouncementsContext.Provider value={contextValue}>{children}</AnnouncementsContext.Provider>
-    </LicenseGate>
+    <AnnouncementsContext.Provider value={contextValue}>{children}</AnnouncementsContext.Provider>
   )
 }

@@ -30,8 +30,7 @@ export interface AnnouncementsContextValue {
   /**
    * Force-show an announcement, bypassing every gate enumerated in
    * `FORCE_SHOW_BYPASS` (frequency, scheduler cooldown, viewCount, isDismissed,
-   * audience). The `<LicenseGate require="pro">` wrapper is NOT bypassed —
-   * unlicensed renders still show the license watermark/warning state.
+   * audience).
    *
    * Used by admin previews and demo affordances. `viewCount` is still
    * incremented (so admins see real telemetry deltas) and analytics events

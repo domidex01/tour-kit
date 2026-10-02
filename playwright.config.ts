@@ -9,15 +9,6 @@ export default defineConfig({
   reporter: [['html', { open: 'never' }], ['list']],
 
   projects: [
-    // Localhost tests — dev bypass active, all packages render
-    {
-      name: 'vite-localhost',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'http://localhost:5173',
-      },
-      testMatch: /vite\/.*localhost/,
-    },
     {
       name: 'next-localhost',
       use: {
@@ -25,24 +16,6 @@ export default defineConfig({
         baseURL: 'http://localhost:3000',
       },
       testMatch: /next\/.*localhost/,
-    },
-    // Production domain tests — gate active
-    // Requires: 127.0.0.1 tourkit-test.dev in /etc/hosts
-    {
-      name: 'vite-production',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'http://tourkit-test.dev:5173',
-      },
-      testMatch: /vite\/.*production/,
-    },
-    {
-      name: 'next-production',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'http://tourkit-test.dev:3000',
-      },
-      testMatch: /next\/.*production/,
     },
     // v2 §1.5 — the two non-React bindings. Both examples run the same
     // three-step tour, so both lanes run the same eight cases.
@@ -65,12 +38,6 @@ export default defineConfig({
   ],
 
   webServer: [
-    {
-      command: 'pnpm --filter vite-tour-kit-demo dev',
-      port: 5173,
-      reuseExistingServer: true,
-      timeout: 60_000,
-    },
     {
       command: 'pnpm --filter next-tour-kit-demo dev',
       port: 3000,

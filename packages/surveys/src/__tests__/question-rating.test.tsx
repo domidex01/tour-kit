@@ -5,12 +5,6 @@ import { axe } from 'vitest-axe'
 import { QuestionRating } from '../components/question-rating'
 import type { RatingScale } from '../types/question'
 
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }: { children: React.ReactNode }) => children,
-  ProGate: ({ children }: { children: React.ReactNode }) => children,
-  useLicenseGate: () => ({ isAllowed: true, isLoading: false }),
-}))
-
 describe('QuestionRating', () => {
   const defaultProps = {
     id: 'rating-test',
