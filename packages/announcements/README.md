@@ -9,7 +9,7 @@
 
 Drop-in **product announcements**, **what's-new modals**, **release notes**, and **in-app notifications** for React. Five UI variants — Modal, Slideout, Banner, Toast, Spotlight — with a priority queue, frequency rules, audience targeting, and optional schedule gating.
 
-> **Pro tier** — requires a license key. See [Licensing](https://usertourkit.com/docs/licensing).
+> **MIT licensed.** Free for any use, including production, with no licence key.
 
 **Alternative to:** [Headway](https://headwayapp.co/), [Beamer](https://www.getbeamer.com/), [Announcekit](https://announcekit.app/), [Pendo](https://www.pendo.io/) announcements, [LaunchNotes](https://www.launchnotes.com/), in-app changelog widgets.
 
@@ -28,35 +28,32 @@ Drop-in **product announcements**, **what's-new modals**, **release notes**, and
 ## Installation
 
 ```bash
-npm install @tour-kit/announcements @tour-kit/license
+npm install @tour-kit/announcements
 # or
-pnpm add @tour-kit/announcements @tour-kit/license
+pnpm add @tour-kit/announcements
 ```
 
 ## Quick Start
 
 ```tsx
-import { LicenseProvider } from '@tour-kit/license'
 import { AnnouncementsProvider, AnnouncementModal } from '@tour-kit/announcements'
 
 function App() {
   return (
-    <LicenseProvider licenseKey={process.env.NEXT_PUBLIC_TOURKIT_LICENSE!}>
-      <AnnouncementsProvider
-        announcements={[
-          {
-            id: 'welcome',
-            variant: 'modal',
-            title: 'Welcome to v2!',
-            description: "Here's what's new.",
-            frequency: 'once',
-          },
-        ]}
-      >
-        <AnnouncementModal id="welcome" />
-        <YourApp />
-      </AnnouncementsProvider>
-    </LicenseProvider>
+    <AnnouncementsProvider
+      announcements={[
+        {
+          id: 'welcome',
+          variant: 'modal',
+          title: 'Welcome to v2!',
+          description: "Here's what's new.",
+          frequency: 'once',
+        },
+      ]}
+    >
+      <AnnouncementModal id="welcome" />
+      <YourApp />
+    </AnnouncementsProvider>
   )
 }
 ```
@@ -217,7 +214,6 @@ import { DEFAULT_QUEUE_CONFIG } from '@tour-kit/announcements'
 - [`@tour-kit/react`](https://www.npmjs.com/package/@tour-kit/react) — sequential product tours
 - [`@tour-kit/hints`](https://www.npmjs.com/package/@tour-kit/hints) — single-element feature hints
 - [`@tour-kit/checklists`](https://www.npmjs.com/package/@tour-kit/checklists) — onboarding checklists
-- [`@tour-kit/license`](https://www.npmjs.com/package/@tour-kit/license) — required Pro license key validation
 
 ## Documentation
 
@@ -225,7 +221,7 @@ Full documentation: [https://usertourkit.com/docs/announcements](https://usertou
 
 ## License
 
-Pro tier — see [LICENSE.md](./LICENSE.md). Requires a Tour Kit Pro license key.
+MIT. See [LICENSE](./LICENSE).
 
 ## `@tour-kit/announcements/engine` — the React-free subpath
 
@@ -265,6 +261,3 @@ import { isScheduleActive } from '@tour-kit/scheduling/engine'
 
 createAnnouncementsEngine({ announcements, isScheduleActive })
 ```
-
-> The engine path is currently **ungated**: the Pro licence check lives in
-> `<AnnouncementsProvider>`, not in the engine.

@@ -33,24 +33,10 @@ behaviours; positioning is yours (`@floating-ui/dom` is a good choice — see
 
 ## Licence
 
-`@tour-kit/vue` is published under the [Business Source License 1.1](./LICENSE.md).
-Development, evaluation, testing, CI and any non-production environment are free
-and need no key. **Production use needs a licence key** — a one-time purchase
-from $9.99 at [usertourkit.com/pricing](https://usertourkit.com/pricing). Every
-version converts to MIT on its Change Date, four years after release.
+[MIT](./LICENSE). Free for any use, including production, with no licence key and
+no badge.
 
-Without a key the binding still works in full; it layers a small badge in the
-corner on non-development hosts. Pass the key to remove it:
+1.0.x was published under BUSL-1.1 and layered an "Unlicensed" badge in production
+without a key. 1.1 and later are MIT: `npm update` removes it. The `license` prop is
+still accepted so 1.0.x code compiles, but it is ignored; you can delete it.
 
-```vue
-<TourProvider
-  :tours="tours"
-  :license="{ licenseKey: import.meta.env.VITE_TOUR_KIT_LICENSE_KEY }"
->
-  <RouterView />
-</TourProvider>
-```
-
-The prop is reactive: a key fetched after mount still takes the badge down. On
-a development host it is never sent anywhere, so local work never consumes one
-of its activation slots.

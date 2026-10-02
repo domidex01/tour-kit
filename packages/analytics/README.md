@@ -9,7 +9,7 @@
 
 Drop-in **plugin-based analytics** for Tour Kit. Pipe tour, hint, checklist, announcement, and feature-adoption events into **PostHog**, **Mixpanel**, **Amplitude**, **Google Analytics 4**, the console (for debugging), or any custom backend with a tiny plugin object.
 
-> **Pro tier** — requires a license key. See [Licensing](https://usertourkit.com/docs/licensing).
+> **MIT licensed.** Free for any use, including production, with no licence key.
 
 **Use this when:** you already have your own product analytics stack and want Tour Kit events flowing into it.
 
@@ -26,9 +26,9 @@ Drop-in **plugin-based analytics** for Tour Kit. Pipe tour, hint, checklist, ann
 ## Installation
 
 ```bash
-npm install @tour-kit/analytics @tour-kit/license
+npm install @tour-kit/analytics
 # or
-pnpm add @tour-kit/analytics @tour-kit/license
+pnpm add @tour-kit/analytics
 ```
 
 Install the vendor SDK for the plugins you use:
@@ -42,24 +42,21 @@ pnpm add @amplitude/analytics-browser        # for amplitudePlugin
 ## Quick Start
 
 ```tsx
-import { LicenseProvider } from '@tour-kit/license'
 import { AnalyticsProvider, posthogPlugin, consolePlugin } from '@tour-kit/analytics'
 import { TourKitProvider } from '@tour-kit/react'
 
 function App() {
   return (
-    <LicenseProvider licenseKey={process.env.NEXT_PUBLIC_TOURKIT_LICENSE!}>
-      <AnalyticsProvider
-        plugins={[
-          posthogPlugin(),
-          process.env.NODE_ENV === 'development' && consolePlugin(),
-        ].filter(Boolean)}
-      >
-        <TourKitProvider>
-          <YourApp />
-        </TourKitProvider>
-      </AnalyticsProvider>
-    </LicenseProvider>
+    <AnalyticsProvider
+      plugins={[
+        posthogPlugin(),
+        process.env.NODE_ENV === 'development' && consolePlugin(),
+      ].filter(Boolean)}
+    >
+      <TourKitProvider>
+        <YourApp />
+      </TourKitProvider>
+    </AnalyticsProvider>
   )
 }
 ```
@@ -115,8 +112,8 @@ Every event payload includes `timestamp` and `sessionId`; tour events also inclu
 ### The React-free subpath
 
 `@tour-kit/analytics/engine` gives a Vue, Svelte or Node consumer the tracker
-and the five plugins with no `react`, no `react/jsx-runtime` and no
-`@tour-kit/license` in its runtime or its type declarations:
+and the five plugins with no `react` and no `react/jsx-runtime` in its runtime
+or its type declarations:
 
 ```ts
 import { createAnalytics, consolePlugin } from '@tour-kit/analytics/engine'
@@ -209,7 +206,6 @@ track({ name: 'custom_event', data: { ... }, skipPlugins: ['posthog'] })
 - [`@tour-kit/checklists`](https://www.npmjs.com/package/@tour-kit/checklists) — emits task completion events
 - [`@tour-kit/surveys`](https://www.npmjs.com/package/@tour-kit/surveys) — emits survey events
 - [`@tour-kit/announcements`](https://www.npmjs.com/package/@tour-kit/announcements) — emits announcement events
-- [`@tour-kit/license`](https://www.npmjs.com/package/@tour-kit/license) — required Pro license validation
 
 ## Documentation
 
@@ -217,4 +213,4 @@ Full documentation: [https://usertourkit.com/docs/analytics](https://usertourkit
 
 ## License
 
-Pro tier — see [LICENSE.md](./LICENSE.md). Requires a Tour Kit Pro license key.
+MIT. See [LICENSE](./LICENSE).

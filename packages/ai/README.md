@@ -9,7 +9,7 @@
 
 Drop-in **AI chat assistant** for React onboarding flows — a **UI + orchestration layer** over the [Vercel AI SDK](https://sdk.vercel.ai/). This package owns the chat UI, document chunking, prompt assembly, and the RAG/CAG wiring; embeddings (`embedMany`), similarity (`cosineSimilarity`), and generation (`streamText`) are delegated to the SDK. RAG runs over an **in-memory vector store** (a linear cosine scan — no index, no persistence); bring your own persistent backend via a custom `VectorStoreAdapter` for production scale.
 
-> **Pro tier** — requires a license key. See [Licensing](https://usertourkit.com/docs/licensing).
+> **MIT licensed.** Free for any use, including production, with no licence key.
 
 **Alternative to:** [Intercom Fin](https://www.intercom.com/fin), [Chatbase](https://www.chatbase.co/), [Crisp MagicReply](https://crisp.chat/), [Pendo Listen](https://www.pendo.io/), hand-rolled OpenAI/Anthropic chat-with-tour-context.
 
@@ -28,9 +28,9 @@ Drop-in **AI chat assistant** for React onboarding flows — a **UI + orchestrat
 ## Installation
 
 ```bash
-npm install @tour-kit/ai @tour-kit/license @ai-sdk/react ai
+npm install @tour-kit/ai @ai-sdk/react ai
 # or
-pnpm add @tour-kit/ai @tour-kit/license @ai-sdk/react ai
+pnpm add @tour-kit/ai @ai-sdk/react ai
 ```
 
 For server-side, install your AI provider:
@@ -44,18 +44,15 @@ pnpm add @ai-sdk/openai      # or @ai-sdk/anthropic, @ai-sdk/google, etc.
 ### Client
 
 ```tsx
-import { LicenseProvider } from '@tour-kit/license'
 import { AiChatProvider, AiChatPanel, AiChatToggle } from '@tour-kit/ai'
 
 function App() {
   return (
-    <LicenseProvider licenseKey={process.env.NEXT_PUBLIC_TOURKIT_LICENSE!}>
-      <AiChatProvider config={{ endpoint: '/api/chat', tourContext: true }}>
-        <YourApp />
-        <AiChatToggle />
-        <AiChatPanel />
-      </AiChatProvider>
-    </LicenseProvider>
+    <AiChatProvider config={{ endpoint: '/api/chat', tourContext: true }}>
+      <YourApp />
+      <AiChatToggle />
+      <AiChatPanel />
+    </AiChatProvider>
   )
 }
 ```
@@ -267,7 +264,6 @@ import type {
 
 - [`@tour-kit/react`](https://www.npmjs.com/package/@tour-kit/react) — sequential product tours (the AI assistant integrates with these)
 - [`@tour-kit/checklists`](https://www.npmjs.com/package/@tour-kit/checklists) — onboarding checklists (use AI to nudge incomplete tasks)
-- [`@tour-kit/license`](https://www.npmjs.com/package/@tour-kit/license) — required Pro license validation
 
 ## Documentation
 
@@ -275,4 +271,4 @@ Full documentation: [https://usertourkit.com/docs/ai](https://usertourkit.com/do
 
 ## License
 
-Pro tier — see [LICENSE.md](./LICENSE.md). Requires a Tour Kit Pro license key.
+MIT. See [LICENSE](./LICENSE).

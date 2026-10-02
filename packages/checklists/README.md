@@ -9,7 +9,7 @@
 
 Drop-in **onboarding checklists**, **getting-started panels**, **activation funnels**, and **setup wizards** for React. Tasks support dependencies (one unlocks the next), progress tracking, completion conditions, and headless render-prop variants.
 
-> **Pro tier** — requires a license key. See [Licensing](https://usertourkit.com/docs/licensing).
+> **MIT licensed.** Free for any use, including production, with no licence key.
 
 **Alternative to:** [Appcues](https://www.appcues.com/) checklists, [Userpilot](https://userpilot.com/) checklists, [Userflow](https://userflow.com/), [Stripe](https://stripe.com/)-style activation lists, hand-rolled task panels.
 
@@ -27,15 +27,14 @@ Drop-in **onboarding checklists**, **getting-started panels**, **activation funn
 ## Installation
 
 ```bash
-npm install @tour-kit/checklists @tour-kit/license
+npm install @tour-kit/checklists
 # or
-pnpm add @tour-kit/checklists @tour-kit/license
+pnpm add @tour-kit/checklists
 ```
 
 ## Quick Start
 
 ```tsx
-import { LicenseProvider } from '@tour-kit/license'
 import {
   ChecklistProvider,
   Checklist,
@@ -58,18 +57,16 @@ const onboarding = createChecklist({
 
 function App() {
   return (
-    <LicenseProvider licenseKey={process.env.NEXT_PUBLIC_TOURKIT_LICENSE!}>
-      <ChecklistProvider checklists={[onboarding]}>
-        <ChecklistPanel checklistId="onboarding">
-          <ChecklistProgress />
-          <Checklist>
-            <ChecklistTask taskId="profile" />
-            <ChecklistTask taskId="invite" />
-            <ChecklistTask taskId="project" />
-          </Checklist>
-        </ChecklistPanel>
-      </ChecklistProvider>
-    </LicenseProvider>
+    <ChecklistProvider checklists={[onboarding]}>
+      <ChecklistPanel checklistId="onboarding">
+        <ChecklistProgress />
+        <Checklist>
+          <ChecklistTask taskId="profile" />
+          <ChecklistTask taskId="invite" />
+          <ChecklistTask taskId="project" />
+        </Checklist>
+      </ChecklistPanel>
+    </ChecklistProvider>
   )
 }
 ```
@@ -210,7 +207,7 @@ import type {
 
 `@tour-kit/checklists/engine` is the checklists state machine with no React in
 it — no `react`, no `react/jsx-runtime`, no `@tour-kit/media`, no
-`@tour-kit/analytics`, no `@tour-kit/license`, no `@floating-ui/react`, no
+`@tour-kit/analytics`, no `@floating-ui/react`, no
 `@radix-ui/react-slot`, in neither the runtime nor the `.d.ts` closure. A Vue,
 Svelte or vanilla app runs checklists with none of them installed and renders
 the list itself.
@@ -257,13 +254,8 @@ Exports: `createChecklistsEngine`, `createChecklistsHandle`,
 `calculateProgress`, `getNextTask`, `getLockedTasks`, `createChecklist`,
 `createTask`, plus the engine types. The reducer stays internal.
 
-**React-free is not a licence bypass.** `@tour-kit/checklists` is a Pro
-package; the `/engine` subpath simply has no React layer for `LicenseGate` to
-live in, and using it is subject to the same licence as the rest of the
-package.
-
 One caveat, honestly: `@tour-kit/checklists` still hard-depends on
-`@tour-kit/media` and `@tour-kit/license`, which list React as a required peer,
+`@tour-kit/media`, which lists React as a required peer,
 so React lands in your `node_modules`. It does **not** land in your bundle:
 nothing `/engine` imports reaches it, which
 `no-react-in-engine-dist.test.ts` asserts against the built bytes on every run.
@@ -288,7 +280,6 @@ type TaskCompletionCondition = {
 - **Circular deps fail differently across APIs.** `createChecklist()` logs an error; `resolveTaskDependencies()` throws; `hasCircularDependency()` is silent. Use the silent check before passing user-built configs.
 - **Render order ≠ dependency order.** Tasks render in array order; dependency resolution affects locked state, not display order.
 - **`<ChecklistPanel defaultExpanded>`** writes the expanded state once per mount to avoid render loops with context-scoped callbacks.
-- **Pair with `<LicenseProvider>`** in production. Dev environments (`localhost`, `127.0.0.1`, `*.local`) bypass the Pro gate.
 
 ## Related packages
 
@@ -296,7 +287,6 @@ type TaskCompletionCondition = {
 - [`@tour-kit/announcements`](https://www.npmjs.com/package/@tour-kit/announcements) — modal / toast / banner announcements
 - [`@tour-kit/adoption`](https://www.npmjs.com/package/@tour-kit/adoption) — feature adoption tracking
 - [`@tour-kit/analytics`](https://www.npmjs.com/package/@tour-kit/analytics) — track checklist completion events
-- [`@tour-kit/license`](https://www.npmjs.com/package/@tour-kit/license) — required Pro license validation
 
 ## Documentation
 
@@ -304,4 +294,4 @@ Full documentation: [https://usertourkit.com/docs/checklists](https://usertourki
 
 ## License
 
-Pro tier — see [LICENSE.md](./LICENSE.md). Requires a Tour Kit Pro license key.
+MIT. See [LICENSE](./LICENSE).

@@ -9,7 +9,7 @@
 
 **Feature adoption tracking** and **nudge system** for React — measure which product features users actually adopt, identify churned features, and surface contextual prompts to drive re-engagement. Ships with an admin dashboard and ready-made conditional render helpers.
 
-> **Pro tier** — requires a license key. See [Licensing](https://usertourkit.com/docs/licensing).
+> **MIT licensed.** Free for any use, including production, with no licence key.
 
 **Alternative to:** [Pendo](https://www.pendo.io/) adoption analytics, [Userpilot](https://userpilot.com/) feature engagement, [Appcues](https://www.appcues.com/) adoption, [Amplitude](https://amplitude.com/) feature engagement, [FullStory](https://www.fullstory.com/) adoption signals.
 
@@ -27,15 +27,14 @@
 ## Installation
 
 ```bash
-npm install @tour-kit/adoption @tour-kit/license
+npm install @tour-kit/adoption
 # or
-pnpm add @tour-kit/adoption @tour-kit/license
+pnpm add @tour-kit/adoption
 ```
 
 ## Quick Start
 
 ```tsx
-import { LicenseProvider } from '@tour-kit/license'
 import {
   AdoptionProvider,
   useFeature,
@@ -59,11 +58,9 @@ const features = [
 
 function App() {
   return (
-    <LicenseProvider licenseKey={process.env.NEXT_PUBLIC_TOURKIT_LICENSE!}>
-      <AdoptionProvider features={features}>
-        <YourApp />
-      </AdoptionProvider>
-    </LicenseProvider>
+    <AdoptionProvider features={features}>
+      <YourApp />
+    </AdoptionProvider>
   )
 }
 
@@ -243,14 +240,12 @@ import type {
 
 - **Storage prefixes** — adoption uses prefixed storage keys to avoid collisions with tour state.
 - **Analytics is opt-in** — `useAdoptionAnalytics()` becomes a no-op without `AnalyticsProvider`.
-- **License gate** — components throw / render fallback UI when the license is invalid. Pair with `<LicenseProvider>` in production.
 
 ## Related packages
 
 - [`@tour-kit/analytics`](https://www.npmjs.com/package/@tour-kit/analytics) — optional, auto-emits events to PostHog, Mixpanel, Amplitude, GA4
 - [`@tour-kit/react`](https://www.npmjs.com/package/@tour-kit/react) — sequential product tours
 - [`@tour-kit/hints`](https://www.npmjs.com/package/@tour-kit/hints) — single-element feature hints
-- [`@tour-kit/license`](https://www.npmjs.com/package/@tour-kit/license) — required Pro license validation
 
 ## Documentation
 
@@ -258,4 +253,4 @@ Full documentation: [https://usertourkit.com/docs/adoption](https://usertourkit.
 
 ## License
 
-Pro tier — see [LICENSE.md](./LICENSE.md). Requires a Tour Kit Pro license key.
+MIT. See [LICENSE](./LICENSE).

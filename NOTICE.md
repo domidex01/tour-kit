@@ -1,37 +1,25 @@
 # Licensing Notice
 
-Tour Kit is a multi-package monorepo with three licensing tiers. Each package directory ships its own licence file, and that file is the authoritative terms for the package. The repository root `LICENSE` file (MIT) covers repository tooling, docs, and examples only — it does **not** cover any package.
+Every published `@tour-kit/*` package is released under the MIT licence. Each
+package directory ships a copy of it as `LICENSE`, and the repository root
+[`LICENSE`](./LICENSE) covers the repository's tooling, docs and examples.
 
-## Source-available packages (BUSL-1.1)
+## Earlier versions
 
-Free for development, evaluation, testing, CI, and any non-production environment. **Production use requires a userTourKit licence key.** Each version converts to MIT on its Change Date, four years after release. Terms live in each package's `LICENSE.md`:
+A published version keeps the licence it was released under:
 
-- `@tour-kit/core` — [`packages/core/LICENSE.md`](./packages/core/LICENSE.md)
-- `@tour-kit/react` — [`packages/react/LICENSE.md`](./packages/react/LICENSE.md)
-- `@tour-kit/hints` — [`packages/hints/LICENSE.md`](./packages/hints/LICENSE.md)
-- `@tour-kit/vue` — [`packages/vue/LICENSE.md`](./packages/vue/LICENSE.md)
-- `@tour-kit/svelte` — [`packages/svelte/LICENSE.md`](./packages/svelte/LICENSE.md)
+- `@tour-kit/core`, `@tour-kit/react` and `@tour-kit/hints` 3.0.x, and
+  `@tour-kit/vue` and `@tour-kit/svelte` 1.0.x, were published under the
+  Business Source License 1.1.
+- `@tour-kit/adoption`, `ai`, `analytics`, `announcements`, `checklists`,
+  `media`, `scheduling` and `surveys` were published under a proprietary licence
+  before October 2026.
 
-## MIT packages (free, open-source)
+The current releases of all of them are MIT.
 
-Covered by the MIT licence declared in each package's `package.json`, no key in any environment:
+## `@tour-kit/license`
 
-- `@tour-kit/codemods` — [`packages/codemods`](./packages/codemods)
-- `@tour-kit/testing-library` — [`packages/testing-library`](./packages/testing-library)
-- `@tour-kit/playwright` — [`packages/playwright`](./packages/playwright)
-
-## Commercial packages (Proprietary)
-
-Proprietary commercial software requiring a paid license. Each package's `LICENSE.md` file is the authoritative terms for that package:
-
-- `@tour-kit/adoption` — [`packages/adoption/LICENSE.md`](./packages/adoption/LICENSE.md)
-- `@tour-kit/ai` — [`packages/ai/LICENSE.md`](./packages/ai/LICENSE.md)
-- `@tour-kit/analytics` — [`packages/analytics/LICENSE.md`](./packages/analytics/LICENSE.md)
-- `@tour-kit/announcements` — [`packages/announcements/LICENSE.md`](./packages/announcements/LICENSE.md)
-- `@tour-kit/checklists` — [`packages/checklists/LICENSE.md`](./packages/checklists/LICENSE.md)
-- `@tour-kit/license` — [`packages/license/LICENSE.md`](./packages/license/LICENSE.md)
-- `@tour-kit/media` — [`packages/media/LICENSE.md`](./packages/media/LICENSE.md)
-- `@tour-kit/scheduling` — [`packages/scheduling/LICENSE.md`](./packages/scheduling/LICENSE.md)
-- `@tour-kit/surveys` — [`packages/surveys/LICENSE.md`](./packages/surveys/LICENSE.md)
-
-Visit <https://usertourkit.com/pricing> for licence keys and commercial licensing.
+The licence-key package is retired. It is deprecated on npm, it is no longer
+published, and no Tour Kit package depends on it. Its source stays in
+[`packages/license`](./packages/license) under its own
+[`LICENSE.md`](./packages/license/LICENSE.md).
