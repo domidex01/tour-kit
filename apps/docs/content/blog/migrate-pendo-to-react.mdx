@@ -8,12 +8,16 @@ category: "Tutorials"
 schema_type: "TechArticle"
 spreadsheet_row: 98
 date: "2026-04-07"
-updated: "2026-04-07"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/migrate-pendo-to-react.png
 ---
 
 # How to export Pendo tours to a self-owned React solution
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 You're paying Pendo $40K-$80K a year for product tours. Your React app has grown. The guides take 54KB of third-party JavaScript on every page load, your SPA throws `pendo is undefined` errors after navigation, and your design team gave up trying to match your Tailwind tokens inside Pendo's theme editor.
 
@@ -321,7 +325,7 @@ Every migration involves tradeoffs, and moving from a full-featured SaaS platfor
 <tr><th>Dimension</th><th>Pendo</th><th>Tour Kit</th></tr>
 </thead>
 <tbody>
-<tr><td>Annual cost (mid-market)</td><td>$40K-$80K</td><td>$0 (MIT) or $9.99 one-time Pro</td></tr>
+<tr><td>Annual cost (mid-market)</td><td>$40K-$80K</td><td>$0 (MIT)</td></tr>
 <tr><td>Bundle impact</td><td>54KB third-party script</td><td>&lt;23KB core gzipped, tree-shakeable</td></tr>
 <tr><td>Guide creation</td><td>Visual builder, no-code</td><td>React components, requires developers</td></tr>
 <tr><td>Design system fit</td><td>Theme editor with constraints</td><td>Full headless, your CSS</td></tr>
@@ -394,7 +398,7 @@ Tour Kit handles guides and onboarding, not analytics. It fires typed event call
 
 ### How much does a Pendo migration save?
 
-A mid-market Pendo contract runs $40K-$80K per year with 5-20% annual renewal increases. Tour Kit's core packages are BUSL-1.1-licensed and source-available. [Pro features](/pricing) (adoption tracking, scheduling, surveys) are a one-time $9.99 purchase. Even accounting for 40 hours of developer time at $150/hour ($6,000), the migration pays for itself within the first quarter.
+A mid-market Pendo contract runs $40K-$80K per year with 5-20% annual renewal increases. Tour Kit is MIT-licensed and free, including in production, and that covers adoption tracking, scheduling and surveys too. Even accounting for 40 hours of developer time at $150/hour ($6,000), the migration pays for itself within the first quarter.
 
 ### What about Pendo's mobile SDK?
 
@@ -467,7 +471,7 @@ export const faqJsonLd = {
       "name": "How much does a Pendo migration save?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A mid-market Pendo contract runs $40K-$80K per year. Tour Kit's core packages are BUSL-1.1-licensed and source-available. Pro features are a one-time $9.99 purchase. Even accounting for developer time, the migration pays for itself within the first quarter."
+        "text": "A mid-market Pendo contract runs $40K-$80K per year. Tour Kit is MIT-licensed and free, including in production. Even accounting for developer time, the migration pays for itself within the first quarter."
       }
     },
     {

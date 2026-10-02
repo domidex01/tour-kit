@@ -8,12 +8,16 @@ category: "Listicles"
 schema_type: "TechArticle"
 spreadsheet_row: 51
 date: "2026-04-07"
-updated: "2026-04-07"
+updated: "2026-10-02"
 ogImage: /og-images/best-alternatives-building-onboarding-in-house.png
 published: true
 ---
 
 # 5 best alternatives to building onboarding in-house
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 Building onboarding in-house sounds reasonable until you do the math. A conservative estimate puts year-one cost at $70,784, split between $45,018 in upfront development and $25,766 in annual maintenance ([Appcues, 2026](https://www.appcues.com/blog/build-vs-buy-saas)). That's before you tackle WCAG compliance, analytics, or the iteration tax of every copy change requiring an engineer. We tested five alternatives that get you further for less.
 
@@ -59,7 +63,7 @@ We didn't test SaaS platforms that require vendor contracts and per-MAU pricing.
 <td>&lt;23KB core</td>
 <td>✅</td>
 <td>✅ strict</td>
-<td>BUSL-1.1</td>
+<td>MIT</td>
 <td>✅</td>
 <td>Design system teams</td>
 </tr>
@@ -99,7 +103,7 @@ We didn't test SaaS platforms that require vendor contracts and per-MAU pricing.
 <td>&#126;12KB</td>
 <td>✅</td>
 <td>✅</td>
-<td>BUSL-1.1</td>
+<td>MIT</td>
 <td>⚠️ partial</td>
 <td>Next.js App Router</td>
 </tr>
@@ -115,7 +119,7 @@ Tour Kit is a headless onboarding library for React that ships logic without pre
 - Headless architecture means your tours match your design system exactly, with no CSS overrides and no `!important` hacks
 - 10 composable packages: install `@tourkit/core` and `@tourkit/react` for tours, then add `@tourkit/analytics` or `@tourkit/surveys` only when you need them
 - TypeScript strict mode with full type exports, so your IDE catches tour configuration errors at build time
-- MIT license, $9.99 one-time for Pro features (no per-seat, no MAU pricing)
+- MIT license, free for every package (no per-seat, no MAU pricing)
 
 ### Limitations
 
@@ -126,7 +130,7 @@ Tour Kit is a headless onboarding library for React that ships logic without pre
 
 ### Pricing
 
-Free (MIT) for core packages. Pro features (adoption tracking, surveys, scheduling) cost $9.99 one-time per project.
+Free (MIT). Every package is included, adoption tracking, surveys and scheduling too.
 
 ### Best for
 
@@ -313,7 +317,7 @@ Building a product tour from scratch costs approximately $45,018 in upfront deve
 
 ### What's the best free alternative to building onboarding in-house?
 
-React Joyride, Shepherd.js, Driver.js, and Onborda are MIT-licensed and free. Tour Kit's core is BUSL-1.1-licensed source-available (free in development, licence key in production). Tour Kit provides a headless architecture under 23KB gzipped with WCAG 2.1 AA compliance. React Joyride has the largest community at 340K+ weekly downloads. Your choice depends on framework and design system requirements.
+React Joyride, Shepherd.js, Driver.js, and Onborda are MIT-licensed and free. Tour Kit is MIT-licensed and free too, including in production. Tour Kit provides a headless architecture under 23KB gzipped with WCAG 2.1 AA compliance. React Joyride has the largest community at 340K+ weekly downloads. Your choice depends on framework and design system requirements.
 
 ### How do I add a product tour to a React app without building one from scratch?
 

@@ -8,12 +8,16 @@ category: "Comparisons"
 schema_type: "TechArticle"
 spreadsheet_row: 1
 date: "2026-04-03"
-updated: "2026-04-03"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/tour-kit-vs-react-joyride.png
 ---
 
 # userTourKit vs React Joyride: headless tours for React (2026)
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 React Joyride has been the default product tour library for React since 2016. It has 603K weekly npm downloads and a decade of production usage behind it. userTourKit shipped in 2025 with a different thesis: give developers tour logic without any UI opinions. Both libraries solve the same problem, but they approach it from opposite directions. This comparison breaks down the tradeoffs with real data so you can pick the right tool for your project.
 
@@ -38,8 +42,8 @@ npm install @tourkit/core @tourkit/react
 <tr><td>Bundle size (gzipped)</td><td>Under 23KB core + 12KB react</td><td>&#126;30KB</td></tr>
 <tr><td>React 19 support</td><td>✅ Native</td><td>✅ v3 only</td></tr>
 <tr><td>TypeScript</td><td>✅ Strict mode, full types</td><td>✅ Built-in (v3)</td></tr>
-<tr><td>License</td><td>MIT (core) / Proprietary (pro)</td><td>MIT</td></tr>
-<tr><td>Pricing</td><td>Free in dev / $9.99 Pro</td><td>Free</td></tr>
+<tr><td>License</td><td>MIT</td><td>MIT</td></tr>
+<tr><td>Pricing</td><td>Free</td><td>Free</td></tr>
 <tr><td>Weekly npm downloads</td><td>New (growing)</td><td>&#126;603K</td></tr>
 <tr><td>Design system agnostic</td><td>✅</td><td>⚠️ Requires overrides</td></tr>
 <tr><td>Accessibility (WCAG 2.1 AA)</td><td>✅ Built-in</td><td>⚠️ Partial</td></tr>
@@ -89,9 +93,7 @@ userTourKit ships with WCAG 2.1 AA compliance built in: focus trapping, `aria-li
 
 ### Pricing and license
 
-React Joyride is entirely MIT and free, while userTourKit's core packages are BUSL-1.1 source-available (free in development). userTourKit offers a Pro tier at $9.99 (one-time) that adds adoption tracking, advanced analytics, scheduling, and announcements. React Joyride is entirely free. If you only need basic product tours, React Joyride costs nothing. If you need onboarding infrastructure (checklists, hints, analytics), userTourKit Pro replaces what would otherwise be a $249+/month SaaS tool.
-
-**Limitation acknowledged:** userTourKit's extended packages (adoption, scheduling, announcements) require the Pro license. If you only need the core tour functionality, the free source-available packages are sufficient.
+Both libraries are MIT-licensed and free, including in production. userTourKit's extended packages (adoption tracking, analytics, scheduling, announcements) are free too, with no licence key. If you only need basic product tours, either library costs nothing. If you need onboarding infrastructure (checklists, hints, analytics), userTourKit's extended packages replace what would otherwise be a $249+/month SaaS tool.
 
 ## Code comparison: building the same tour
 
@@ -201,6 +203,6 @@ userTourKit's core is 7.2KB gzipped compared to React Joyride's approximately 30
 
 Yes, React Joyride v3 supports React 19. If you are on React Joyride v2, you need to upgrade to v3 first. The v2-to-v3 migration involves API changes to step definitions and callback signatures. Check the React Joyride changelog for the full migration guide.
 
-### Can I use userTourKit without the Pro license?
+### Does userTourKit have a paid tier?
 
-Yes. The core tour functionality (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) is BUSL-1.1-licensed and source-available. The Pro license ($9.99, one-time) adds adoption tracking, announcements, checklists, analytics, media embedding, and scheduling. Most teams start with the free packages and upgrade when they need onboarding infrastructure beyond basic tours.
+No. Every package is MIT-licensed and free, including in production: the core tour functionality (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) and the extended packages for adoption tracking, announcements, checklists, analytics, media embedding, and scheduling. There is no licence key. Most teams start with the core packages and add the others when they need onboarding infrastructure beyond basic tours.

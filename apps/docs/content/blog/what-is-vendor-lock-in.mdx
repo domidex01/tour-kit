@@ -8,12 +8,16 @@ category: "Glossary"
 schema_type: "TechArticle"
 spreadsheet_row: 324
 date: "2026-04-12"
-updated: "2026-04-12"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/what-is-vendor-lock-in.png
 ---
 
 # What is vendor lock-in? Why it matters for onboarding tools
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a paid licence.
 
 You pick an onboarding platform, build 40 tours in its visual builder, train your PM team on its workflow, pipe events into its proprietary analytics. Then pricing doubles. Moving feels impossible. That's vendor lock-in, and onboarding tools are uniquely prone to it.
 
@@ -79,14 +83,14 @@ In the onboarding space, the pattern plays out more quietly. A team outgrows App
 
 ## Vendor lock-in in User Tour Kit
 
-Tour Kit addresses vendor lock-in by keeping tour definitions in your codebase as React components, routing event data to your own analytics providers, and using BUSL-1.1 licensing on core packages so you can fork, modify, and self-host with the full source visible. If you stop using Tour Kit tomorrow, you still have the code.
+Tour Kit addresses vendor lock-in by keeping tour definitions in your codebase as React components, routing event data to your own analytics providers, and using the MIT licence on every package, so you can fork, modify, and self-host it. If you stop using Tour Kit tomorrow, you still have the code.
 
 Specifically:
 
 - Tour definitions live in `.tsx` files you own, tracked in version control
 - Event data flows to your analytics provider (PostHog, Mixpanel, Amplitude). Tour Kit doesn't store it
 - No proprietary data formats. Configuration is TypeScript objects
-- MIT-licensed core packages. You can fork, modify, and self-host
+- MIT-licensed packages, core and extended alike. You can fork, modify, and self-host
 
 This maps to what Martin Fowler describes as the [headless component pattern](https://martinfowler.com/articles/headless-component.html), separating logic from presentation so neither side creates a dependency you can't escape.
 

@@ -8,14 +8,18 @@ category: "GEO"
 schema_type: "TechArticle"
 spreadsheet_row: 218
 date: "2026-04-10"
-updated: "2026-04-10"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/tour-kit-faq.png
 ---
 
 # Tour Kit FAQ: everything developers ask before installing
 
-You found a product tour library. The README looks promising. But before you `npm install`, you have questions. Does it actually work with React 19? Will it fight your Tailwind setup? What's the catch with the free tier?
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a paid licence.
+
+You found a product tour library. The README looks promising. But before you `npm install`, you have questions. Does it actually work with React 19? Will it fight your Tailwind setup? What's the catch with the licence?
 
 We built Tour Kit, so we're biased. We're also the best people to answer these questions honestly, because we know where the sharp edges are. Every claim below is verifiable against npm, GitHub, or bundlephobia.
 
@@ -294,7 +298,7 @@ React Joyride has 400,000+ weekly npm downloads and 5,100+ GitHub stars. It's th
     </tr>
     <tr>
       <td>License</td>
-      <td>BUSL-1.1 (free in dev) + Pro ($9.99 one-time)</td>
+      <td>MIT (free)</td>
       <td>MIT (free)</td>
     </tr>
     <tr>
@@ -318,7 +322,7 @@ Shepherd.js is a well-maintained, framework-agnostic tour library. Userorbit cal
 The key differences:
 
 - **React integration:** Tour Kit is React-native (hooks and providers). Shepherd has a React wrapper, but the core is vanilla JS. This matters for Server Components and concurrent features.
-- **Licensing:** Shepherd's core is MIT, but "a paid license is required for commercial use" of advanced features ([Usertour](https://www.usertour.io/blog/product-tour-joyride)). Tour Kit is BUSL-1.1 for core packages (free in development, licence key in production), $9.99 one-time for Pro.
+- **Licensing:** Shepherd's core is MIT, but "a paid license is required for commercial use" of advanced features ([Usertour](https://www.usertour.io/blog/product-tour-joyride)). Tour Kit is MIT-licensed across every package and free in production too.
 - **Content model:** Shepherd uses HTML strings for custom step content. Tour Kit uses JSX, so you render React components directly inside steps.
 - **Accessibility:** Shepherd provides keyboard navigation and ARIA attributes. Tour Kit adds focus trapping and `prefers-reduced-motion`.
 
@@ -341,7 +345,7 @@ Tour Kit sits in the code-owned, developer-controlled camp. Use it when:
 
 ## What license does Tour Kit use?
 
-Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are BUSL-1.1-licensed: free in development, evaluation, testing, and CI, with a licence key required in production. The extended packages (analytics, adoption, checklists, surveys, announcements, media, scheduling) require a Pro license at $9.99 one-time per project, which also covers production use of the core.
+Tour Kit is MIT-licensed. Every package is free for any use, including commercial production: the core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) and the extended packages (analytics, adoption, checklists, surveys, announcements, media, scheduling). There is no licence key and no paid tier.
 
 For context, licensing varies widely across tour libraries:
 
@@ -355,9 +359,9 @@ For context, licensing varies widely across tour libraries:
   </thead>
   <tbody>
     <tr>
-      <td>Tour Kit (core)</td>
-      <td>BUSL-1.1</td>
-      <td>Free in dev, licence key in prod</td>
+      <td>Tour Kit (all packages)</td>
+      <td>MIT</td>
+      <td>Free</td>
     </tr>
     <tr>
       <td>React Joyride</td>
@@ -441,13 +445,13 @@ Tour Kit works in mobile browsers. The positioning engine adapts to viewport siz
 
 Yes. The `@tourkit/analytics` package provides a plugin-based integration system. Connect tour events (start, step view, completion, dismissal) to PostHog, Mixpanel, Amplitude, Google Analytics, Plausible, or any custom backend.
 
-Analytics is a Pro package ($9.99 one-time, includes all extended packages). The core tour functionality, including callback events you can wire to any analytics tool manually, is free.
+Analytics is free and MIT-licensed, like every other package. If you'd rather not add a package, the core tour callbacks can be wired to any analytics tool manually.
 
 ## Can I add video or media inside tour steps?
 
 The `@tourkit/media` package supports embedding YouTube, Vimeo, Loom, Wistia, and Lottie animations inside tour steps. Since Tour Kit is headless, you can also render any React component inside a step, including your own custom video player.
 
-Media support is a Pro feature.
+Media support is free and MIT-licensed, like every other package.
 
 ## What we recommend
 
@@ -480,7 +484,7 @@ npm install @tourkit/core @tourkit/react
 
 ### Is Tour Kit free?
 
-Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are BUSL-1.1-licensed and source-available for commercial use. Extended packages for analytics, checklists, surveys, and media require a Pro license at $9.99 one-time per project. No per-user or per-MAU pricing.
+Yes. Every Tour Kit package is MIT-licensed and free for any use, including commercial production: the core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) and the extended packages for analytics, checklists, surveys, and media. No licence key. No per-user or per-MAU pricing.
 
 ### Does Tour Kit require React?
 
@@ -554,7 +558,7 @@ export const jsonLd = [
         "name": "Is Tour Kit free?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Tour Kit's core packages are BUSL-1.1-licensed and source-available for commercial use. Extended packages for analytics, checklists, surveys, and media require a Pro license at $9.99 one-time per project."
+          "text": "Yes. Every Tour Kit package is MIT-licensed and free for any use, including commercial production: the core packages and the extended packages for analytics, checklists, surveys, and media. No licence key. No per-user or per-MAU pricing."
         }
       },
       {

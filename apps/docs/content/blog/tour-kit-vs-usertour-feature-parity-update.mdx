@@ -7,10 +7,14 @@ secondary_keywords: ["usertour alternative", "usertour parity", "open source pro
 category: "Comparison"
 schema_type: "TechArticle"
 date: "2026-05-03"
-updated: "2026-05-03"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/tour-kit-vs-usertour-feature-parity-update.png
 ---
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a paid licence.
 
 ## TL;DR
 
@@ -95,7 +99,7 @@ We do not pretend the gap closed entirely. Six things on Usertour's surface have
 | --- | --- | --- |
 | Visual no-code flow editor | Yes | No (by design) |
 | Self-hosted admin panel | Yes (v0.6.0) | No (Phase 2) |
-| License-key activation flow | Yes (v0.6.0) | Polar.sh checkout only |
+| License-key activation flow | Yes (v0.6.0) | Not needed (MIT, no key) |
 | Event trackers UI | Yes (v0.6.0) | Plugins to PostHog / Mixpanel / Amplitude |
 | CSV export of analytics | Yes (v0.6.0) | Out of scope |
 | Real-time push | Socket.IO | None |
@@ -133,8 +137,8 @@ Choose **Tour Kit** if:
 
 The terminal phase of "close client-only gaps" is shipping with this release. Next on the roadmap:
 
-- **Phase 2 (weeks 12–26)**: optional OSS dashboard MVP. Reads code-defined tours from the host app, ingests events from `@tour-kit/analytics`, exposes a per-tour completion view. No DB-defined flows, ever — code stays the source of truth. Triggers on 50+ Pro licenses + 10+ inbound dashboard requests.
-- **Phase 3 (weeks 26–40)**: hosted Tour Kit Cloud (Solo $19/mo, Team $49/mo). Triggers on 100+ self-host installs OR 30+ cloud waitlist signups before week 26.
+- **Phase 2 (weeks 12–26)**: optional OSS dashboard MVP. Reads code-defined tours from the host app, ingests events from `@tour-kit/analytics`, exposes a per-tour completion view. No DB-defined flows, ever — code stays the source of truth. Triggers on 10+ inbound dashboard requests.
+- **Phase 3 (weeks 26–40)**: hosted Tour Kit Cloud. Triggers on 100+ self-host installs OR 30+ cloud waitlist signups before week 26.
 
 If you want the dashboard before we build it, file an issue at [github.com/domidex01/tour-kit](https://github.com/domidex01/tour-kit). Inbound demand is what flips the trigger.
 

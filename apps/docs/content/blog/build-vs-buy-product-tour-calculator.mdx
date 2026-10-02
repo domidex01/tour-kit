@@ -8,12 +8,16 @@ category: "Build vs Buy"
 schema_type: "TechArticle"
 spreadsheet_row: 131
 date: "2026-04-09"
-updated: "2026-04-09"
+updated: "2026-10-02"
 ogImage: /og-images/build-vs-buy-product-tour-calculator.png
 published: true
 ---
 
 # The developer's calculator: DIY tour vs library vs SaaS
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a one-time licence fee.
 
 Every product team hits the same crossroads: build onboarding from scratch, install an open-source library, or pay for a SaaS platform. The usual advice is to "just buy" and move on. But that advice comes from the vendors selling you the subscription. We ran the numbers across all three paths and found the answer depends on four variables: your team's hourly rate, your MAU count, how many tours you maintain, and your time horizon.
 
@@ -54,7 +58,7 @@ Year-one costs tell a misleading story because they hide the maintenance multipl
     <tr>
       <td>License / subscription</td>
       <td>$0</td>
-      <td>$0 in dev (BUSL-1.1) or [$9.99 one-time (Tour Kit Pro)](/pricing)</td>
+      <td>$0 (Tour Kit is MIT)</td>
       <td>$2,988-$10,548/yr (Appcues) or $15K-$48K/yr (Pendo)</td>
     </tr>
     <tr>
@@ -78,7 +82,7 @@ Year-one costs tell a misleading story because they hide the maintenance multipl
     <tr>
       <td><strong>Year 1 total</strong></td>
       <td><strong>$70,000-$85,000</strong></td>
-      <td><strong>$18,000-$36,099</strong></td>
+      <td><strong>$18,000-$36,000</strong></td>
       <td><strong>$5,988-$54,000</strong></td>
     </tr>
   </tbody>
@@ -118,7 +122,7 @@ Year one favors SaaS for small teams, but the cost curves diverge sharply over 3
     <tr>
       <td>Subscription (3 years)</td>
       <td>$0</td>
-      <td>$0-$9.99</td>
+      <td>$0</td>
       <td>$31,500</td>
       <td>$94,500+</td>
     </tr>
@@ -132,9 +136,9 @@ Year one favors SaaS for small teams, but the cost curves diverge sharply over 3
     <tr>
       <td><strong>3-year total</strong></td>
       <td><strong>$142,500</strong></td>
-      <td><strong>$48,000-$48,099</strong></td>
+      <td><strong>$48,000</strong></td>
       <td><strong>$36,000</strong></td>
-      <td><strong>$9.99,000+</strong></td>
+      <td><strong>$99,000+</strong></td>
     </tr>
   </tbody>
 </table>
@@ -169,7 +173,7 @@ total = initial_cost + (annual_maintenance × 3) + framework_upgrades
 ```
 integration_cost = (1 × hourly_rate × hours_per_week × integration_weeks)
 annual_maintenance = integration_cost × 0.15
-license = 99  // Tour Kit Pro, one-time
+license = 0  // Tour Kit is MIT-licensed
 total = integration_cost + (annual_maintenance × 3) + license
 ```
 

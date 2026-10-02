@@ -7,12 +7,16 @@ secondary_keywords: ["next.js onboarding tutorial", "react onboarding checklist 
 category: "Tutorial"
 schema_type: "TechArticle"
 date: "2026-04-18"
-updated: "2026-04-18"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/nextjs-onboarding-flow-tutorial.png
 ---
 
 # Build a complete Next.js 15 onboarding flow: tour + checklist + analytics
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 A product tour by itself is an introduction — not an onboarding flow. A real onboarding flow guides users from sign-up to activation across multiple sessions, tracks which steps they've completed, and reports what's working to an analytics pipeline. This tutorial builds that full flow in a Next.js 15 App Router project: a three-step first-run tour, a persistent activation checklist that survives reloads, and an analytics plugin that reports every event to your provider of choice. Ship in about forty-five minutes; no Server Component fighting, no SSR workarounds, no third-party runtime.
 
@@ -286,9 +290,9 @@ That's your **activation funnel**. It tells you where users drop off — and bec
 
 ## FAQ
 
-### Do I need the Pro packages (`@tour-kit/checklists`, `@tour-kit/analytics`)?
+### Do I need to pay for `@tour-kit/checklists` or `@tour-kit/analytics`?
 
-The tour (`@tour-kit/react`) and hints are source-available under BUSL-1.1 (free in development). Checklists, analytics, announcements, adoption, media, and scheduling are Pro — $9.99 one-time for all of them. For production onboarding flows, the Pro packages pay for themselves in the first week.
+No. Tour Kit is MIT-licensed and free, including in production. That covers the tour (`@tour-kit/react`) and hints as well as checklists, analytics, announcements, adoption, media, and scheduling.
 
 ### Does this work with Next.js Server Components?
 
@@ -306,7 +310,7 @@ Or gate at the `TourProvider` level if you want to hide tour UI entirely.
 
 ### What if my users span multiple timezones for scheduled onboarding?
 
-Pair this flow with `@tour-kit/scheduling` (Pro) to time-box announcements or checklists to a specific timezone or business-hours window. See the scheduling docs for IANA timezone support.
+Pair this flow with `@tour-kit/scheduling` to time-box announcements or checklists to a specific timezone or business-hours window. See the scheduling docs for IANA timezone support.
 
 ### What about mobile?
 

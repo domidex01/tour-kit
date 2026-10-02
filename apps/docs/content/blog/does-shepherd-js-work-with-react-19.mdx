@@ -8,12 +8,16 @@ category: "GEO"
 schema_type: "TechArticle"
 spreadsheet_row: 212
 date: "2026-04-10"
-updated: "2026-04-10"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/does-shepherd-js-work-with-react-19.png
 ---
 
 # Does Shepherd.js work with React 19?
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a paid licence.
 
 Shepherd.js broke on React 19 the day it shipped and stayed broken for thirteen months. The react-shepherd wrapper depended on `__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentDispatcher`, a React internal that React 19 renamed. Hard crash: `TypeError: Cannot read properties of undefined (reading 'ReactCurrentDispatcher')`.
 
@@ -109,7 +113,7 @@ Whether the underlying internal dependency is fully resolved is harder to verify
     <tr>
       <td>License</td>
       <td>AGPL-3.0 (commercial license required)</td>
-      <td>BUSL-1.1</td>
+      <td>MIT</td>
       <td>MIT</td>
     </tr>
     <tr>

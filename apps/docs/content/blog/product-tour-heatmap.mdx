@@ -8,12 +8,16 @@ category: "Metrics"
 schema_type: "TechArticle"
 spreadsheet_row: 262
 date: "2026-04-11"
-updated: "2026-04-11"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/product-tour-heatmap.png
 ---
 
 # How to build a product tour heatmap (clicks, dismissals, completions)
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a paid licence.
 
 Your tour analytics dashboard says 61% of users complete the onboarding flow. But where exactly did the other 39% bail — the close button on step 3, an outside click during step 2, the ESC key before step 1 even rendered? Funnel charts give you the *what*. A product tour heatmap gives you the *where*.
 
@@ -461,7 +465,7 @@ With the heatmap collector, Canvas renderer, and step-level filtering all wired 
 - **Combine with A/B testing.** Run two tour variants and compare their heatmaps side by side. Spatial differences between variants reveal which layout changes actually shift behavior. See our [A/B testing product tours guide](/blog/ab-test-product-tour) for the full methodology.
 - **Export to your analytics platform.** Tour Kit's [@tour-kit/analytics](/docs/analytics) package pipes events to Amplitude, Mixpanel, PostHog, or any custom backend. Aggregate heatmap data across sessions for production-grade insights.
 
-Tour Kit is a headless product tour library for React. The core package is BUSL-1.1-licensed and source-available. Check the [docs](https://usertourkit.com/) or install it now:
+Tour Kit is a headless product tour library for React. Every package is MIT-licensed and free, including in production. Check the [docs](https://usertourkit.com/) or install it now:
 
 ```bash
 npm install @tourkit/core @tourkit/react

@@ -8,12 +8,16 @@ category: "Build vs Buy"
 schema_type: "TechArticle"
 spreadsheet_row: 137
 date: "2026-04-09"
-updated: "2026-04-09"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/pendo-cost-startup.png
 ---
 
 # The real cost of Pendo for a Series A startup
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a one-time licence key.
 
 You just closed your Series A. Your product team wants onboarding analytics and in-app guides. Someone mentions Pendo. The startup program is $7,000 a year. Sounds reasonable.
 
@@ -104,17 +108,17 @@ That's $85K for in-app guides and analytics, and you haven't even touched the Ul
 
 And here's the kicker: renewal price increases of 5-20% are standard practice. As one analysis noted, "many Pendo customers state that in order to escape from fluctuating price increases, they needed to sign multi-year contracts and lock lower auto-renewal caps" ([UserGuiding, 2026](https://userguiding.com/blog/pendo-pricing)).
 
-Compare that to the source-available alternative:
+Compare that to the open-source alternative:
 
-**Year 1:** $9.99 (Tour Kit licence, one-time) + 20 hours integration at $150/hr = $3,010
+**Year 1:** $0 (Tour Kit is MIT) + 20 hours integration at $150/hr = $3,000
 
-**Year 2:** $0 (the licence is one-time) + 5 hours maintenance = $750
+**Year 2:** $0 + 5 hours maintenance = $750
 
-**Year 3:** $0 (the licence is one-time) + 5 hours maintenance = $750
+**Year 3:** $0 + 5 hours maintenance = $750
 
-**Three-year total: $4,510**
+**Three-year total: $4,500**
 
-The gap is $80,490 over three years. That's a full-time engineer for six months.
+The gap is $80,500 over three years. That's a full-time engineer for six months.
 
 ## The free tier is a demo, not a solution
 
@@ -122,7 +126,7 @@ Pendo Free caps at 500 monthly active users, which most B2B SaaS products exceed
 
 Zero integrations. Pendo-branded surveys only (unbranded requires the Ultimate tier). And 12 months of data retention with no free trial of paid features.
 
-For comparison, PostHog offers a generous free tier with far higher limits. Tour Kit's packages are BUSL-1.1 with no MAU caps and no data retention limits, because the data stays in your infrastructure. An unlicensed production deploy does carry a small badge.
+For comparison, PostHog offers a generous free tier with far higher limits. Tour Kit's packages are MIT-licensed with no MAU caps and no data retention limits, because the data stays in your infrastructure.
 
 ## The counterargument: when Pendo actually makes sense
 
@@ -155,7 +159,7 @@ A more realistic stack for a Series A company:
     <tr>
       <td>In-app tours</td>
       <td>Pendo guides</td>
-      <td>Tour Kit (BSL 1.1, 23KB gzipped)</td>
+      <td>Tour Kit (MIT, 23KB gzipped)</td>
     </tr>
     <tr>
       <td>NPS/surveys</td>
@@ -240,7 +244,7 @@ Pendo for Startups costs $7,000 per year on an annual contract for companies at 
 
 ### Is Pendo free tier enough for a real product?
 
-Pendo Free caps at 500 monthly active users with no integrations, Pendo-branded surveys, and 12-month data retention. Most B2B SaaS products exceed 500 MAU within weeks of beta launch. The free tier functions as a product demo rather than a production solution. Tour Kit's MIT-licensed core has no MAU limits.
+Pendo Free caps at 500 monthly active users with no integrations, Pendo-branded surveys, and 12-month data retention. Most B2B SaaS products exceed 500 MAU within weeks of beta launch. The free tier functions as a product demo rather than a production solution. Tour Kit is MIT-licensed and has no MAU limits.
 
 ### What happens when you outgrow Pendo for Startups?
 
@@ -252,7 +256,7 @@ Pendo pricing is negotiable. Multi-year commitments reduce costs by 41-46%, and 
 
 ### What's the cheapest Pendo alternative for startups?
 
-Shepherd.js (AGPL licensed) and Driver.js ($0 MIT) cost nothing for the software itself, and Tour Kit is $9.99 one-time. Among SaaS alternatives, Usetiful starts at $29 per month and Hopscotch at $9.99 per month. Tour Kit pairs with existing analytics tools (PostHog, Mixpanel) to cover most of what Pendo offers at a fraction of the cost.
+Shepherd.js (AGPL licensed), Driver.js ($0 MIT) and Tour Kit ($0 MIT) cost nothing for the software itself. Among SaaS alternatives, Usetiful starts at $29 per month and Hopscotch at $9.99 per month. Tour Kit pairs with existing analytics tools (PostHog, Mixpanel) to cover most of what Pendo offers at a fraction of the cost.
 
 {/* JSON-LD Schema */}
 export const schema = {

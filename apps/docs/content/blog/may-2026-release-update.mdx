@@ -1,18 +1,22 @@
 ---
 title: "userTourKit May 2026 release: codemods, testing helpers, and a soft-gate license"
 slug: "may-2026-release-update"
-description: "Five phases shipped: @tour-kit/testing-library, @tour-kit/playwright, three migration codemods (Joyride, Shepherd, Driver), license soft-gate with try-before-buy watermark, and a Phase 8 QA pass covering analytics, accessibility, and autostart."
+description: "userTourKit release notes for May 2026: testing helpers, a Playwright bridge, three codemods and a licence soft-gate since removed. Tour Kit is now MIT."
 primary_keyword: "userTourKit release notes"
 secondary_keywords: ["tour-kit codemods", "react onboarding testing library", "joyride to userTourKit", "shepherd.js migration", "soft gate license"]
 category: "Releases"
 schema_type: "Article"
 date: "2026-05-15"
-updated: "2026-05-15"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/may-2026-release-update.png
 ---
 
 # userTourKit May 2026 release: codemods, testing helpers, and a soft-gate license
+
+> **Update, October 2026: Tour Kit is now MIT-licensed and free, including in production.**
+> The licence soft-gate and try-before-buy watermark below no longer apply to current versions: there is no licence key and no Pro tier. Older versions keep the licence they were published under and still show the "Unlicensed" badge in production without a key; updating to the latest version removes it, with no code change.
+> The post below is left as a record of the earlier model. See [pricing](/pricing).
 
 Five phases went out in the last few weeks. Most of the work was driven by people we kept watching hit the same walls: Playwright tests scraping the DOM because there was no way to drive a tour deterministically, Joyride users asking "is there a codemod?", and consumers who wanted to evaluate the Pro packages but ran into a runtime throw on the first import. This release fixes all of that.
 

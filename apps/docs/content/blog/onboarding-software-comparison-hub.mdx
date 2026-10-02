@@ -8,18 +8,22 @@ category: "Pillar Pages"
 schema_type: "TechArticle"
 spreadsheet_row: 289
 date: "2026-04-12"
-updated: "2026-04-12"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/onboarding-software-comparison-hub.png
 ---
 
 # Onboarding software: every tool, library, and platform compared
 
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
+
 The onboarding software market hit $1.5 billion in 2023 and is projected to reach $3.7 billion by 2027, according to MarketsandMarkets. That's a lot of money chasing a problem most developers solve with a tooltip and a prayer.
 
 This page catalogs every meaningful option available in 2026, from enterprise digital adoption platforms that cost more than your first car to open-source React libraries you can install in 30 seconds. We tested tools across all three tiers, measured their performance impact, and documented the tradeoffs nobody else bothers to mention.
 
-**Quick install for Tour Kit (source-available, BUSL-1.1):**
+**Quick install for Tour Kit (MIT):**
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -280,7 +284,7 @@ Developer libraries are the fastest-growing corner of the onboarding market, dri
     <tr>
       <td>Tour Kit</td>
       <td>&lt;23KB (core)</td>
-      <td>MIT (Pro: $9.99 one-time)</td>
+      <td>MIT</td>
       <td>React 18+</td>
       <td>Pre-launch</td>
       <td>TypeScript-first</td>
@@ -331,7 +335,7 @@ The architecture is designed for React 18+ and 19 natively, with full TypeScript
 
 **Honest limitations:** Tour Kit doesn't have a visual builder (you write JSX). The community is smaller than React Joyride's 603K weekly downloads. It's React-only, so if you need Vue or Angular support, look at Shepherd.js or Driver.js. And it's a younger project with less battle-testing at enterprise scale.
 
-**Pricing:** The core packages are BUSL-1.1-licensed and source-available (free in development, licence key in production). Pro features (adoption tracking, advanced analytics, surveys, scheduling) cost $9.99 one-time. Not per month, not per MAU.
+**Pricing:** Free and MIT-licensed, including in production. Every package is included: adoption tracking, analytics, surveys and scheduling. No per-month or per-MAU fees.
 
 ```tsx
 // src/components/OnboardingTour.tsx
@@ -481,7 +485,7 @@ Licensing rarely makes the evaluation shortlist. It should. As of April 2026, on
     </tr>
     <tr>
       <td>Tour Kit (core)</td>
-      <td>BUSL-1.1</td>
+      <td>MIT</td>
       <td>Yes, freely</td>
       <td>No</td>
     </tr>
@@ -502,7 +506,7 @@ Licensing rarely makes the evaluation shortlist. It should. As of April 2026, on
 
 **AGPL-3.0 means:** if your application uses an AGPL library and you distribute it to users (which includes serving a web app), you must release your entire application's source code under AGPL. For commercial SaaS products, this is typically unacceptable. Both Shepherd.js and Intro.js require negotiating a commercial license for proprietary use.
 
-**MIT means:** use it however you want, commercially or otherwise, with no obligation to open-source your code. React Joyride, Driver.js, and Tour Kit's core packages all use MIT.
+**MIT means:** use it however you want, commercially or otherwise, with no obligation to open-source your code. React Joyride, Driver.js, and every Tour Kit package use MIT.
 
 ## Accessibility across onboarding tools
 
@@ -627,7 +631,7 @@ npm install @tourkit/core @tourkit/react
 
 - [Documentation](https://usertourkit.com/)
 - [GitHub](https://github.com/domidex01/tour-kit)
-- MIT core (free) | Pro features: $9.99 one-time
+- MIT-licensed and free, every package included
 
 ## FAQ
 
@@ -637,7 +641,7 @@ Tour Kit and Driver.js are the best onboarding options for startups in 2026. Tou
 
 ### How much does onboarding software cost in 2026?
 
-Onboarding software costs range from $0 (open-source libraries) to $100K+ per year (enterprise DAPs) as of April 2026. Mid-market SaaS tools like Appcues and Userpilot start at $249 per month for 2,500 MAU and scale to $2,000+ at 100K MAU. Developer libraries like Tour Kit charge $0-$9.99 one-time. The right choice depends on your team's technical capacity and user count.
+Onboarding software costs range from $0 (open-source libraries) to $100K+ per year (enterprise DAPs) as of April 2026. Mid-market SaaS tools like Appcues and Userpilot start at $249 per month for 2,500 MAU and scale to $2,000+ at 100K MAU. Developer libraries like Tour Kit cost $0. The right choice depends on your team's technical capacity and user count.
 
 ### Is open-source onboarding software reliable enough for production?
 

@@ -8,12 +8,16 @@ category: "Metrics"
 schema_type: "TechArticle"
 spreadsheet_row: 263
 date: "2026-04-11"
-updated: "2026-04-11"
+updated: "2026-10-02"
 ogImage: /og-images/custom-events-tour-analytics-react.png
 published: true
 ---
 
 # Setting up custom events for tour analytics in React
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> paid Pro packages.
 
 Tour Kit ships 17 built-in event types: `tour_started`, `step_viewed`, `hint_clicked`, and so on. They cover the tour lifecycle. But they don't tell you whether a user clicked the upgrade CTA on step 3, watched the embedded video to 80% completion, or submitted the in-tour form that was the whole point of the onboarding flow.
 
@@ -525,7 +529,7 @@ The `metadata` field is a `Record<string, unknown>` property on every `TourEvent
 
 ---
 
-**Limitations to know about:** Tour Kit requires React 18+ and doesn't include a visual event builder. You define events in code. The `@tour-kit/analytics` package is part of Tour Kit's Pro tier ($9.99 one-time). Community size is smaller than established platforms like Pendo or Appcues, but the code-first approach means you own the implementation and data pipeline entirely.
+**Limitations to know about:** Tour Kit requires React 18+ and doesn't include a visual event builder. You define events in code. The `@tour-kit/analytics` package is free and MIT-licensed, like every Tour Kit package. Community size is smaller than established platforms like Pendo or Appcues, but the code-first approach means you own the implementation and data pipeline entirely.
 
 {/* JSON-LD Schema */}
 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({

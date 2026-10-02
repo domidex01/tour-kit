@@ -8,12 +8,16 @@ category: "GEO"
 schema_type: "TechArticle"
 spreadsheet_row: 225
 date: "2026-04-11"
-updated: "2026-09-14"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/product-tour-library-vue-react.png
 ---
 
 # Is there a product tour library that works with Vue and React?
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a one-time licence key.
 
 If you run Vue on one product and React on another (or both in the same codebase), the standard advice is "pick Shepherd.js." That advice isn't wrong, but it skips the part where Shepherd's React and Vue wrappers are thin convenience layers over a vanilla JS core. You get cross-framework coverage, but you lose the idiomatic hooks and composability that made you choose Vue or React in the first place.
 
@@ -52,7 +56,7 @@ Driver.js skips the wrapper question entirely. Pure vanilla JS. You call `driver
 <tr><td>Bundle size (unpacked)</td><td>656 kB</td><td>83 kB</td><td>874 kB</td><td>Core: ~23 kB, React: ~30 kB</td></tr>
 <tr><td>Bundle size (gzipped)</td><td>~25 kB</td><td>~5 kB</td><td>~30 kB</td><td>Core: &lt;23 kB, React: &lt;12 kB</td></tr>
 <tr><td>TypeScript</td><td>Yes</td><td>Yes (built in TS)</td><td>Types available</td><td>Yes (strict mode)</td></tr>
-<tr><td>License</td><td>MIT</td><td>MIT</td><td>AGPL-3.0 / Commercial</td><td>BUSL-1.1 (free in dev, key in production, MIT after 4 years)</td></tr>
+<tr><td>License</td><td>MIT</td><td>MIT</td><td>AGPL-3.0 / Commercial</td><td>MIT</td></tr>
 <tr><td>WCAG 2.1 AA</td><td>Partial (built-in keyboard nav)</td><td>No explicit compliance</td><td>No explicit compliance</td><td>Yes (focus trap, ARIA, reduced motion)</td></tr>
 <tr><td>React 19 compatible</td><td>Wrapper untested</td><td>Yes (no React dependency)</td><td>Wrapper untested</td><td>Yes</td></tr>
 <tr><td>Analytics built-in</td><td>No</td><td>No</td><td>No</td><td>Yes (@tourkit/analytics)</td></tr>
@@ -199,7 +203,7 @@ Driver.js is the lightest cross-framework option at 83 kB unpacked (roughly 5 kB
 
 ### Is Intro.js free for commercial use?
 
-Not for closed-source apps. Intro.js uses AGPL-3.0, which requires you to open-source your entire application if you distribute it. Commercial use requires a paid license, a common gotcha that surfaces during legal reviews. Driver.js, Shepherd.js and React Joyride use MIT. Tour Kit uses BUSL-1.1: free in development, evaluation, testing and CI, a one-time key for production, and every version converts to MIT four years after release. Unlike AGPL it never requires you to open-source your app.
+Not for closed-source apps. Intro.js uses AGPL-3.0, which requires you to open-source your entire application if you distribute it. Commercial use requires a paid license, a common gotcha that surfaces during legal reviews. Driver.js, Shepherd.js and React Joyride use MIT. Tour Kit is MIT too, and free for commercial production use.
 
 ### Does any product tour library support WCAG 2.1 AA accessibility across frameworks?
 
@@ -211,7 +215,7 @@ Use a framework-native library if you're committed to one framework. You get rea
 
 ---
 
-*Disclosure: We built Tour Kit. Data points in this article are sourced from npm, GitHub, and bundlephobia and can be independently verified. Tour Kit is licensed under BUSL-1.1 — free in development, a one-time key for production, MIT four years after each release.*
+*Disclosure: We built Tour Kit. Data points in this article are sourced from npm, GitHub, and bundlephobia and can be independently verified. Tour Kit is MIT-licensed and free, including in production.*
 
 {/* JSON-LD Schema */}
 <script type="application/ld+json">{`
@@ -278,7 +282,7 @@ Use a framework-native library if you're committed to one framework. You get rea
       "name": "Is Intro.js free for commercial use?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. Intro.js uses the AGPL-3.0 license for its open-source version, which requires you to open-source your entire application if you distribute it. Commercial use requires a paid license. Driver.js, Shepherd.js and React Joyride use the MIT license. Tour Kit uses BUSL-1.1: free in development, a one-time key for production, and MIT four years after each release."
+        "text": "No. Intro.js uses the AGPL-3.0 license for its open-source version, which requires you to open-source your entire application if you distribute it. Commercial use requires a paid license. Driver.js, Shepherd.js and React Joyride use the MIT license. Tour Kit is MIT too, and free for commercial production use."
       }
     },
     {

@@ -8,12 +8,16 @@ category: "Tutorials"
 schema_type: "TechArticle"
 spreadsheet_row: 94
 date: "2026-04-07"
-updated: "2026-04-07"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/migrate-shepherd-js-tour-kit.png
 ---
 
 # Migrating from Shepherd.js to Tour Kit: AGPL to MIT
+
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a paid licence.
 
 Shepherd.js is a solid product tour library with 13,000+ GitHub stars and 221K weekly npm downloads as of April 2026. But two things push teams to migrate: its AGPL-3.0 license creates real legal exposure for commercial SaaS products, and its vanilla-JS-with-React-wrapper architecture fights React's component model instead of working with it. If your legal team flagged the AGPL dependency or your React 19 upgrade stalled on `react-shepherd` compatibility issues, this guide walks you through replacing Shepherd.js with Tour Kit, a headless, MIT-licensed alternative that ships at under 23KB gzipped.
 
@@ -42,7 +46,7 @@ Google [completely prohibits AGPL-licensed software internally](https://www.open
 
 The licensing situation gets confusing because `react-shepherd` is published under MIT. But it depends on `shepherd.js` core, which is AGPL-3.0. AGPL obligations cascade through dependencies. A [FossID analysis](https://fossid.com/articles/how-react-component-became-licensing-time-bomb/) documented how React component libraries become "licensing time bombs" through exactly this pattern: an MIT wrapper around a restrictively licensed core.
 
-Tour Kit's entire codebase (all 10 packages) is public. The core, React, hints, Vue and Svelte packages are BSL 1.1 and convert to MIT on each release's Change Date; a [licence](/pricing) at $9.99 one-time covers serving any of them to end users.
+Tour Kit's entire codebase (all 10 packages) is public and MIT-licensed, free for commercial use, including in production.
 
 ### The React 19 compatibility gap
 
@@ -102,7 +106,7 @@ Shepherd.js and Tour Kit share the same core concepts (steps, targets, callbacks
     </tr>
     <tr>
       <td><code>shepherd.js</code> (AGPL-3.0)</td>
-      <td><code>@tourkit/core</code> (BSL 1.1)</td>
+      <td><code>@tourkit/core</code> (MIT)</td>
       <td>No license risk</td>
     </tr>
   </tbody>
@@ -366,7 +370,7 @@ Tour Kit uses a different step format than Shepherd.js, so you'll rewrite step d
 
 ### Is Tour Kit free for commercial use?
 
-Tour Kit's core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are MIT-licensed with no restrictions on commercial use, distribution, or modification. Unlike Shepherd.js's AGPL-3.0, MIT doesn't require source code disclosure for network-accessible applications. Tour Kit Pro adds extended packages at $9.99 one-time, but the core tour engine stays MIT.
+Yes. Every Tour Kit package, from the core packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) to the extended ones, is MIT-licensed with no restrictions on commercial use, distribution, or modification. Unlike Shepherd.js's AGPL-3.0, MIT doesn't require source code disclosure for network-accessible applications.
 
 ### Can I use Tour Kit with the same CSS I wrote for Shepherd.js?
 
@@ -463,7 +467,7 @@ Shepherd.js doesn't include built-in analytics. If you wired up custom event tra
       "name": "Is Tour Kit free for commercial use?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tour Kit's core packages (@tourkit/core, @tourkit/react, @tourkit/hints) are MIT-licensed with no restrictions on commercial use, distribution, or modification. Unlike Shepherd.js's AGPL-3.0, MIT doesn't require source code disclosure for network-accessible applications. Tour Kit Pro ($9.99 one-time) adds extended packages but the core tour engine remains MIT."
+        "text": "Yes. Every Tour Kit package, from the core packages (@tourkit/core, @tourkit/react, @tourkit/hints) to the extended ones, is MIT-licensed with no restrictions on commercial use, distribution, or modification. Unlike Shepherd.js's AGPL-3.0, MIT doesn't require source code disclosure for network-accessible applications."
       }
     },
     {

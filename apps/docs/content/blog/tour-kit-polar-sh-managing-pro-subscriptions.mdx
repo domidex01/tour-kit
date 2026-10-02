@@ -1,19 +1,24 @@
 ---
 title: "Tour Kit + Polar.sh: managing Pro subscriptions with license keys"
 slug: "tour-kit-polar-sh-managing-pro-subscriptions"
-description: "Wire Polar.sh license keys to Tour Kit Pro packages in React. Client-side validation, activation limits, and the real cost at international scale."
+description: "A Polar.sh integration for license keys in React, as built for the old Tour Kit Pro tier. Tour Kit is now MIT and needs no key; the pattern still fits your library."
 primary_keyword: "polar sh integration"
 secondary_keywords: ["polar sh react", "open source monetization polar", "polar license key validation", "polar sh developer tools"]
 category: "Integrations"
 schema_type: "TechArticle"
 spreadsheet_row: 200
 date: "2026-04-09"
-updated: "2026-04-09"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/tour-kit-polar-sh-managing-pro-subscriptions.png
 ---
 
 # Tour Kit + Polar.sh: managing Pro subscriptions with license keys
+
+> **Update, October 2026: Tour Kit is now MIT-licensed and free, including in production.**
+> Tour Kit no longer sells a Pro tier or checks a Polar key, so none of this code is needed to use it.
+> The Polar.sh validation, activation and caching pattern still works if you sell your own React library.
+> The post below is left as a record of the earlier model. See [pricing](/pricing).
 
 Polar.sh handles the part of selling open-source software that nobody wants to build: payment processing, tax compliance across 100+ countries, and license key delivery. We picked it for Tour Kit's Pro tier because it auto-generates license keys on purchase and exposes a validation endpoint you can call directly from a React component. No backend required on your side.
 

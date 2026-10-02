@@ -8,18 +8,22 @@ category: "Pillar Pages"
 schema_type: "TechArticle"
 spreadsheet_row: 295
 date: "2026-04-12"
-updated: "2026-04-12"
+updated: "2026-10-02"
 published: true
 ogImage: /og-images/tour-kit-comparison-index.png
 ---
 
 # Tour Kit vs everything: the complete comparison index
 
+> **Update, October 2026:** Tour Kit is now MIT-licensed, with no licence key and no
+> production badge. This post has been updated to match; earlier versions described
+> a paid licence.
+
 We've published over 50 comparison articles, migration guides, and alternatives roundups since launching Tour Kit. Finding the right one meant digging through the blog. This page fixes that.
 
 Every comparison we've written is organized below by category: head-to-head matchups, library roundups, SaaS alternatives, migration paths, and pricing breakdowns. Each section includes a summary table so you can scan without clicking through, plus links to the full deep-dives when you want the details.
 
-**Quick install for Tour Kit (source-available, BUSL-1.1):**
+**Quick install for Tour Kit (MIT):**
 
 ```bash
 npm install @tourkit/core @tourkit/react
@@ -57,11 +61,11 @@ This table compares Tour Kit against every major open-source library and SaaS pl
 <td><strong>Tour Kit</strong></td>
 <td>Library</td>
 <td>&lt;23KB core (gzipped)</td>
-<td>BUSL-1.1</td>
+<td>MIT</td>
 <td>✅</td>
 <td>✅</td>
 <td>✅ Native</td>
-<td>Free / $9.99 one-time Pro</td>
+<td>Free</td>
 </tr>
 <tr>
 <td>React Joyride</td>
@@ -224,7 +228,7 @@ The open-source product tour ecosystem includes over a dozen actively maintained
 
 | Article | Focus |
 |---------|-------|
-| [Best free product tour libraries (open source only)](/blog/best-free-product-tour-libraries-open-source) | MIT, BUSL-1.1 and AGPL options compared |
+| [Best free product tour libraries (open source only)](/blog/best-free-product-tour-libraries-open-source) | MIT and AGPL options compared |
 | [Lightweight product tour libraries under 10KB](/blog/lightweight-product-tour-libraries-under-10kb) | Bundle size as the primary filter |
 | [Best product tour libraries for monorepo teams](/blog/best-product-tour-libraries-monorepo-design-system-teams) | Multi-package and design system integration |
 | [Best product tour tools with GDPR compliance](/blog/best-product-tour-tools-gdpr-compliance) | Privacy-first, no external scripts |
@@ -307,12 +311,12 @@ Money matters. These articles break down the real costs, not just sticker prices
 | [TCO comparison: Appcues vs Tour Kit](/blog/tco-comparison-appcues-tour-kit) | 12-month total cost of ownership |
 | [Build vs buy calculator](/blog/build-vs-buy-product-tour-calculator) | Interactive cost comparison across DIY, library, and SaaS |
 | [One-time license vs subscription](/blog/one-time-license-vs-subscription-math-bootstrapped-teams) | The math for bootstrapped teams |
-| [Tour Kit free vs Pro](/blog/tour-kit-free-vs-pro) | What's in each tier |
+| [Tour Kit free vs Pro](/blog/tour-kit-free-vs-pro) | The old tier split, kept as a record (every package is free now) |
 | [Best onboarding tool free tiers](/blog/onboarding-tool-best-free-tier) | Comparing free plans across tools |
 | [Cheapest product tour tool (2026)](/blog/cheapest-product-tour-tool-2026) | Price as the primary filter |
 | [Free trial vs freemium onboarding](/blog/free-trial-vs-freemium-onboarding) | Onboarding strategy, not tour tools |
 
-Tour Kit's pricing model is simple. The core three packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are BUSL-1.1-licensed and source-available (free in development, licence key in production), as is every package. One one-time [$9.99 licence](/pricing) covers them all. No monthly fees. No per-MAU pricing.
+Tour Kit's pricing model is simple: every package, including the core three (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`), is MIT-licensed and free, including in production. No licence key. No monthly fees. No per-MAU pricing.
 
 ## How to choose the right comparison
 
@@ -340,7 +344,7 @@ We've tested every tool on this page. Here's what we learned about running a fai
 
 **Ask about React 19 compatibility now, not later.** As of April 2026, React 19 is stable and widely adopted. Libraries built on class components (React Joyride) or direct DOM manipulation (Driver.js) can't use concurrent features, `useTransition`, or the new `use` hook. Even if you're still on React 18, evaluate whether the library you choose will work when you upgrade.
 
-**Calculate total cost over 12 months, not sticker price.** A $249/month SaaS tool costs $2,988/year. A $9.99 one-time library license costs $9.99 total. But the SaaS includes analytics and a visual builder your PM team might need. Factor in developer hours for building and maintaining code-owned tours. The [build vs buy calculator](/blog/build-vs-buy-product-tour-calculator) makes this math concrete.
+**Calculate total cost over 12 months, not sticker price.** A $249/month SaaS tool costs $2,988/year. An MIT-licensed library costs nothing to license. But the SaaS includes analytics and a visual builder your PM team might need. Factor in developer hours for building and maintaining code-owned tours. The [build vs buy calculator](/blog/build-vs-buy-product-tour-calculator) makes this math concrete.
 
 ## What Tour Kit doesn't do well
 
@@ -378,11 +382,11 @@ Tour Kit is the best product tour library for React developers who want full des
 
 ### How does Tour Kit compare to SaaS tools like Appcues?
 
-Tour Kit is a React library you install as a dependency. Appcues is a hosted platform that injects an external JavaScript snippet. Tour Kit costs $9.99 once for the Pro tier; Appcues starts at $249 per month. The tradeoff is that Tour Kit requires developers to build and maintain tours in code, while Appcues provides a visual builder for non-technical team members. We break this down in our [TCO comparison](/blog/tco-comparison-appcues-tour-kit).
+Tour Kit is a React library you install as a dependency. Appcues is a hosted platform that injects an external JavaScript snippet. Tour Kit is free and MIT-licensed; Appcues starts at $249 per month. The tradeoff is that Tour Kit requires developers to build and maintain tours in code, while Appcues provides a visual builder for non-technical team members. We break this down in our [TCO comparison](/blog/tco-comparison-appcues-tour-kit).
 
 ### Is Tour Kit free?
 
-The core three packages (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`) are BUSL-1.1-licensed and source-available (free in development, licence key in production), as is every package. One one-time $9.99 licence covers them all. No subscriptions. No per-MAU pricing. See [pricing](/pricing) for the full breakdown.
+Yes. Every package, including the core three (`@tourkit/core`, `@tourkit/react`, `@tourkit/hints`), is MIT-licensed and free, including in production. No licence key. No subscriptions. No per-MAU pricing.
 
 ### Can I migrate from React Joyride to Tour Kit?
 
