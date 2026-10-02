@@ -5,11 +5,6 @@ import { SurveysProvider } from '../context'
 import { useSurveys } from '../hooks'
 import type { SurveyConfig } from '../types'
 
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  ProGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}))
-
 vi.mock('@tour-kit/core', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tour-kit/core')>()
   return {

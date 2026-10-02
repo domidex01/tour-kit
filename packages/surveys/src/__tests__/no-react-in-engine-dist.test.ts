@@ -65,7 +65,6 @@ const FORBIDDEN = [
   'react/jsx-runtime',
   '@tour-kit/media',
   '@tour-kit/analytics',
-  '@tour-kit/license',
   '@floating-ui/react',
   '@radix-ui/react-slot',
   '@radix-ui/react-dialog',
@@ -79,7 +78,6 @@ const FORBIDDEN = [
 const FORBIDDEN_RAW: readonly (string | RegExp)[] = [
   '@tour-kit/media',
   '@tour-kit/analytics',
-  '@tour-kit/license',
   '@floating-ui/react',
   '@radix-ui/',
   'class-variance-authority',
@@ -94,7 +92,6 @@ const FORBIDDEN_RAW: readonly (string | RegExp)[] = [
  */
 const FORBIDDEN_RAW_CONTROL: readonly (string | RegExp)[] = [
   '@tour-kit/media',
-  '@tour-kit/license',
   '@floating-ui/react',
   'class-variance-authority',
   /["']react["']/,
@@ -106,15 +103,14 @@ const CONTROL_JS = [
   'react',
   'react/jsx-runtime',
   '@tour-kit/media',
-  '@tour-kit/license',
   '@floating-ui/react',
   '@radix-ui/react-dialog',
   'class-variance-authority',
 ] as const
 
 /**
- * Also measured, and NOT the announcements list. `@tour-kit/license`,
- * `@floating-ui/react` and `@radix-ui/react-dialog` are FALSE in this
+ * Also measured, and NOT the announcements list. `@floating-ui/react` and
+ * `@radix-ui/react-dialog` are FALSE in this
  * package's declaration closure — putting them here would red a correct build,
  * which is the exact failure the measured-control rule exists to prevent
  * (Phase 0's finding, third occurrence).

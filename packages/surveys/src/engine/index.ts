@@ -2,15 +2,12 @@
  * `@tour-kit/surveys/engine` — the React-free door.
  *
  * v3 Phase 3. Everything here runs in Node, Vue, Svelte or a plain `<script>`:
- * no React, no JSX runtime, no DOM, and no licence gate. A consumer drives the
- * queue, the six fatigue gates, the audience, the schedule and the scoring, and
- * renders whatever it likes.
+ * no React, no JSX runtime, no DOM. A consumer drives the queue, the six
+ * fatigue gates, the audience, the schedule and the scoring, and renders
+ * whatever it likes.
  *
- * Two things are deliberately NOT re-exported from here:
- *   - `<SurveysProvider>` and every component — they are the React half
- *   - the licence gate — imported once, in the provider (Decision 9). The
- *     engine path is currently UNGATED; whether non-React consumers are gated
- *     is a commercial decision the v3 handoff still carries as Open question 1.
+ * `<SurveysProvider>` and every component are deliberately NOT re-exported
+ * from here — they are the React half.
  *
  * The reducer, its action union, `drainQueue`, `updateSurvey`,
  * `createInitialSurveyState`, serialize/deserialize and the individual gate

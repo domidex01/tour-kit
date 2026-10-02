@@ -1,7 +1,6 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
-import { LicenseGate } from '@tour-kit/license'
 import { DefaultChatTransport } from 'ai'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type SlidingWindowRateLimiter, createRateLimiter } from '../core/rate-limiter'
@@ -193,9 +192,5 @@ export function AiChatProvider({ config, children, tourContextValue }: AiChatPro
     ]
   )
 
-  return (
-    <LicenseGate require="pro">
-      <AiChatContext.Provider value={value}>{children}</AiChatContext.Provider>
-    </LicenseGate>
-  )
+  return <AiChatContext.Provider value={value}>{children}</AiChatContext.Provider>
 }

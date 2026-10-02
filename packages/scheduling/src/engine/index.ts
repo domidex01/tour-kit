@@ -3,15 +3,15 @@
  *
  * Everything here is reachable from the main entry at the same path with the
  * same signature; nothing moved. What this entry adds is a runtime and a
- * `.d.ts` chain that never name `react`, `react-dom`, `@tour-kit/license` or
- * `@tour-kit/analytics`, so a Vue, Svelte or Node consumer can evaluate a
+ * `.d.ts` chain that never name `react`, `react-dom` or `@tour-kit/analytics`,
+ * so a Vue, Svelte or Node consumer can evaluate a
  * schedule with none of them installed.
  *
  * Rules, each with a test behind it (`no-react-in-engine-dist.test.ts`,
  * `subpath-resolution.test.ts`):
  * - Re-exports and comments only. No declaration, no side-effect import —
  *   `sideEffects: false` in the manifest is only true while nothing runs here.
- * - Never `../components/schedule-gate` (React + LicenseGate), never
+ * - Never `../components/schedule-gate` (React), never
  *   `../hooks/*` (React, and `@tour-kit/analytics` behind them), never
  *   `../index`.
  * - The built file names NO bare specifier at all. This package depends on

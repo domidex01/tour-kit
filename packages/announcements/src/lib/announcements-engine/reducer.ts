@@ -19,10 +19,7 @@ import type {
  * Phase 0 §4 sign-off; pinned by a literal-array test in
  * `__tests__/force-show.test.tsx`. New gates added to `show()` MUST default to
  * "respect, don't bypass" — adding a gate name here is a deliberate API change
- * and breaks the pinned test, forcing a review.
- *
- * The `<LicenseGate require="pro">` wrapper is intentionally NOT a member of
- * this list — `forceShow` must not strip the license soft-gate watermark. See
+ * and breaks the pinned test, forcing a review. See
  * `apps/docs/content/docs/guides/imperative-control.mdx`.
  */
 export const FORCE_SHOW_BYPASS = [

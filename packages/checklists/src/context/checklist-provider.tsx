@@ -1,7 +1,6 @@
 'use client'
 
 import { useAnalyticsOptional } from '@tour-kit/analytics'
-import { LicenseGate } from '@tour-kit/license'
 import * as React from 'react'
 import {
   type ChecklistsEngine,
@@ -196,9 +195,5 @@ export function ChecklistProvider({
     [snapshot.checklists, engineContext, handle]
   )
 
-  return (
-    <LicenseGate require="pro">
-      <ChecklistContext.Provider value={contextValue}>{children}</ChecklistContext.Provider>
-    </LicenseGate>
-  )
+  return <ChecklistContext.Provider value={contextValue}>{children}</ChecklistContext.Provider>
 }

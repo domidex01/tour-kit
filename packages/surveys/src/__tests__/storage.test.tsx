@@ -5,11 +5,6 @@ import { SurveysProvider } from '../context'
 import { useSurveys } from '../hooks'
 import type { SurveyConfig } from '../types'
 
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  ProGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}))
-
 const sharedStore = new Map<string, string>()
 
 vi.mock('@tour-kit/core', async (importOriginal) => {

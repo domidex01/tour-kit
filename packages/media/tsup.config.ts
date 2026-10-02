@@ -19,7 +19,6 @@ export default defineConfig({
     'react',
     'react-dom',
     '@lottiefiles/react-lottie-player',
-    '@tour-kit/license',
     'tailwindcss',
     'tailwindcss/plugin',
   ],

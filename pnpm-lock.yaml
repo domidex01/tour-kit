@@ -325,9 +325,6 @@ importers:
       '@tour-kit/hints':
         specifier: workspace:*
         version: link:../../packages/hints
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../../packages/license
       '@tour-kit/media':
         specifier: workspace:*
         version: link:../../packages/media
@@ -431,9 +428,6 @@ importers:
       '@tour-kit/hints':
         specifier: workspace:*
         version: link:../../packages/hints
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../../packages/license
       '@tour-kit/media':
         specifier: workspace:*
         version: link:../../packages/media
@@ -584,9 +578,6 @@ importers:
       '@tour-kit/hints':
         specifier: workspace:*
         version: link:../../packages/hints
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../../packages/license
       '@tour-kit/media':
         specifier: workspace:*
         version: link:../../packages/media
@@ -697,9 +688,6 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../license
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -752,9 +740,6 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../license
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -804,9 +789,6 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../license
     devDependencies:
       '@amplitude/analytics-browser':
         specifier: ^2.36.7
@@ -877,9 +859,6 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../license
       '@tour-kit/media':
         specifier: workspace:*
         version: link:../media
@@ -962,9 +941,6 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../license
       '@tour-kit/media':
         specifier: workspace:*
         version: link:../media
@@ -1112,9 +1088,6 @@ importers:
       '@tour-kit/core':
         specifier: workspace:^
         version: link:../core
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../license
       '@tour-kit/media':
         specifier: workspace:*
         version: link:../media
@@ -1228,9 +1201,6 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../license
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -1338,9 +1308,6 @@ importers:
       '@tour-kit/core':
         specifier: workspace:^
         version: link:../core
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../license
       '@tour-kit/media':
         specifier: workspace:*
         version: link:../media
@@ -1408,9 +1375,6 @@ importers:
       '@tour-kit/analytics':
         specifier: workspace:*
         version: link:../analytics
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../license
     devDependencies:
       '@testing-library/react':
         specifier: 'catalog:'
@@ -1460,9 +1424,6 @@ importers:
       '@tour-kit/core':
         specifier: workspace:*
         version: link:../core
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../license
       '@tour-kit/media':
         specifier: workspace:*
         version: link:../media
@@ -1527,9 +1488,6 @@ importers:
       '@tour-kit/core':
         specifier: workspace:^
         version: link:../core
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../license
     devDependencies:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^5.0.3
@@ -1616,9 +1574,6 @@ importers:
       '@tour-kit/core':
         specifier: workspace:^
         version: link:../core
-      '@tour-kit/license':
-        specifier: workspace:*
-        version: link:../license
       vue-router:
         specifier: ^4.0.0
         version: 4.6.4(vue@3.5.42(typescript@5.9.3))

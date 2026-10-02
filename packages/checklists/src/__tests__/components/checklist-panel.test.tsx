@@ -34,7 +34,7 @@ describe('ChecklistPanel — defaultExpanded does not infinite-loop', () => {
       </ChecklistProvider>
     )
 
-    // Two commits max: initial mount, plus optional re-render once ProGate settles.
+    // Two commits max: initial mount, plus an optional settling re-render.
     // The bug caused unbounded commits.
     expect(commitCount).toBeLessThan(10)
   })

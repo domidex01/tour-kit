@@ -1,4 +1,3 @@
-import { LicenseGate } from '@tour-kit/license'
 import type * as React from 'react'
 
 interface ScheduleGateProps {
@@ -6,13 +5,12 @@ interface ScheduleGateProps {
 }
 
 /**
- * Renders children only when the consumer holds a valid Pro license.
- *
- * This is a thin convenience wrapper over `<LicenseGate require="pro">` — it
- * does NOT evaluate a schedule. To gate UI on schedule activity, evaluate
- * `isScheduleActive(schedule)` (or `useScheduleStatus`) and branch in your own
- * render. `ScheduleGate` only fences the scheduling feature behind the Pro tier.
+ * @deprecated Renders its children unchanged. It used to fence scheduling
+ * behind the Pro licence; Tour Kit is MIT now, so there is nothing to gate.
+ * Kept so existing imports still compile. It never evaluated a schedule — to
+ * gate UI on schedule activity, use `isScheduleActive(schedule)` or
+ * `useScheduleStatus` and branch in your own render.
  */
 export function ScheduleGate({ children }: ScheduleGateProps) {
-  return <LicenseGate require="pro">{children}</LicenseGate>
+  return <>{children}</>
 }

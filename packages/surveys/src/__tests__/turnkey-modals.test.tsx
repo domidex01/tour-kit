@@ -3,11 +3,6 @@ import userEvent from '@testing-library/user-event'
 import type * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  ProGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}))
-
 vi.mock('@tour-kit/core', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tour-kit/core')>()
   return {

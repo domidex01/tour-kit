@@ -4,12 +4,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { axe } from 'vitest-axe'
 import { QuestionBoolean } from '../components/question-boolean'
 
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }: { children: React.ReactNode }) => children,
-  ProGate: ({ children }: { children: React.ReactNode }) => children,
-  useLicenseGate: () => ({ isAllowed: true, isLoading: false }),
-}))
-
 describe('QuestionBoolean', () => {
   const defaultProps = {
     id: 'bool-test',

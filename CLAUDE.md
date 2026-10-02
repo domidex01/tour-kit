@@ -185,101 +185,79 @@ Both `react` and `hints` packages depend on `core`. Turbo handles build order au
     `process.env`: without it esbuild leaves four reads, two unguarded, and a
     browser throws `ReferenceError: process is not defined` on the first
     `interpolate()` or segment audience.
-  - react <12 KB
-  - hints <6.5 KB, measured 6 231. v3 Phase 1 raised this from 6 KB at 5 543:
+  - react <12 KB, measured 11 152 (the MIT relicense dropped the licence
+    shim; `@tour-kit/license` had been external, so the row barely moves)
+  - hints <6.5 KB, measured 6 243. v3 Phase 1 raised this from 6 KB at 5 543:
     the +688 B is the module-boundary cost of the reducer, persistence, engine
     and handle leaving `hints-provider.tsx` for `lib/hints-engine/` (core §1.3
     paid +446 B for the same shape). The provider is a binding over
     `createHintsHandle` now.
-  - hints/engine subpath <2.5 KB, measured 2 195 — the hints state machine,
+  - hints/engine subpath <2.5 KB, measured 2 212 — the hints state machine,
     its persistence, `createHintsHandle` and `getHotspotPosition`; the
     components, hooks and context stay on the main entry. Built with
     `splitting: true`, so the row is the shell plus the two React-free chunks
     it imports, and a guard that read the shell alone would pass forever.
-  - analytics <4 KB (root; per-plugin <1.5 KB each)
+  - analytics <4 KB (root, measured 3 622; per-plugin <1.5 KB each)
   - analytics/engine subpath <4 KB, measured 3 312 — the tracker and the five
-    plugins with no React, no jsx-runtime and no licence gate; it shares the
-    root row's ceiling because it is a strict subset of the root entry.
-  - adoption <10 KB, measured 8 552
-  - checklists <10.5 KB, measured 10 089. v3 Phase 2 raised this from 10 KB at
+    plugins with no React and no jsx-runtime; it shares the root row's
+    ceiling because it is a strict subset of the root entry.
+  - adoption <10 KB, measured 8 524
+  - checklists <10.5 KB, measured 10 058. v3 Phase 2 raised this from 10 KB at
     8 604: the reducer, persistence and the three `utils/` leaves moved into
     `lib/checklists-engine/`, and the `engine/index` entry turns on the chunk
     split. The provider is a binding over `createChecklistsHandle` now.
   - checklists/engine subpath <4.5 KB, measured 4 349 — the reducer, the
     dependency graph, progress, persistence, the urlVisit listener and its
     attach leaf, `createChecklistsEngine` and `createChecklistsHandle`; the
-    components, hooks, context and the licence gate stay on the main entry.
+    components, hooks and context stay on the main entry.
     Built with `splitting: true`, so the row is the re-export shell plus the
     one React-free chunk it shares with the main entry — a guard that read the
     shell alone would pass forever.
-  - announcements <15 KB, measured 14 513. v3 Phase 3 raised this from 14 KB at
+  - announcements <15 KB, measured 14 483. v3 Phase 3 raised this from 14 KB at
     13 322: the +1 191 B is the module-boundary cost of 282 provider lines
     moving into `lib/announcements-engine/`, plus a sixth tsup entry re-cutting
     every chunk boundary in the package (hints paid +688 B and checklists
     +1 486 B for the same shape). The provider is a binding over
     `createAnnouncementsHandle` now — 831 lines to 151.
-  - announcements/engine subpath <4.5 KB, measured 4 313 — the reducer, the
+  - announcements/engine subpath <4.5 KB, measured 4 359 — the reducer, the
     single-transition queue advance, segment eligibility, persistence, the
     scheduler, the priority queue, frequency, audience, the optional-peer
     schedule resolver, `createAnnouncementsEngine` and
     `createAnnouncementsHandle`; the five display variants, the hooks, the
-    context, the toast adapter and the licence gate stay on the main entry.
+    context and the toast adapter stay on the main entry.
     Built with `splitting: true`, so the row is the re-export shell plus the two
     React-free chunks it imports, and a guard that read the shell alone would
     pass forever. The optional `@tour-kit/scheduling` peer is measured-PRESENT
     in this closure, never forbidden — it is React-free at its own `/engine`
     subpath and is reached through a call-time `require` that `minify: true`
     renames, so the guard asserts it as a raw substring.
-  - surveys <13 KB, measured 12 570. v3 Phase 3 raised this from 12.5 KB at
+  - surveys <13 KB, measured 12 572. v3 Phase 3 raised this from 12.5 KB at
     11 535: the +1 035 B is 401 provider lines moving into `lib/surveys-engine/`
     plus a third tsup entry re-cutting the chunk boundaries. The provider is a
     binding over `createSurveysHandle` now — 746 lines to 204.
-  - surveys/engine subpath <5 KB, measured 4 552 — the reducer with its atomic
+  - surveys/engine subpath <5 KB, measured 4 585 — the reducer with its atomic
     `drainQueue`, persistence, the six fatigue gates, the scheduler, the
     priority queue, audience, NPS/CSAT/CES scoring, the optional-peer schedule
     resolver, `createSurveysEngine` and `createSurveysHandle`; the components,
-    hooks, context and the licence gate stay on the main entry. Storage is an
+    hooks and context stay on the main entry. Storage is an
     INJECTED adapter rather than one the engine resolves: six existing suites
     stub `createStorageAdapter` through `vi.mock` on core's main barrel, and
     `vi.mock` does not intercept a `/engine` subpath, so an engine that resolved
     its own would silently disarm all six.
-  - license <8.5 KB, measured 8 392. The licence-payment Wave 1 raised this
-    from 8 KB at 7 793: +302 B of that is `MULTI_LABEL_SUFFIXES`, the curated
-    public-suffix table behind `toRegistrableDomain()`, and 21 B is the
-    dev-host branch in `LicenseGate` that keeps the badge off localhost. Last-two-labels alone
-    turns `foo.co.uk` into `co.uk` and `x.vercel.app` into `vercel.app`, so one
-    Starter key would cover an entire registry or every Vercel deployment — an
-    incomplete table is the one failure here that costs money, so the table
-    does not get shrunk to fit the row. Grow the table before reaching for
-    `tldts`: it carries the full PSL and does not fit this package at any
-    plausible budget. The +276 B from 8 116 is the module boundary under
-    `splitting: false`: the badge moved out to `lib/watermark-dom.ts` so the
-    non-React bindings could share it, and with no chunk splitting this entry
-    inlines it right back.
-  - license/headless subpath <7 KB, measured 6 590 — the React-free door, and
-    the one row `vue` and `svelte` cannot show you. The licence package is
-    external to both their builds, so their own rows stay ~1.2 KB while the
-    gate, the validation, the cache, the domain rules and the badge sit here;
-    the badge's logo alone is 4 KB of raw path data before gzip.
-    Like every other row this is the package's OWN bytes: `zod` is a real
-    runtime import of this entry and is external, so it is NOT in the 6 378.
-    Measured with esbuild, a consumer who bundles `startLicenseGate` ships
-    67 787 B gzipped once zod comes along, and zod does not tree-shake out
-    because the gate calls `validateLicenseKey`. Quote that number, not this
-    row, when someone asks what the licence costs their bundle.
-  - media <9 KB
-  - ai <7 KB (client), <8 KB (server)
-  - scheduling <4 KB
+  - media <9 KB, measured 7 986
+  - ai <7 KB (client), <8 KB (server); measured 6 245 and 4 716
+  - scheduling <4 KB, measured 3 691
   - scheduling/engine subpath <3.6 KB, measured 3 039 — twenty-four evaluation
-    functions and three constants; the hooks, the gate and the analytics peer
-    stay on the main entry.
-  - vue <1.5 KB, measured 1 329
-  - svelte <1.3 KB, measured 1 033
+    functions and three constants; the hooks, the deprecated `ScheduleGate`
+    pass-through and the analytics peer stay on the main entry.
+  - vue <1.5 KB, measured 1 250
+  - svelte <1.3 KB, measured 1 001
 
-  The binding rows moved 15-70 B when the licence gate landed, and that is the
-  whole visible cost: `@tour-kit/license` is external to both builds, so all
-  either entry gains is the import and the call. The bytes are in the
-  `license/headless` row above.
+  Every package has been MIT since the 2026-10 relicense
+  (`plan/v3/mit-relicense-plan.md`): no licence gate, no badge, no network call
+  to Polar. `@tour-kit/license` is retired (`private: true`, `npm deprecate`d)
+  and `packages/__tests__/free-package-isolation.test.ts` fails if any package
+  imports or depends on it again.
 
   The hints / announcements / surveys / media / ai numbers rose in v2 §1.2
   **without a byte being added**: they all ship a `headless` entry, so the gate
@@ -368,7 +346,6 @@ When adding new animations, prefix with `motion-safe:` if it's a `tailwindcss-an
 @tour-kit/analytics ────┼──► @tour-kit/core
 @tour-kit/announcements ┤
 @tour-kit/checklists ───┤
-@tour-kit/license ──────┤
 @tour-kit/media ────────┤
 @tour-kit/scheduling ───┤
 @tour-kit/surveys ──────┤
@@ -379,14 +356,9 @@ When adding new animations, prefix with `motion-safe:` if it's a `tailwindcss-an
 `@tour-kit/vue` and `@tour-kit/svelte` are the odd ones out on that arrow: they
 import the `@tour-kit/core/engine` subpath only, never the main entry, so no
 React reaches their `.d.ts` chains. A per-package `no-react-in-dist.test.ts`
-enforces it, with a positive control so a broken scan fails loudly. They also
-depend on `@tour-kit/license`, but only through its React-free `/headless`
-entry — which is why `react` and `react-dom` are **optional** peers of the
-licence package. Both bindings ship under BUSL-1.1 and start the licence gate
-from their provider's mount hook; the gate is a dependency, never an optional
-peer, because an opt-in gate is no gate.
+enforces it, with a positive control so a broken scan fails loudly.
 
-Note: `@tour-kit/scheduling` is an optional peer dependency for `@tour-kit/announcements`. `@tour-kit/license` is the runtime validator the other Pro packages consult.
+Note: `@tour-kit/scheduling` is an optional peer dependency for `@tour-kit/announcements`.
 
 ## Package-Specific Documentation
 

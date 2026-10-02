@@ -1,12 +1,8 @@
 import { act, renderHook } from '@testing-library/react'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup } from '@testing-library/react'
 import { type AnalyticsPlugin, AnalyticsProvider } from '@tour-kit/analytics'
 import type * as React from 'react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }: { children: React.ReactNode; require: 'pro' }) => <>{children}</>,
-}))
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { AnnouncementsProvider, FORCE_SHOW_BYPASS } from '../context/announcements-provider'
 import { useAnnouncement } from '../hooks/use-announcement'
@@ -198,65 +194,5 @@ describe('forceShow bypass matrix — one test per Phase 0 §4 row', () => {
       result.current.forceShow()
     })
     expect(result.current.state?.viewCount).toBe(before + 1)
-  })
-})
-
-// ─── §3 — License soft-gate boundary ────────────────────────────────────────
-// forceShow MUST NOT bypass LicenseGate. The license gate is a soft wrapper
-// that renders children AND overlays a watermark when unlicensed — calling
-// forceShow on an unlicensed provider must leave the watermark intact.
-
-describe('forceShow — LicenseGate soft boundary preserved', () => {
-  beforeEach(() => {
-    vi.resetModules()
-    vi.doMock('@tour-kit/license', () => ({
-      LicenseGate: ({ children }: { children: React.ReactNode; require: 'pro' }) => (
-        <>
-          {children}
-          <div data-testid="license-watermark">Tour Kit · Unlicensed</div>
-        </>
-      ),
-    }))
-  })
-
-  afterEach(() => {
-    cleanup()
-    vi.restoreAllMocks()
-  })
-
-  it('forceShow under an unlicensed LicenseGate still shows the watermark', async () => {
-    // Re-import BOTH the provider and the context hook from the same module
-    // graph reset by vi.doMock — otherwise the static import at the top of
-    // this file references a different React Context object than the freshly
-    // re-imported provider sets, and the hook throws "must be used within".
-    const { AnnouncementsProvider } = await import('../context/announcements-provider')
-    const { useAnnouncementsContext } = await import('../context/announcements-context')
-
-    function ForceShowProbe() {
-      const ctx = useAnnouncementsContext()
-      return (
-        <button type="button" data-testid="force" onClick={() => ctx.forceShow('a')}>
-          Force
-        </button>
-      )
-    }
-
-    render(
-      <AnnouncementsProvider
-        announcements={[{ id: 'a', variant: 'modal', title: 't', autoShow: false }]}
-        storage={null}
-      >
-        <ForceShowProbe />
-      </AnnouncementsProvider>
-    )
-
-    expect(screen.getByTestId('license-watermark')).toBeInTheDocument()
-
-    act(() => {
-      screen.getByTestId('force').click()
-    })
-
-    // Post-forceShow, the watermark survives — the license wrapper is NOT bypassed.
-    expect(screen.getByTestId('license-watermark')).toBeInTheDocument()
   })
 })

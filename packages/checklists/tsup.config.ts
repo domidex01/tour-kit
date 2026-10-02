@@ -15,14 +15,7 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: [
-    'react',
-    'react-dom',
-    '@tour-kit/core',
-    '@tour-kit/analytics',
-    '@tour-kit/license',
-    '@floating-ui/react',
-  ],
+  external: ['react', 'react-dom', '@tour-kit/core', '@tour-kit/analytics', '@floating-ui/react'],
   treeshake: true,
   // explicit: it was tsup's ESM default and invisible while there was one entry
   splitting: true,

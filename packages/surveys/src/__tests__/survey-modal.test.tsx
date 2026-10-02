@@ -1,15 +1,9 @@
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type * as React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { SurveyModal } from '../components/survey-modal'
 import { SurveysProvider } from '../context'
 import type { SurveyConfig } from '../types'
-
-vi.mock('@tour-kit/license', () => ({
-  LicenseGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  ProGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}))
 
 vi.mock('@tour-kit/core', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tour-kit/core')>()

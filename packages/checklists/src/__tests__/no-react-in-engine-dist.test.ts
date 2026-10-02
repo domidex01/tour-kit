@@ -57,7 +57,6 @@ const FORBIDDEN = [
   'react/jsx-runtime',
   '@tour-kit/media',
   '@tour-kit/analytics',
-  '@tour-kit/license',
   '@floating-ui/react',
   '@radix-ui/react-slot',
   'class-variance-authority',
@@ -69,15 +68,13 @@ const CONTROL_JS = [
   'react/jsx-runtime',
   '@tour-kit/media',
   '@tour-kit/analytics',
-  '@tour-kit/license',
   '@floating-ui/react',
   '@radix-ui/react-slot',
   'class-variance-authority',
 ] as const
 
 /**
- * Also measured. `@tour-kit/analytics`, `@tour-kit/license` and
- * `@floating-ui/react` are measured FALSE in the declaration closure, so they
+ * Also measured. `@tour-kit/analytics` and `@floating-ui/react` are measured FALSE in the declaration closure, so they
  * are deliberately absent — putting them here would red a correct build, which
  * is the exact failure the measured-control rule exists to prevent.
  */

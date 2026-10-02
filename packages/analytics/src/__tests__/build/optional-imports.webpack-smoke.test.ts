@@ -78,7 +78,6 @@ const EXTERNALS = {
   // `exports` map has `./engine`. This mirrors the built file's import list; it
   // weakens no assertion.
   '@tour-kit/core/engine': 'module @tour-kit/core/engine',
-  '@tour-kit/license': 'module @tour-kit/license',
 }
 
 const tmpDirs: string[] = []

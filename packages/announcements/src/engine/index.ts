@@ -2,16 +2,11 @@
  * `@tour-kit/announcements/engine` — the React-free door.
  *
  * v3 Phase 3. Everything here runs in Node, Vue, Svelte or a plain `<script>`:
- * no React, no JSX runtime, no DOM, and no `@tour-kit/license` gate. A consumer
- * drives the queue, the frequency rules, the audience and the schedule, and
- * renders whatever it likes.
+ * no React, no JSX runtime, no DOM. A consumer drives the queue, the frequency
+ * rules, the audience and the schedule, and renders whatever it likes.
  *
- * Two things are deliberately NOT re-exported from here:
- *   - `<AnnouncementsProvider>` and every component — they are the React half
- *   - the licence gate — it is imported once, in the provider (Decision 9).
- *     The engine path is currently UNGATED; whether non-React consumers are
- *     gated is a commercial decision the v3 handoff still carries as Open
- *     question 1.
+ * `<AnnouncementsProvider>` and every component are deliberately NOT
+ * re-exported from here — they are the React half.
  *
  * Re-exports and comments only. No declaration, no side-effect import — a
  * `const` here would be a byte every consumer of the main entry also pays for.

@@ -1,7 +1,6 @@
 'use client'
 
 import { createStorageAdapter, useTourContextOptional } from '@tour-kit/core'
-import { LicenseGate } from '@tour-kit/license'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSyncExternalStore } from 'react'
 import type { StepValidation } from '../lib/surveys-engine/create-surveys-engine'
@@ -15,10 +14,10 @@ import { SurveysContext } from './surveys-context'
  * v3 Phase 3 — this provider is a BINDING over `@tour-kit/surveys/engine`.
  *
  * 401 lines of reducer, persistence and fatigue gates now live in
- * `lib/surveys-engine/` and run with no React at all. What is left is the four
+ * `lib/surveys-engine/` and run with no React at all. What is left is the three
  * things only React can do: build the storage adapter and read the tour context
  * (two things the engine cannot), subscribe a tree to the engine's snapshot,
- * forward prop changes as verbs, and wrap in the licence gate.
+ * and forward prop changes as verbs.
  *
  * The storage adapter is built HERE and passed in, not resolved in the engine.
  * Six existing suites stub `createStorageAdapter` through `vi.mock` on core's
@@ -200,9 +199,5 @@ export function SurveysProvider({
     [state, verbs]
   )
 
-  return (
-    <LicenseGate require="pro">
-      <SurveysContext.Provider value={value}>{children}</SurveysContext.Provider>
-    </LicenseGate>
-  )
+  return <SurveysContext.Provider value={value}>{children}</SurveysContext.Provider>
 }
